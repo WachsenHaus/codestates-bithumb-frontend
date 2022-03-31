@@ -1,18 +1,22 @@
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
-import { tickerState } from '../atom/ticker.atom';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
 import MainSiderBar from '../components/MainSiderBar';
-import { useConnectBitThumb } from '../hooks/useWebSocket';
+import { useGenerateBitThumbSocket, useObserverWSMessage } from '../hooks/useWebSocket';
 
 const MainPage = () => {
   /** init */
-  //   const bitThumbWs = useConnectBitThumb();
+  //   const [_, setWebSocket] = useRecoilState(userWebSocketState);
+
+  //   const bitThumbWs =
+  useGenerateBitThumbSocket('ticker');
+  // useGenerateBitThumbSocket('transaction');
+  // useGenerateBitThumbSocket('orderbookdepth');
+  useObserverWSMessage();
   //   useEffect(() => {
-  //     console.log('Connected');
+  //     bitThumbWs && setWebSocket(bitThumbWs);
   //   }, [bitThumbWs]);
 
   return (

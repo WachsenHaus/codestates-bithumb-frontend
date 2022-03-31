@@ -7,7 +7,8 @@ const MainSiderBar = () => {
       style={{
         gridRowStart: 1,
         gridRowEnd: -1,
-        gridColumn: 2,
+        gridColumnStart: 2,
+        gridColumnEnd: -1,
       }}
     >
       사이드바

@@ -1,30 +1,19 @@
+import { CoinSymbolBTCTypes } from './../type/coinTypes';
 import React from 'react';
 import { atom } from 'recoil';
-import { CoinSymbolTypes, TickTypes } from '../type/coinTypes';
-
-// type: 'ticker',
-// symbols: ['BTC_KRW', 'ETH_KRW'],
-// tickTypes: ['30M', '1H', '12H', '24H', 'MID'],
-
-export interface ITickerTypes {
-  type: 'ticker';
-  symbols: CoinSymbolTypes[];
-  tickTypes: TickTypes[];
-}
+import { CoinSymbolKRWTypes, TickTypes } from '../type/coinTypes';
+import { ITickerTypes } from './user.atom';
+import CONST from '../const';
 
 /**
  * 현재 클라이언의 초기값 상태.
  */
-export const tickerState = atom<ITickerTypes>({
+export const atomTickerState = atom<ITickerTypes>({
   key: 'tickerState',
-  default: {
-    type: 'ticker',
-    symbols: ['BTC_KRW'],
-    tickTypes: ['30M'],
-  },
+  default: CONST.DEFAULT_TICKER_SOCKET,
 });
 
-export const userFavouriteState = atom({
+export const atomUserFavouriteState = atom({
   key: 'userFavouriteState',
   default: '',
 });
