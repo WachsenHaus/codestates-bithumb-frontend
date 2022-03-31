@@ -12,11 +12,9 @@ const App = () => {
     <RecoilRoot>
       <Grommet plain>
         <Router>
-          <div>
-            <Routes>
-              <Route path={PathRoutes.HOME} element={<MainPage />} />
-            </Routes>
-          </div>
+          <Routes>
+            <Route path={PathRoutes.HOME} element={<MainPage />} />
+          </Routes>
         </Router>
       </Grommet>
     </RecoilRoot>
