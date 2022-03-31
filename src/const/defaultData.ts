@@ -10,7 +10,7 @@ import {
 
 export const DEFAULT_TICKER_SENDER: ITickerSenderTypes = {
   type: 'ticker',
-  symbols: ['BTC_KRW', 'ETH_KRW', 'KLAY_KRW', 'XNO_KRW', 'ZIL_KRW'],
+  symbols: ['BTC_KRW'],
   tickTypes: ['30M'],
 };
 
@@ -67,8 +67,9 @@ export const DEFAULT_TRANSACTION_RECEIV_DATA: ITransactionReceiverTypes = {
         symbol: '', // 통화코드
         buySellGb: '', // 체결종류(1:매도체결, 2:매수체결)
         contPrice: '', // 체결가격
-        contAmt: '', // 체결수량
-        contDtm: '', // 체결금액
+        contQty: '', // 체결수량
+        contAmt: '', // 체결금액
+        contDtm: '', // 체결시각
         updn: '', // 직전 시세와 비교 up-상승, dn-하락
       },
     ],

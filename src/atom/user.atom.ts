@@ -66,8 +66,9 @@ export interface ITransactionReceiverTypes {
         symbol: string; // 통화코드
         buySellGb: string; // 체결종류(1:매도체결, 2:매수체결)
         contPrice: string; // 체결가격
-        contAmt: string; // 체결수량
-        contDtm: string; // 체결금액
+        contQty: string; //체결수량
+        contAmt: string; // 체결금액
+        contDtm: string; // 체결시각
         updn: string; // 직전 시세와 비교 up-상승, dn-하락
       }
     ];
