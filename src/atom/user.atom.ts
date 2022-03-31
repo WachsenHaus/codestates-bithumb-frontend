@@ -1,9 +1,14 @@
 import React from 'react';
 import { atom, selector } from 'recoil';
 import CONST from '../const';
-import { CoinSymbolKRWTypes, CoinSymbolBTCTypes, TickTypes } from '../type/coinTypes';
+import {
+  CoinSymbolKRWTypes,
+  CoinSymbolBTCTypes,
+  TickTypes,
+} from '../type/coinTypes';
 
-export interface ITickerTypes {
+export type SocketNamesType = 'ticker' | 'orderbookdepth' | 'transaction';
+export interface ITickerSenderTypes {
   type: 'ticker';
   symbols: CoinSymbolKRWTypes[] | CoinSymbolBTCTypes[];
   tickTypes: TickTypes[];
@@ -29,7 +34,7 @@ export interface ITickerReceiverTypes {
     volumePower: string; // 체결강도
   };
 }
-export interface IOrderBookDepthTypes {
+export interface IOrderBookDepthSenderTypes {
   type: 'orderbookdepth';
   symbols: CoinSymbolKRWTypes[] | CoinSymbolBTCTypes[];
 }
@@ -48,7 +53,7 @@ export interface IOrderBookReceiverTypes {
     datetime: string; // 일시
   };
 }
-export interface ITransactionTypes {
+export interface ITransactionSenderTypes {
   type: 'transaction';
   symbols: CoinSymbolKRWTypes[] | CoinSymbolBTCTypes[];
 }
@@ -69,17 +74,20 @@ export interface ITransactionReceiverTypes {
   };
 }
 
-export type SocketNamesType = 'ticker' | 'orderbookdepth' | 'transaction';
+// export type SocketNamesType = 'ticker' | 'orderbookdepth' | 'transaction';
 
-export type SocketType = {
-  identifiler: SocketNamesType;
-  // 웹 소캣 객체
-  ws: WebSocket | undefined;
-  // 보내는 웹소캣 내용
-  senderType: ITickerTypes | IOrderBookDepthTypes | ITransactionTypes;
-  // 받는 내용을 담는 배열
-  receiverType: ITickerReceiverTypes | IOrderBookReceiverTypes | ITransactionReceiverTypes;
-};
+// export type SocketType = {
+//   identifiler: SocketNamesType;
+//   // 웹 소캣 객체
+//   ws: WebSocket | undefined;
+//   // 보내는 웹소캣 내용
+//   senderType: ITickerTypes | IOrderBookDepthTypes | ITransactionTypes;
+//   // 받는 내용을 담는 배열
+//   receiverType:
+//     | ITickerReceiverTypes
+//     | IOrderBookReceiverTypes
+//     | ITransactionReceiverTypes;
+// };
 export interface ISimbolsTypes {
   symbols: {
     KRW: CoinSymbolKRWTypes[];
@@ -99,40 +107,85 @@ export const atomSimbolsState = atom<ISimbolsTypes>({
     },
   },
 });
+
 /**
- *  socket은 배열로 N개를 가지지만. type이 중복된다면 추가를 하지 않는다.
+ * 티커
  */
-export const atomSocketsState = atom<Array<SocketType>>({
-  key: 'atomSimbolsState',
-  default: [],
+export const tickerSocketState = atom<WebSocket | undefined>({
+  key: 'tickerSocketState',
+  default: undefined,
 });
-export const atomFixSocketsState = selector<Array<SocketType>>({
-  key: 'FilteredDailyState',
-  get: ({ get }) => {
-    const dailyInfo = get(atomSocketsState);
-    return dailyInfo;
-  },
-  set: ({ set }, newValue) => {
-    return set(atomSocketsState, (oldState) => {
-      return {
-        ...oldState,
-        ...newValue,
-      };
-    });
-  },
+
+export const tickerReceiveState = atom<ITickerReceiverTypes>({
+  key: 'tickerReceiveState',
+  default: CONST.DEFAULT_TICKER_RECEIV_DATA,
 });
+
+export const tickerSenderState = atom<ITickerSenderTypes>({
+  key: 'tickerSenderState',
+  default: CONST.DEFAULT_TICKER_SENDER,
+});
+
+/**
+ * orderbookdepth
+ */
+export const orderbookdepthSocketState = atom<WebSocket | undefined>({
+  key: 'orderbookdepthSocketState',
+  default: undefined,
+});
+
+export const orderbookdepthReceiveState = atom<IOrderBookReceiverTypes>({
+  key: 'orderbookdepthReceiveState',
+  default: CONST.DEFAULT_ORDERBOOK_DEPTH_RECEIV_DATA,
+});
+
+export const orderbookdepthSenderState = atom<IOrderBookDepthSenderTypes>({
+  key: 'orderbookdepthSenderState',
+  default: CONST.DEFAULT_ORDERBOOK_DEPTH_SENDER,
+});
+
+/**
+ * transaction
+ */
+export const transactionSocketState = atom<WebSocket | undefined>({
+  key: 'transactionSocketState',
+  default: undefined,
+});
+
+export const transactionReceiveState = atom<ITransactionReceiverTypes>({
+  key: 'transactionReceiveState',
+  default: CONST.DEFAULT_TRANSACTION_RECEIV_DATA,
+});
+
+export const transactionSenderState = atom<ITransactionSenderTypes>({
+  key: 'transactionSenderState',
+  default: CONST.DEFAULT_TRANSACTION_SENDER,
+});
+
+// /**
+//  *  socket은 배열로 N개를 가지지만. type이 중복된다면 추가를 하지 않는다.
+//  */
+// export const atomSocketsState = atom<Array<SocketType>>({
+//   key: 'atomSimbolsState',
+//   default: [],
+// });
+
+// export const atomSocketIdentifier = atom<SocketNamesType>({
+//   key: 'atomSocketIdentifier',
+//   default: 'ticker',
+// });
 
 /**
  *
  */
 
-export type AtomWebSocketTypes = WebSocket;
+// export type AtomWebSocketTypes = WebSocket;
 
-export const atomWebSocketState = atom<AtomWebSocketTypes[] | undefined>({
-  key: 'userWebSocketState',
-  default: undefined,
-});
-export const atomFavouriteState = atom({
-  key: 'userFavouriteState',
-  default: [''],
-});
+// export const atomWebSocketState = atom<AtomWebSocketTypes[] | undefined>({
+//   key: 'userWebSocketState',
+//   default: undefined,
+// });
+// export const atomFavouriteState = atom({
+//   key: 'userFavouriteState',
+//   default: [''],
+// });

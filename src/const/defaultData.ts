@@ -1,15 +1,16 @@
+import CONST from './index';
 import {
-  IOrderBookDepthTypes,
+  IOrderBookDepthSenderTypes,
   IOrderBookReceiverTypes,
   ITickerReceiverTypes,
-  ITickerTypes,
+  ITickerSenderTypes,
   ITransactionReceiverTypes,
-  ITransactionTypes,
+  ITransactionSenderTypes,
 } from '../atom/user.atom';
 
-export const DEFAULT_TICKER_SOCKET: ITickerTypes = {
+export const DEFAULT_TICKER_SENDER: ITickerSenderTypes = {
   type: 'ticker',
-  symbols: ['BTC_KRW'],
+  symbols: ['BTC_KRW', 'ETH_KRW', 'KLAY_KRW', 'XNO_KRW', 'ZIL_KRW'],
   tickTypes: ['30M'],
 };
 
@@ -35,7 +36,7 @@ export const DEFAULT_TICKER_RECEIV_DATA: ITickerReceiverTypes = {
   },
 };
 
-export const DEFAULT_ORDERBOOK_DEPTH_SOCKET: IOrderBookDepthTypes = {
+export const DEFAULT_ORDERBOOK_DEPTH_SENDER: IOrderBookDepthSenderTypes = {
   type: 'orderbookdepth',
   symbols: ['BTC_KRW'],
 };
@@ -54,7 +55,7 @@ export const DEFAULT_ORDERBOOK_DEPTH_RECEIV_DATA: IOrderBookReceiverTypes = {
     datetime: '',
   },
 };
-export const DEFAULT_TRANSACTION_SOCKET: ITransactionTypes = {
+export const DEFAULT_TRANSACTION_SENDER: ITransactionSenderTypes = {
   type: 'transaction',
   symbols: ['BTC_KRW'],
 };

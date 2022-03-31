@@ -4,17 +4,17 @@ import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
 import MainSiderBar from '../components/MainSiderBar';
-import { useGenerateBitThumbSocket, useObserverWSMessage } from '../hooks/useWebSocket';
+import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
   /** init */
-  //   const [_, setWebSocket] = useRecoilState(userWebSocketState);
+  // const [_, setWebSocket] = useRecoilState(atomSocketsState);
 
   //   const bitThumbWs =
   useGenerateBitThumbSocket('ticker');
-  // useGenerateBitThumbSocket('transaction');
-  // useGenerateBitThumbSocket('orderbookdepth');
-  useObserverWSMessage();
+  useGenerateBitThumbSocket('transaction');
+  useGenerateBitThumbSocket('orderbookdepth');
+  // useObserverWSMessage();
   //   useEffect(() => {
   //     bitThumbWs && setWebSocket(bitThumbWs);
   //   }, [bitThumbWs]);
