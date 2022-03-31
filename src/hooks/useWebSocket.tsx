@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import produce from 'immer';
 import {
+  IOrderBookReceiverTypes,
   orderbookdepthReceiveState,
   orderbookdepthSenderState,
   orderbookdepthSocketState,
@@ -69,10 +70,18 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
             setRcvTicker(resultData);
             break;
           case 'orderbookdepth':
-            setRcvOrder(resultData);
+            const data = resultData as IOrderBookReceiverTypes;
+            const next = produce(data, (draft) => {
+              draft.content.list.sort(
+                (a, b) => Number(b.price) - Number(a.price)
+              );
+            });
+
+            setRcvOrder(next);
             break;
           case 'transaction':
             setRcvTransaction(resultData);
+
             break;
           default:
             break;

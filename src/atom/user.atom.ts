@@ -38,18 +38,18 @@ export interface IOrderBookDepthSenderTypes {
   type: 'orderbookdepth';
   symbols: CoinSymbolKRWTypes[] | CoinSymbolBTCTypes[];
 }
+
+export type OrderBookReceiverListType = {
+  symbol: string;
+  orderType: 'ask' | 'bid'; // 주문타입 - ask(매도) bid(매수)
+  price: string; // 호가
+  quantity: string; // 잔량
+  total: string; // 건수
+};
 export interface IOrderBookReceiverTypes {
   type: 'orderbookdepth';
   content: {
-    list: [
-      {
-        symbol: string;
-        orderType: 'ask' | 'bid'; // 주문타입 - bit / ask
-        price: string; // 호가
-        quantity: string; // 잔량
-        total: string; // 건수
-      }
-    ];
+    list: Array<OrderBookReceiverListType>;
     datetime: string; // 일시
   };
 }

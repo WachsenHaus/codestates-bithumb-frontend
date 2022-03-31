@@ -25,7 +25,7 @@ const MainPage = () => {
       style={{
         display: 'grid',
         gridTemplateRows: '7% auto 40%',
-        gridTemplateColumns: '80% 40%',
+        gridTemplateColumns: '80% auto',
       }}
     >
       <MainHeader />
