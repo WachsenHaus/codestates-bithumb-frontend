@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useRecoilState } from 'recoil';
+import { tickerState } from '../atom/ticker.atom';
 
 /**
  *
@@ -7,6 +9,8 @@ import React, { useEffect, useState } from 'react';
 export const useConnectBitThumb = () => {
   const [ws, setWs] = useState<WebSocket>();
   const [isConnect, setIsConnect] = useState(false);
+  const [userTicker, setUserTickerState] = useRecoilState(tickerState);
+  console.log(userTicker);
 
   useEffect(() => {
     try {
@@ -33,15 +37,19 @@ export const useConnectBitThumb = () => {
 
   useEffect(() => {
     if (isConnect) {
-      //   console.log('연결되었습니다. 서버에 요청하겠습니다.');
-      //   const data = JSON.stringify({
-      //     type: 'ticker',
-      //     symbols: ['BTC_KRW', 'ETH_KRW'],
-      //     tickTypes: ['30M', '1H', '12H', '24H', 'MID'],
-      //   });
-      //   ws?.send(data);
+      console.log('연결되었습니다. 서버에 요청하겠습니다.');
+      const ticker = JSON.stringify(userTicker);
+      // const transaction = JSON.stringify({
+      //   type: 'transaction',
+      //   symbols: ['BTC_KRW', 'ETH_KRW'],
+      // });
+      // const orderbookdepth = JSON.stringify({
+      //   type: 'orderbookdepth',
+      //   symbols: ['BTC_KRW', 'ETH_KRW'],
+      // });
+      ws?.send(ticker);
     }
-  }, [isConnect]);
+  }, [isConnect, ws]);
   return ws;
 };
 

@@ -1,33 +1,26 @@
 import React, { useEffect } from 'react';
 import { Grommet } from 'grommet';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { RecoilRoot, useRecoilState } from 'recoil';
 import { useConnectBitThumb } from './hooks/useWebSocket';
+import { tickerState } from './atom/ticker.atom';
+import PathRoutes from './Routes';
+import MainPage from './page/MainPage';
 
 const App = () => {
-  const bitThumbWs = useConnectBitThumb();
-  /**
-   * 테스트 웹소켓
-   */
-
-  //https://apidocs.bithumb.com/docs/websocket_public
-  useEffect(() => {}, []);
   return (
-    <Grommet plain>
-      <h1 className="text-3xl text-red-300">안녕하세요</h1>
-      <div
-        onClick={() => {
-          console.log('?');
-          if (bitThumbWs) {
-            bitThumbWs.onmessage = (evt: MessageEvent) => {
-              console.log(evt);
-              console.log(evt.data);
-            };
-          }
-        }}
-        className="text-3xl text-red-300"
-      >
-        안녕하세요
-      </div>
-    </Grommet>
+    <RecoilRoot>
+      <Grommet plain>
+        <Router>
+          <div>
+            <Routes>
+              <Route path={PathRoutes.HOME} element={<MainPage />} />
+            </Routes>
+          </div>
+        </Router>
+      </Grommet>
+    </RecoilRoot>
   );
 };
+
 export default App;
