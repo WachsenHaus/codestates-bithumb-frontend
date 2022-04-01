@@ -1,0 +1,58 @@
+@keyframes ask-effect {
+  from {
+    opacity: 1;
+    background-color: blue;
+  }
+  to {
+    opacity: 0.1;
+    background-color: white;
+  }
+}
+
+@keyframes bid-effect {
+  from {
+    opacity: 1;
+    background-color: red;
+  }
+  to {
+    opacity: 0.1;
+    background-color: white;
+  }
+}
+
+@keyframes up-effect {
+  from {
+    opacity: 1;
+    border-color: blue;
+  }
+  to {
+    opacity: 0;
+    border-color: white;
+  }
+}
+
+@keyframes down-effect {
+  from {
+    opacity: 1;
+    border-color: red;
+  }
+  to {
+    opacity: 0;
+    border-color: white;
+  }
+}
+
+.askEffect {
+  animation: ask-effect 2s;
+}
+
+.bidEffect {
+  animation: bid-effect 2s;
+}
+.upEffect {
+  animation: up-effect 0.2s;
+}
+
+.downEffect {
+  animation: down-effect 0.2s;
+}

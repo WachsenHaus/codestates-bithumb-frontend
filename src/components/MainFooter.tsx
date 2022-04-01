@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 import React, { useEffect, useState } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { v4 as uuid } from 'uuid';
 import produce from 'immer';
+import styles from './animation.module.css';
 import {
   IOrderBookReceiverTypes,
   ITickerReceiverTypes,
@@ -36,41 +38,15 @@ type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
  * @returns 티커가 그려지는 메인 바텀 푸터입니다.
  */
 const MainFooter = () => {
-  // const userSocket = useRecoilValue(atomSocketsState);
-
-  const [wsTicker, setWsTicker] = useRecoilState(tickerSocketState);
   const [rcvTicker, setRcvTicker] = useRecoilState(tickerReceiveState);
   const [senderTicker, setSenderTicker] = useRecoilState(tickerSenderState);
 
-  const [wsOrder, setWsOrder] = useRecoilState(orderbookdepthSocketState);
-  const [rcvOrder, setRcvOrder] = useRecoilState(orderbookdepthReceiveState);
-  const [senderOrder, setSenderOrder] = useRecoilState(
-    orderbookdepthSenderState
-  );
-
-  const [wsTransaction, setWsTransaction] = useRecoilState(
-    transactionSocketState
-  );
-  const [rcvTransaction, setRcvTransaction] = useRecoilState(
-    transactionReceiveState
-  );
-  const [senderTransaction, setSenderTransaction] = useRecoilState(
-    transactionSenderState
-  );
-
-  // const setSockets = useSetRecoilState(atomSocketsState);
-  // const setSocketIdentifier = useSetRecoilState(atomSocketIdentifier);
-  // 배열로 해서 코인이름이 같은애만 바꿔치기를하자.
   const [drawData, setDrawData] = useState<ITickerReceiverTypes[]>([]);
 
   /**
    * 티커정보를 갱신함.
    */
   useEffect(() => {
-    // if (!drawData) {
-    //   if (rcvTicker.content.openPrice === '') return;
-    // }
-
     if (rcvTicker) {
       if (drawData.length === 0) {
         if (rcvTicker.content.openPrice === '') {
@@ -125,8 +101,6 @@ const MainFooter = () => {
 
           break;
         case 'FAVOURITE':
-          // 테스트 코드
-          // console.log(userSocket);
           break;
         default:
           break;
@@ -173,15 +147,6 @@ const MainFooter = () => {
             label="BTC 마켓"
             onClick={onClick('BTC')}
           />
-          {/* </Box> */}
-
-          {/* <Button
-            size="large"
-            type="button"
-            margin="small"
-            label="즐겨 찾기"
-            onClick={onClick('FAVOURITE')}
-          ></Button> */}
         </Box>
       </div>
       <div>
@@ -198,24 +163,38 @@ const MainFooter = () => {
                 <TableCell scope="col" border="bottom">
                   변동률(%)
                 </TableCell>
-                {/* <TableCell scope="col" border="bottom">
-                  거래 금액
-                </TableCell>
-                <TableCell scope="col" border="bottom">
-                  시가 총액
-                </TableCell> */}
               </TableRow>
             </TableHeader>
             <TableBody>
               {drawData.map((item) => {
                 return (
                   item.content.openPrice !== '' && (
-                    <TableRow>
+                    <TableRow key={uuid()}>
                       <TableCell scope="row">
                         <strong>{item?.content.symbol}</strong>
                       </TableCell>
                       <TableCell scope="row">
-                        <strong>
+                        <strong
+                          className={classNames(
+                            `
+                          ${
+                            rcvTicker.content.symbol === item.content.symbol &&
+                            Number(item?.content.chgRate) > 0
+                              ? `${styles.upEffect}`
+                              : ''
+                          }
+                          `,
+                            `
+                          ${
+                            rcvTicker.content.symbol === item.content.symbol &&
+                            Number(item?.content.chgRate) < 0
+                              ? `${styles.downEffect}`
+                              : ''
+                          }
+                          `,
+                            `border-b-2  border-opacity-0`
+                          )}
+                        >
                           {Number(item?.content.openPrice).toLocaleString(
                             'ko-kr'
                           )}
@@ -235,12 +214,6 @@ const MainFooter = () => {
                           {item?.content.chgRate}%
                         </strong>
                       </TableCell>
-                      {/* <TableCell scope="row">
-                      <strong>{item?.content.value}</strong>
-                    </TableCell>
-                    <TableCell scope="row">
-                      <strong>{item?.content.volume}</strong>
-                    </TableCell> */}
                     </TableRow>
                   )
                 );

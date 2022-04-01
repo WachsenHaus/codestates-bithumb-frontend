@@ -27,17 +27,23 @@ import produce from 'immer';
 import moment from 'moment';
 import { motion } from 'framer-motion';
 import codestates from '../asset/img/codestates-ci.png';
+import styles from './animation.module.css';
+import { Item } from 'framer-motion/types/components/Reorder/Item';
+import { quickSort } from '../utils/utils';
 
 const CONST_DISPALY_COUNT = 20;
+const CONST_LOADING_CNT = 18;
 
 const MainSideBar = () => {
   const or = useRecoilValue(orderbookdepthReceiveState);
   const transaction = useRecoilValue(transactionReceiveState);
   const [originData, setOriginData] = useState<OrderBookReceiverListType[]>([]);
-  const [drawData, setDrawData] = useState<OrderBookReceiverListType[]>([]);
   const [transactionList, setTransactionList] = useState<
     TransactionReceiverListType[]
   >([]);
+  const [middleIndex, setMiddleIndex] = useState(-1);
+  const [sortData, setSortData] = useState<OrderBookReceiverListType[]>([]);
+  const [drawData, setDrawData] = useState<OrderBookReceiverListType[]>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -50,6 +56,9 @@ const MainSideBar = () => {
       });
     }
   }, [transactionList]);
+  /**
+   * 체결내역 함수
+   */
   useEffect(() => {
     const { list } = transaction.content;
     if (list) {
@@ -75,158 +84,163 @@ const MainSideBar = () => {
       });
       setTransactionList(next);
     }
-    // console.log(transactionList);
-
-    // transaction.content.list
   }, [transaction.content.list]);
 
+  /**
+   * 호가창 함수
+   */
   useEffect(() => {
-    const rawData = or as IOrderBookReceiverTypes;
-
-    if (rawData) {
+    const {
+      content: { list },
+    } = or as IOrderBookReceiverTypes;
+    if (list) {
+      // 처음 데이터를 수신한다면
       if (originData.length === 0) {
-        // 원본 배열에는 데이터를 계속 넣는다.
-        setOriginData(rawData.content.list);
+        // 그냥 넣는다.
+        if (list[0].symbol === '') {
+          return;
+        }
+        setOriginData(list);
         return;
       }
     }
-    if (rawData) {
-      // list배열을 돌면서 데이터 배열을 다 훑으면서 심볼과 금액이 있다면 기존데이터배열에 갱신하고 없다면 추가
-      const origin = produce(originData, (draft) => {
-        //result 원본배열
-        for (let i = 0; i < rawData.content.list.length; i++) {
-          const { symbol, price, orderType, quantity } =
-            rawData.content.list[i];
+    if (list) {
+      // 입력받은데이터와 원본 데이터를 이중비교하고 동일한 심볼과 가격이 있다면 엎어치기를함.
+      const next = produce(originData, (draft) => {
+        for (let i = 0; i < list.length; i++) {
+          const { symbol, price, orderType, quantity } = list[i];
+          if (price === '' || symbol === '') {
+            break;
+          }
           for (let j = 0; j < draft.length; j++) {
             try {
-              if (draft[j].symbol === symbol) {
-                if (draft[j].price === price) {
-                  // draft[j].orderType = orderType;
-                  // draft[j].quantity = quantity;
-                  return;
-                }
+              if (draft[j].symbol === symbol && draft[j].price === price) {
+                draft[j].orderType = orderType;
+                draft[j].quantity = quantity;
+                return;
               }
             } catch (err) {
               console.log(err);
             }
           }
-          draft.push(rawData.content.list[i]);
+          draft.push(list[i]);
           if (draft.length >= 1000) {
             draft.shift();
           }
         }
       });
-
       //원본데이터는 저장을한다.
-      setOriginData(origin);
+      setOriginData(next);
     }
   }, [or]);
 
+  /**
+   * 체결가격이 들어온다면
+   */
   useEffect(() => {
     const { list } = transaction.content;
+    // 호가가격보다 체결가격이 먼저 들어왔다면
     if (originData.length === 0) {
       // 원본 배열에는 데이터를 계속 넣는다.
-      if (list) {
+      if (list.length >= 1 && list[list.length - 1].symbol !== '') {
         const addOpenPrice: OrderBookReceiverListType = {
           price: list[list.length - 1].contPrice,
           orderType: 'bid',
           quantity: list[list.length - 1].contQty,
           symbol: list[list.length - 1].symbol,
-          total: '',
+          total: 'current',
         };
-        // draft.push(addOpenPrice);
+        console.log({ ...addOpenPrice });
+        // 임의로 하나의 객체를 생성해서 넣음.
         setOriginData([addOpenPrice]);
         return;
       }
     }
     if (list) {
-      // console.log(list);
       const origin = produce(originData, (draft) => {
         //result 원본배열
+        // 체결내역으로 들어온 객체로 원본데이터와 비교를함.
         for (let i = 0; i < list.length; i++) {
-          const { symbol, contPrice, contQty } = list[i];
+          const { symbol, contPrice, contQty, buySellGb } = list[i];
+
           for (let j = 0; j < draft.length; j++) {
-            if (draft[j].symbol === symbol) {
-              if (draft[j].price === contPrice) {
-                draft[j].price = contPrice;
-                draft[j].orderType = 'bid';
-                draft[j].quantity = contQty;
-                return;
-              }
+            if (draft[j].symbol === symbol && draft[j].price === contPrice) {
+              draft[j].orderType = buySellGb === '1' ? 'ask' : 'bid';
+              draft[j].quantity = contQty;
+              return;
             }
           }
+
           const addOpenPrice: OrderBookReceiverListType = {
             price: contPrice,
-            orderType: 'bid',
-            quantity: transaction.content.list[0].contQty,
-            symbol: transaction.content.list[0].symbol,
-            total: 'a',
+            orderType: buySellGb === '1' ? 'ask' : 'bid',
+            quantity: contQty,
+            symbol: symbol,
+            total: 'current',
           };
+          if (addOpenPrice.price === '') {
+            return;
+          }
           draft.push(addOpenPrice);
         }
       });
       setOriginData(origin);
     }
-  }, [transaction]);
+  }, [transaction.content]);
 
+  /**
+   * 값을 담는 오리지날 변수가 변경이 되었다면 그리기 위한 용도의 배열로 값을 변경하는 함수
+   */
   useEffect(() => {
-    // const { openPrice } = ticker.content;
-    const { contPrice } = transaction.content.list[0];
-
+    console.time('sort');
     const draw = produce(originData, (draft) => {
-      //정렬은 다른곳에서.
+      // const reuslt = quickSort(draft);
+      // return reuslt;
       draft.sort((a, b) => Number(b.price) - Number(a.price));
-      const index = draft.findIndex((item) => {
-        return item.price === contPrice;
-      });
-      if (index !== -1) {
+    });
+    console.timeEnd('sort');
+    setSortData(draw);
+  }, [originData]);
+
+  /**
+   * 인덱스만 찾는 훅스
+   */
+  useEffect(() => {
+    const {
+      content: { list },
+    } = transaction;
+    const index = sortData.findIndex(
+      (item) => item.price === list[list.length - 1].contPrice
+    );
+    const a = list[list.length - 1].contPrice;
+    // console.log(list[list.length - 1].contPrice);
+    // 찾았다면
+    if (index !== -1) {
+      const next = produce(sortData, (draft) => {
         for (let i = 0; i < draft.length; i++) {
           if (i < index) {
-            // console.log(i);
+            // 높은곳에 물량이 쌓인것은 매도니까 파란색
             draft[i].orderType = 'ask';
           } else {
+            // 배열의 후순위쪽은 파란색
             draft[i].orderType = 'bid';
           }
         }
         const complement = Math.ceil(CONST_DISPALY_COUNT / 2);
-        // console.log(complement);
-        // console.log(index);
         const left = index - complement;
-
         if (index > left) {
           draft.splice(0, left);
         }
-      }
-
-      // const nextIndex = draft.findIndex((item) => {
-      //   return item.price === contPrice;
-      // });
-      // if (nextIndex !== -1) {
-      //   for (let i = 0; i < draft.length; i++) {
-      //     if (i < nextIndex) {
-      //       draft[i].orderType = 'ask';
-      //     } else {
-      //       draft[i].orderType = 'bid';
-      //     }
-      //   }
-      //   const complement = Math.ceil(CONST_DISPALY_COUNT / 2);
-      //   const right = index + complement;
-      //   if (right > index) {
-      //     draft.splice(right);
-      //   }
-      // }
-    });
-    setDrawData(draw);
-  }, [or]);
-
-  /**
-   * 체결내역 데이터를 관리함
-   */
-  // useEffect(() => {}, [transaction]);
+      });
+      setDrawData(next);
+    } else {
+      console.log(a);
+      console.log({ ...drawData });
+    }
+  }, [sortData]);
 
   return (
     <div
-      // className="bg-"
       style={{
         gridRowStart: 1,
         gridRowEnd: -1,
@@ -284,8 +298,6 @@ const MainSideBar = () => {
 
         {/* 사이드 본문 */}
         <div
-          // direction="column"
-          // overflow={'hidden'}
           style={{
             display: 'grid',
             gridRowStart: 2,
@@ -300,18 +312,18 @@ const MainSideBar = () => {
           <div
             className="h-full"
             style={{
-              // height: '540px',
-
+              height: '530px',
+              overflowY: 'scroll',
               minHeight: '530px',
               maxHeight: 'auto',
             }}
           >
-            {drawData.length < 10 && (
+            {drawData.length < CONST_LOADING_CNT && (
               <motion.div
                 className="relative h-full w-full flex justify-center items-center"
                 animate={{
                   x: -100,
-                  opacity: drawData.length < 10 ? 1 : 0,
+                  opacity: drawData.length < CONST_LOADING_CNT ? 1 : 0,
                 }}
                 transition={{
                   ease: 'backOut',
@@ -326,17 +338,16 @@ const MainSideBar = () => {
               </motion.div>
             )}
 
-            {drawData.length > 10 &&
+            {drawData.length > CONST_LOADING_CNT &&
               drawData.map((item, index) => {
                 return (
                   index < CONST_DISPALY_COUNT && (
                     <div
                       className="grid grid-cols-2 grid-rows-1 px-8"
-                      // key={`${item.price}_${item.quantity}_${item.orderType}`}
+                      key={uuidv4()}
                     >
                       <motion.div
                         className={classNames(
-                          // `${item.total === 'a' ? 'border-2' : ''}`,
                           `flex ml-2 justify-start items-center`,
                           `${
                             item.orderType === 'ask'
@@ -345,12 +356,42 @@ const MainSideBar = () => {
                           }`
                         )}
                       >
-                        <span>
+                        <span
+                          className={classNames(
+                            `${
+                              item.orderType === 'ask' &&
+                              transaction.content.list[
+                                transaction.content.list.length - 1
+                              ].contPrice === item.price
+                                ? `${styles.askEffect}`
+                                : ''
+                            }`,
+                            `${
+                              item.orderType === 'bid' &&
+                              transaction.content.list[
+                                transaction.content.list.length - 1
+                              ].contPrice === item.price
+                                ? `${styles.bidEffect}`
+                                : ''
+                            }`
+                          )}
+                        >
                           {Number(item.price).toLocaleString('ko-kr')}
                         </span>
                       </motion.div>
-                      <div className="flex justify-end items-center">
-                        <span>{Number(item.quantity).toFixed(4)}</span>
+                      <div className="flex justify-evenly items-center">
+                        <Meter
+                          size="xsmall"
+                          thickness="xsmall"
+                          color="orange"
+                          margin={{
+                            left: '-140px',
+                          }}
+                          value={Number(item.quantity) * 50}
+                        />
+                        <span className="absolute ml-10">
+                          {Number(item.quantity).toFixed(4)}
+                        </span>
                       </div>
                     </div>
                   )
@@ -422,13 +463,10 @@ const MainSideBar = () => {
                 transactionList.map((item, index) => {
                   return (
                     <motion.div
+                      key={uuidv4()}
                       ref={
                         index === transactionList.length - 1 ? scrollRef : null
                       }
-                      // animate={{
-                      //   opacity: true,
-                      //   animationDelay: 1 * index * 100,
-                      // }}
                       style={{
                         display: 'grid',
                         height: '30px',
@@ -451,7 +489,6 @@ const MainSideBar = () => {
                         )}
                       >
                         <span>{Number(item.contQty).toFixed(4)}</span>
-                        {/* {item.contQty} */}
                       </div>
                     </motion.div>
                   );
