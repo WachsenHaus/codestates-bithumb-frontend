@@ -31,8 +31,8 @@ import styles from './animation.module.css';
 import { Item } from 'framer-motion/types/components/Reorder/Item';
 import { quickSort } from '../utils/utils';
 
-const CONST_DISPALY_COUNT = 20;
-const CONST_LOADING_CNT = 18;
+const CONST_DISPALY_COUNT = 30;
+const CONST_LOADING_CNT = 16;
 
 const MainSideBar = () => {
   const or = useRecoilValue(orderbookdepthReceiveState);
@@ -348,7 +348,7 @@ const MainSideBar = () => {
                     >
                       <motion.div
                         className={classNames(
-                          `flex ml-2 justify-start items-center`,
+                          `flex  justify-start items-center`,
                           `${
                             item.orderType === 'ask'
                               ? 'text-blue-400'
@@ -385,11 +385,11 @@ const MainSideBar = () => {
                           thickness="xsmall"
                           color="orange"
                           margin={{
-                            left: '-140px',
+                            left: '-70px',
                           }}
                           value={Number(item.quantity) * 50}
                         />
-                        <span className="absolute ml-10">
+                        <span className="ml-5">
                           {Number(item.quantity).toFixed(4)}
                         </span>
                       </div>

@@ -32,7 +32,9 @@ const MainPage = () => {
 
   return (
     <div
-      className={classNames(`w-screen h-screen min-h-max min-w-max`)}
+      className={classNames(
+        `w-screen h-screen min-h-max min-w-max overflow-hidden`
+      )}
       style={{
         fontFamily: 'Courier',
         letterSpacing: '0.01rem',
@@ -44,7 +46,7 @@ const MainPage = () => {
           width: '100%',
           height: '100%',
           gridTemplateRows: '7% auto 40%',
-          gridTemplateColumns: '80% auto',
+          gridTemplateColumns: '77% auto',
         }}
       >
         <MainHeader />
