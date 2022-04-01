@@ -169,7 +169,7 @@ const MainFooter = () => {
               {drawData.map((item) => {
                 return (
                   item.content.openPrice !== '' && (
-                    <TableRow key={uuid()}>
+                    <TableRow>
                       <TableCell scope="row">
                         <strong>{item?.content.symbol}</strong>
                       </TableCell>

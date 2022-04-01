@@ -344,7 +344,7 @@ const MainSideBar = () => {
                   index < CONST_DISPALY_COUNT && (
                     <div
                       className="grid grid-cols-2 grid-rows-1 px-8"
-                      key={uuidv4()}
+                      // key={uuidv4()}
                     >
                       <motion.div
                         className={classNames(
@@ -463,7 +463,6 @@ const MainSideBar = () => {
                 transactionList.map((item, index) => {
                   return (
                     <motion.div
-                      key={uuidv4()}
                       ref={
                         index === transactionList.length - 1 ? scrollRef : null
                       }
