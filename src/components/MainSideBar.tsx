@@ -1,5 +1,5 @@
-import { Box } from 'grommet';
-import React, { useEffect, useState } from 'react';
+import { Box, Button, Clock, Heading, Meter, Spinner, Text } from 'grommet';
+import React, { useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import {
   Chart as ChartJS,
@@ -25,10 +25,12 @@ import {
 import classNames from 'classnames';
 import produce from 'immer';
 import moment from 'moment';
+import { motion } from 'framer-motion';
+import codestates from '../asset/img/codestates-ci.png';
 
-const CONST_DISPALY_COUNT = 36;
+const CONST_DISPALY_COUNT = 20;
 
-const MainSiderBar = () => {
+const MainSideBar = () => {
   const or = useRecoilValue(orderbookdepthReceiveState);
   const transaction = useRecoilValue(transactionReceiveState);
   const [originData, setOriginData] = useState<OrderBookReceiverListType[]>([]);
@@ -37,6 +39,17 @@ const MainSiderBar = () => {
     TransactionReceiverListType[]
   >([]);
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollRef) {
+      scrollRef?.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'end',
+        inline: 'nearest',
+      });
+    }
+  }, [transactionList]);
   useEffect(() => {
     const { list } = transaction.content;
     if (list) {
@@ -76,6 +89,8 @@ const MainSiderBar = () => {
         setOriginData(rawData.content.list);
         return;
       }
+    }
+    if (rawData) {
       // list배열을 돌면서 데이터 배열을 다 훑으면서 심볼과 금액이 있다면 기존데이터배열에 갱신하고 없다면 추가
       const origin = produce(originData, (draft) => {
         //result 원본배열
@@ -145,7 +160,7 @@ const MainSiderBar = () => {
             orderType: 'bid',
             quantity: transaction.content.list[0].contQty,
             symbol: transaction.content.list[0].symbol,
-            total: '',
+            total: 'a',
           };
           draft.push(addOpenPrice);
         }
@@ -211,7 +226,7 @@ const MainSiderBar = () => {
 
   return (
     <div
-      // className="h-full"
+      // className="bg-"
       style={{
         gridRowStart: 1,
         gridRowEnd: -1,
@@ -221,70 +236,107 @@ const MainSiderBar = () => {
         height: '100%',
       }}
     >
-      <Box background={'light-2'} height="100%">
+      <div
+        className="grid "
+        style={{
+          height: '100%',
+          gridTemplateColumns: '50% auto',
+          gridTemplateRows: '7% auto',
+        }}
+      >
+        {/* 사이드 헤더 */}
         <div
-          className="grid "
           style={{
-            height: '100%',
-            gridTemplateColumns: '50% auto',
-            gridTemplateRows: '7% auto',
+            gridRowStart: 1,
+            gridRowEnd: 1,
+            gridColumnStart: 1,
+            gridColumnEnd: 2,
           }}
         >
-          {/* 사이드 헤더 */}
-          <div
-            style={{
-              gridRowStart: 1,
-              gridRowEnd: 1,
-              gridColumnStart: 1,
-              gridColumnEnd: 2,
-            }}
-          >
-            <div className="w-full h-full flex justify-center items-center">
-              <div>가격 (KRW)</div>
-            </div>
-          </div>
-          <div
-            style={{
-              gridRowStart: 1,
-              gridRowEnd: 1,
-              gridColumnStart: 2,
-              gridColumnEnd: 3,
-            }}
-          >
-            <div className="w-full h-full flex justify-center items-center">
-              <div>수량 (BTC)</div>
-            </div>
-          </div>
-
-          {/* 사이드 본문 */}
-          <Box
-            // direction="column"
-            overflow={'hidden'}
-            style={{
-              display: 'grid',
-              gridRowStart: 2,
-              gridRowEnd: -1,
-              gridColumnStart: 1,
-              gridColumnEnd: -1,
-              height: '100%',
-            }}
-          >
-            <div
-              // className="h-full"
+          <div className="w-full h-full flex justify-center items-center">
+            <h1
               style={{
-                height: '700px',
-                minHeight: '700px',
+                fontFamily: 'bmjua',
               }}
             >
-              {drawData.map((item, index) => {
+              가격 (KRW)
+            </h1>
+          </div>
+        </div>
+        <div
+          style={{
+            gridRowStart: 1,
+            gridRowEnd: 1,
+            gridColumnStart: 2,
+            gridColumnEnd: 3,
+          }}
+        >
+          <div className="w-full h-full flex justify-center items-center">
+            <h1
+              style={{
+                fontFamily: 'bmjua',
+              }}
+            >
+              수량 (BTC)
+            </h1>
+          </div>
+        </div>
+
+        {/* 사이드 본문 */}
+        <div
+          // direction="column"
+          // overflow={'hidden'}
+          style={{
+            display: 'grid',
+            gridRowStart: 2,
+            gridRowEnd: -1,
+            gridColumnStart: 1,
+            gridColumnEnd: -1,
+            height: '100%',
+            width: '100%',
+            gridTemplateRows: '57% auto',
+          }}
+        >
+          <div
+            className="h-full"
+            style={{
+              // height: '540px',
+
+              minHeight: '530px',
+              maxHeight: 'auto',
+            }}
+          >
+            {drawData.length < 10 && (
+              <motion.div
+                className="relative h-full w-full flex justify-center items-center"
+                animate={{
+                  x: -100,
+                  opacity: drawData.length < 10 ? 1 : 0,
+                }}
+                transition={{
+                  ease: 'backOut',
+                  delay: 200,
+                }}
+              >
+                <Spinner
+                  message={'Loading Data'}
+                  size="xsmall"
+                  aria-label="meter"
+                />
+              </motion.div>
+            )}
+
+            {drawData.length > 10 &&
+              drawData.map((item, index) => {
                 return (
                   index < CONST_DISPALY_COUNT && (
                     <div
-                      className="grid grid-cols-2 grid-rows-1"
+                      className="grid grid-cols-2 grid-rows-1 px-8"
                       // key={`${item.price}_${item.quantity}_${item.orderType}`}
                     >
-                      <div
+                      <motion.div
                         className={classNames(
+                          // `${item.total === 'a' ? 'border-2' : ''}`,
                           `flex ml-2 justify-start items-center`,
                           `${
                             item.orderType === 'ask'
@@ -293,71 +345,134 @@ const MainSiderBar = () => {
                           }`
                         )}
                       >
-                        <span>{item.price}</span>
-                      </div>
+                        <span>
+                          {Number(item.price).toLocaleString('ko-kr')}
+                        </span>
+                      </motion.div>
                       <div className="flex justify-end items-center">
-                        <span>{item.quantity}</span>
+                        <span>{Number(item.quantity).toFixed(4)}</span>
                       </div>
                     </div>
                   )
                 );
               })}
-            </div>
-            <Box
+          </div>
+          <div className="flex flex-col justify-center h-full">
+            <h1
+              className="text-2xl flex justify-center items-center"
               style={{
-                gridTemplateColumns: 'auto',
-                gridTemplateRows: '10% 10% auto',
-                // height: '200px',
+                fontFamily: 'bmjua',
               }}
             >
-              <div>체결내역</div>
-              <div
+              체결 내역
+            </h1>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '30% 40% auto',
+                gridTemplateRows: 'auto',
+              }}
+            >
+              <h1
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '30% 40% auto',
-                  gridTemplateRows: 'auto',
+                  fontFamily: 'bmjua',
                 }}
+                className="w-full flex justify-center items-center"
               >
-                <div className="w-full flex justify-center items-center">
-                  시간
-                </div>
-                <div className="w-full flex justify-center items-center">
-                  가격
-                </div>
-                <div className="w-full flex justify-center items-center">
-                  수량(BTC)
-                </div>
-              </div>
-              <div className="grid grid-cols-1 grid-rows-1 h-64">
-                <div className="flex  flex-col">
-                  {transactionList.map((item, index) => {
-                    return (
-                      <div
-                        // key={`${item.contDtm} + ${item.buySellGb}`}
-                        className="grid"
-                        style={{
-                          gridTemplateColumns: '30% 40% 30%',
-                        }}
-                      >
-                        <div className="flex justify-center items-center">
-                          {moment(item.contDtm).format('HH:mm:ss')}
-                        </div>
-                        <div className="flex justify-center items-center">
-                          {item.contPrice}
-                        </div>
-                        <div className="flex justify-center items-center">
-                          {item.contQty}
-                        </div>
+                시간
+              </h1>
+              <h1
+                style={{
+                  fontFamily: 'bmjua',
+                }}
+                className="w-full flex justify-center items-center"
+              >
+                가격
+              </h1>
+              <h1
+                style={{
+                  fontFamily: 'bmjua',
+                }}
+                className="w-full flex justify-center items-center"
+              >
+                수량(BTC)
+              </h1>
+            </div>
+            <div className="h-64 overflow-scroll overflow-x-hidden">
+              {transactionList.length < 10 && (
+                <motion.div
+                  className="relative h-full w-full flex justify-center items-center"
+                  animate={{
+                    x: -100,
+                    opacity: transactionList.length < 10 ? 1 : 0,
+                  }}
+                  transition={{
+                    ease: 'backOut',
+                    delay: 200,
+                  }}
+                >
+                  <Spinner
+                    message={'Loading Data'}
+                    size="xsmall"
+                    aria-label="meter"
+                  />
+                </motion.div>
+              )}
+              {transactionList.length > 10 &&
+                transactionList.map((item, index) => {
+                  return (
+                    <motion.div
+                      ref={
+                        index === transactionList.length - 1 ? scrollRef : null
+                      }
+                      // animate={{
+                      //   opacity: true,
+                      //   animationDelay: 1 * index * 100,
+                      // }}
+                      style={{
+                        display: 'grid',
+                        height: '30px',
+                        gridTemplateColumns: '30% 40% 30%',
+                      }}
+                    >
+                      <div className="flex justify-center items-center">
+                        {moment(item.contDtm).format('HH:mm:ss')}
                       </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </Box>
-          </Box>
+                      <div className="flex justify-center items-center">
+                        {Number(item.contPrice).toLocaleString('ko-kr')}
+                      </div>
+                      <div
+                        className={classNames(
+                          `${
+                            item.updn === 'up'
+                              ? 'text-red-400'
+                              : 'text-blue-400'
+                          } flex justify-center items-center"`
+                        )}
+                      >
+                        <span>{Number(item.contQty).toFixed(4)}</span>
+                        {/* {item.contQty} */}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+            </div>
+            <div
+              className="flex justify-center items-center  bg-no-repeat bg-contain"
+              style={{
+                width: '100%',
+                height: '30px',
+                backgroundPosition: '240px 0px',
+
+                backgroundImage: `url(${codestates})`,
+              }}
+            >
+              최영훈
+            </div>
+          </div>
         </div>
-      </Box>
+      </div>
     </div>
   );
 };
-export default MainSiderBar;
+export default MainSideBar;

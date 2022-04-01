@@ -61,32 +61,35 @@ const MainFooter = () => {
   // const setSockets = useSetRecoilState(atomSocketsState);
   // const setSocketIdentifier = useSetRecoilState(atomSocketIdentifier);
   // 배열로 해서 코인이름이 같은애만 바꿔치기를하자.
-  const [data, setData] = useState<ITickerReceiverTypes[]>([]);
+  const [drawData, setDrawData] = useState<ITickerReceiverTypes[]>([]);
 
   /**
    * 티커정보를 갱신함.
    */
   useEffect(() => {
-    const result = rcvTicker as ITickerReceiverTypes;
-    if (result) {
-      if (
-        data.length === 0
-        // (data.length === 1 && data[0].content.symbol === '')
-      ) {
-        setData([result]);
+    // if (!drawData) {
+    //   if (rcvTicker.content.openPrice === '') return;
+    // }
+
+    if (rcvTicker) {
+      if (drawData.length === 0) {
+        if (rcvTicker.content.openPrice === '') {
+          return;
+        }
+        setDrawData([rcvTicker]);
         return;
       }
-      const next = produce(data, (draft) => {
+      const next = produce(drawData, (draft) => {
         const index = draft.findIndex(
-          (item) => item.content.symbol === result.content.symbol
+          (item) => item.content.symbol === rcvTicker.content.symbol
         );
         if (index !== -1) {
-          draft[index].content = result.content;
+          draft[index].content = rcvTicker.content;
         } else {
-          draft.push(result);
+          draft.push(rcvTicker);
         }
       });
-      setData(next);
+      setDrawData(next);
     }
   }, [rcvTicker]);
 
@@ -102,7 +105,7 @@ const MainFooter = () => {
     ) => {
       switch (type) {
         case 'KRW':
-          setData([]);
+          setDrawData([]);
           setSenderTicker((prevData) => {
             return {
               ...prevData,
@@ -112,7 +115,7 @@ const MainFooter = () => {
 
           break;
         case 'BTC':
-          setData([]);
+          setDrawData([]);
           setSenderTicker((prevData) => {
             return {
               ...prevData,
@@ -144,12 +147,13 @@ const MainFooter = () => {
       <div
         className="w-full h-full grid"
         style={{
-          gridTemplateColumns: 'auto 20%',
+          gridTemplateColumns: 'auto',
         }}
       >
         <Box
           direction="row"
           background={'light-5'}
+          width="100%"
           className={classNames('flex flex-row justify-start items-center')}
         >
           <Button
@@ -171,26 +175,13 @@ const MainFooter = () => {
           />
           {/* </Box> */}
 
-          <Button
+          {/* <Button
             size="large"
             type="button"
             margin="small"
             label="즐겨 찾기"
             onClick={onClick('FAVOURITE')}
-          ></Button>
-        </Box>
-        <Box
-          direction="row"
-          background={'light-5'}
-          className={classNames('flex flex-row justify-start items-center')}
-        >
-          <Button
-            size="large"
-            type="button"
-            margin="small"
-            label="검색"
-            onClick={onClick('FAVOURITE')}
-          />
+          ></Button> */}
         </Box>
       </div>
       <div>
@@ -202,10 +193,10 @@ const MainFooter = () => {
                   자산
                 </TableCell>
                 <TableCell scope="col" border="bottom">
-                  실시간 시세
+                  실시간 시세(KRW)
                 </TableCell>
                 <TableCell scope="col" border="bottom">
-                  변동률
+                  변동률(%)
                 </TableCell>
                 {/* <TableCell scope="col" border="bottom">
                   거래 금액
@@ -216,25 +207,42 @@ const MainFooter = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((item) => {
+              {drawData.map((item) => {
                 return (
-                  <TableRow>
-                    <TableCell scope="row">
-                      <strong>{item?.content.symbol}</strong>
-                    </TableCell>
-                    <TableCell scope="row">
-                      <strong>{item?.content.openPrice}</strong>
-                    </TableCell>
-                    <TableCell scope="row">
-                      <strong>{item?.content.chgRate}</strong>
-                    </TableCell>
-                    {/* <TableCell scope="row">
+                  item.content.openPrice !== '' && (
+                    <TableRow>
+                      <TableCell scope="row">
+                        <strong>{item?.content.symbol}</strong>
+                      </TableCell>
+                      <TableCell scope="row">
+                        <strong>
+                          {Number(item?.content.openPrice).toLocaleString(
+                            'ko-kr'
+                          )}
+                          원
+                        </strong>
+                      </TableCell>
+                      <TableCell scope="row">
+                        <strong
+                          className={classNames(`
+                        ${
+                          Number(item?.content.chgRate) > 0
+                            ? 'text-red-400'
+                            : ' text-blue-400'
+                        }
+                        `)}
+                        >
+                          {item?.content.chgRate}%
+                        </strong>
+                      </TableCell>
+                      {/* <TableCell scope="row">
                       <strong>{item?.content.value}</strong>
                     </TableCell>
                     <TableCell scope="row">
                       <strong>{item?.content.volume}</strong>
                     </TableCell> */}
-                  </TableRow>
+                    </TableRow>
+                  )
                 );
               })}
             </TableBody>

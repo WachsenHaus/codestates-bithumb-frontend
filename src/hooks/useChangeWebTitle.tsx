@@ -7,7 +7,9 @@ const useChangeWebTitle = () => {
 
   useEffect(() => {
     const htmlTitle = document.querySelector('title');
-    const title = `${rcvTicker.content.openPrice} / ${rcvTicker.content.symbol}`;
+    const title = `${Number(rcvTicker.content.openPrice).toLocaleString(
+      'ko-kr'
+    )} / ${rcvTicker.content.symbol}`;
     if (htmlTitle) {
       htmlTitle.innerHTML = title;
     }

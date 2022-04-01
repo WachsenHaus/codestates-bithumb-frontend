@@ -10,7 +10,7 @@ import {
 
 export const DEFAULT_TICKER_SENDER: ITickerSenderTypes = {
   type: 'ticker',
-  symbols: ['BTC_KRW'],
+  symbols: ['BTC_KRW', 'ETH_KRW', 'KLAY_KRW', 'XNO_KRW', 'ZIL_KRW'],
   tickTypes: ['30M'],
 };
 

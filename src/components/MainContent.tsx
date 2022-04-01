@@ -30,8 +30,16 @@ const MainContent = () => {
 
   const [drawData, setDrawData] = useState<any[]>();
   useEffect(() => {
+    if (rcvTicker.content.symbol !== 'BTC_KRW') {
+      return;
+    }
     if (!drawData) {
-      if (rcvTicker.content.openPrice === '') return;
+      if (
+        rcvTicker.content.openPrice === '' ||
+        rcvTicker.content.symbol !== 'BTC_KRW'
+      ) {
+        return;
+      }
       const obj = {
         x: rcvTicker.content.time,
         y: rcvTicker.content.openPrice,
@@ -41,11 +49,16 @@ const MainContent = () => {
     }
     setDrawData(
       produce(drawData, (draft) => {
-        const obj = {
-          x: rcvTicker.content.time,
-          y: rcvTicker.content.openPrice,
-        };
-        draft?.push(obj);
+        if (rcvTicker.content.symbol === 'BTC_KRW') {
+          const obj = {
+            x: rcvTicker.content.time,
+            y: rcvTicker.content.openPrice,
+          };
+          draft?.push(obj);
+          if (draft.length > 10000) {
+            draft.shift();
+          }
+        }
       })
     );
   }, [rcvTicker.content]);
@@ -62,25 +75,22 @@ const MainContent = () => {
   };
   return (
     <div
-      className="h-full bg-blue-300  opacity-90"
+      className="opacity-90"
       style={{
         gridRowStart: 2,
         gridRowEnd: 3,
         gridColumn: 1,
-        width: '100%',
-        height: '100%',
       }}
     >
-      <div className="w-9/12">
+      <div className="relative h-full">
         <Line
           data={dddd}
           options={{
             responsive: true,
+            maintainAspectRatio: false,
             animation: {
               easing: 'linear',
-              onComplete: () => {},
             },
-            // responsive: true,
           }}
         />
       </div>

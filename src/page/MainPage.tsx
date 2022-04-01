@@ -1,38 +1,58 @@
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
+import { useRecoilValue } from 'recoil';
+import {
+  orderbookdepthSocketState,
+  tickerSocketState,
+  transactionSocketState,
+} from '../atom/user.atom';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
-import MainSiderBar from '../components/MainSiderBar';
+import MainSideBar from '../components/MainSideBar';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
-  /** init */
-  // const [_, setWebSocket] = useRecoilState(atomSocketsState);
-
-  //   const bitThumbWs =
   useGenerateBitThumbSocket('ticker');
   useGenerateBitThumbSocket('transaction');
   useGenerateBitThumbSocket('orderbookdepth');
   useChangeWebTitle();
-  // useObserverWSMessage();
-  //   useEffect(() => {
-  //     bitThumbWs && setWebSocket(bitThumbWs);
-  //   }, [bitThumbWs]);
+
+  const tickerWs = useRecoilValue(tickerSocketState);
+  const transactionWs = useRecoilValue(transactionSocketState);
+  const orderbookWs = useRecoilValue(orderbookdepthSocketState);
+  useEffect(() => {
+    return () => {
+      tickerWs?.close();
+      transactionWs?.close();
+      orderbookWs?.close();
+    };
+  }, []);
 
   return (
     <div
-      className={classNames(`grid w-screen h-screen`)}
+      className={classNames(`w-screen h-screen min-h-max min-w-max`)}
       style={{
-        gridTemplateRows: '7% auto 40%',
-        gridTemplateColumns: '80% auto',
+        fontFamily: 'Courier',
+        letterSpacing: '0.01rem',
       }}
     >
-      <MainHeader />
-      <MainContent />
-      <MainFooter />
-      <MainSiderBar />
+      <div
+        style={{
+          display: 'grid',
+          width: '100%',
+          height: '100%',
+          gridTemplateRows: '7% auto 40%',
+          gridTemplateColumns: '80% auto',
+        }}
+      >
+        <MainHeader />
+        <MainContent />
+        <MainFooter />
+
+        <MainSideBar />
+      </div>
     </div>
   );
 };

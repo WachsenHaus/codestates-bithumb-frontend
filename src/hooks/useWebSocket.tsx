@@ -124,8 +124,10 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
               wsTicker.close();
               console.warn(`Exist ${type} Socket`);
             }
-            setWsTicker(ws);
-            ws.send(stringify(senderTicker));
+            if (wsTicker?.CLOSED || wsTicker === undefined) {
+              setWsTicker(ws);
+              ws.send(stringify(senderTicker));
+            }
           };
 
           ws.onerror = generateOnError(type);

@@ -6,7 +6,7 @@
    v2.0 | 20110126
    License: none (public domain)
 */
-
+/* 
 html,
 body,
 div,
@@ -92,11 +92,11 @@ video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font: inherit;
+  font: 'bmjua';
   vertical-align: baseline;
 }
 /* HTML5 display-role reset for older browsers */
-article,
+/* article,
 aside,
 details,
 figcaption,
@@ -130,4 +130,10 @@ q:after {
 table {
   border-collapse: collapse;
   border-spacing: 0;
+} */
+
+@font-face {
+  font-family: 'bmjua';
+  src: url('./asset/font/BMJUA_otf.otf') format('otf');
+  src: url('./asset/font/BMJUA_ttf.ttf') format('truetype');
 }
