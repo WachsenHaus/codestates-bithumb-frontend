@@ -4,6 +4,7 @@ import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
 import MainSiderBar from '../components/MainSiderBar';
+import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
@@ -14,6 +15,7 @@ const MainPage = () => {
   useGenerateBitThumbSocket('ticker');
   useGenerateBitThumbSocket('transaction');
   useGenerateBitThumbSocket('orderbookdepth');
+  useChangeWebTitle();
   // useObserverWSMessage();
   //   useEffect(() => {
   //     bitThumbWs && setWebSocket(bitThumbWs);
@@ -23,7 +25,6 @@ const MainPage = () => {
     <div
       className={classNames(`grid w-screen h-screen`)}
       style={{
-        display: 'grid',
         gridTemplateRows: '7% auto 40%',
         gridTemplateColumns: '80% auto',
       }}

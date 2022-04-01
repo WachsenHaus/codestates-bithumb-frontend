@@ -127,6 +127,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
             setWsTicker(ws);
             ws.send(stringify(senderTicker));
           };
+
           ws.onerror = generateOnError(type);
           ws.onclose = generateOnCloser(type);
           ws.onmessage = generateOnMessage(type);
