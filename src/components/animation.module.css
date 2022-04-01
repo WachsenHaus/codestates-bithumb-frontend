@@ -23,7 +23,7 @@
 @keyframes up-effect {
   from {
     opacity: 1;
-    border-color: blue;
+    border-color: red;
   }
   to {
     opacity: 0;
@@ -34,7 +34,7 @@
 @keyframes down-effect {
   from {
     opacity: 1;
-    border-color: red;
+    border-color: blue;
   }
   to {
     opacity: 0;
