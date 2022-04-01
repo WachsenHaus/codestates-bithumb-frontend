@@ -67,11 +67,14 @@ https://www.figma.com/proto/Ft1BxA5Psn4bW1hGd0RAgy/codestates-bithumb-frontend-%
 코딩하기전에 빗썸 홈페이지와 api를 구경하면서 프로토타입으로 만든 피그마입니다
 개발을 진행하면서 구현해야할것과 많이 다르고 시간이 부족하여 피그마는 이후로 수정하지 못했습니다.
 
-### 성능 최적화 고민
+# 성능 최적화 고민
 1. 객체 깊은 복사  
   1.1 https://bi9choi.notion.site
 2. 정렬 속도  
   2.1 https://bi9choi.notion.site/sort-d35559931b604db0a26a8f8c8f2b9e75
+
+노션 
+3. https://bi9choi.notion.site/7f8eda0a78124414be50b52906833142
 
 
 ## 궁금한 점
