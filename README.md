@@ -72,7 +72,7 @@ https://www.figma.com/proto/Ft1BxA5Psn4bW1hGd0RAgy/codestates-bithumb-frontend-%
   1.1 https://bi9choi.notion.site
 2. 정렬 속도  
   2.1 https://bi9choi.notion.site/sort-d35559931b604db0a26a8f8c8f2b9e75
-3. 노션
+3. 노션  
   3.1 https://bi9choi.notion.site/7f8eda0a78124414be50b52906833142
 
 
