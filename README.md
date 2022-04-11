@@ -1,6 +1,7 @@
 # 목차
 
 ```
+0. 프로젝트 노션 링크
 1. 배포링크
 2. 프로젝트 실행 방법
 3. 사용한 기술 스택
@@ -8,7 +9,9 @@
 5. 구현 방법 및 구현하면서 어려웠던 점
 6. Prototype 소개(Figma)
 ```
-
+## 프로젝트 노션 링크
+1. 노션  
+https://bi9choi.notion.site/7f8eda0a78124414be50b52906833142
 ## 배포링크
 
 1. www.wachsenhaus.com
@@ -69,11 +72,9 @@ https://www.figma.com/proto/Ft1BxA5Psn4bW1hGd0RAgy/codestates-bithumb-frontend-%
 
 # 성능 최적화 고민
 1. 객체 깊은 복사  
-  1.1 https://bi9choi.notion.site
+  1.1 https://bi9choi.notion.site/CS-9838e5c82d9449b398728e4d4da2b2bc
 2. 정렬 속도  
-  2.1 https://bi9choi.notion.site/sort-d35559931b604db0a26a8f8c8f2b9e75
-3. 노션  
-  3.1 https://bi9choi.notion.site/7f8eda0a78124414be50b52906833142
+  2.1 https://bi9choi.notion.site/CS-sort-f4f658f6497c473ab170868a0689d49e
 
 
 ## 궁금한 점
