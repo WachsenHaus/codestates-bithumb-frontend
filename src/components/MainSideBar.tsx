@@ -342,10 +342,7 @@ const MainSideBar = () => {
               drawData.map((item, index) => {
                 return (
                   index < CONST_DISPALY_COUNT && (
-                    <div
-                      className="grid grid-cols-2 grid-rows-1 px-8"
-                      // key={uuidv4()}
-                    >
+                    <div className="grid grid-cols-2 grid-rows-1 px-8">
                       <motion.div
                         className={classNames(
                           `flex  justify-start items-center`,
