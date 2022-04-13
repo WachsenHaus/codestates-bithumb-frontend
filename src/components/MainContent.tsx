@@ -111,8 +111,9 @@ const MainContent = () => {
         }
         if (wrapperRef.current) {
           const chart = createChart(wrapperRef.current, {
-            width: 800,
-            height: 500,
+            // width: ',
+            // wid
+            height: 400,
             crosshair: {
               mode: 0,
             },
@@ -126,28 +127,28 @@ const MainContent = () => {
               timeVisible: true,
             },
           });
-          const chart2 = createChart(wrapperRef.current, {
-            width: 800,
-            height: 200,
-            crosshair: {
-              mode: 0,
-            },
-            timeScale: {
-              borderColor: 'rgba(197, 203, 206, 0.8)',
-            },
-          });
+          // const chart2 = createChart(wrapperRef.current, {
+          //   width: 800,
+          //   height: 200,
+          //   crosshair: {
+          //     mode: 0,
+          //   },
+          //   timeScale: {
+          //     borderColor: 'rgba(197, 203, 206, 0.8)',
+          //   },
+          // });
 
-          const volumeSeries = chart.addHistogramSeries({
-            title: '거래량',
-            priceFormat: {
-              type: 'volume',
-            },
-            priceScaleId: '',
-            scaleMargins: {
-              top: 0.9,
-              bottom: 0,
-            },
-          });
+          // const volumeSeries = chart.addHistogramSeries({
+          //   title: '거래량',
+          //   priceFormat: {
+          //     type: 'volume',
+          //   },
+          //   priceScaleId: '',
+          //   scaleMargins: {
+          //     top: 0.9,
+          //     bottom: 0,
+          //   },
+          // });
           const candleSeries = chart.addCandlestickSeries();
           candleSeries.applyOptions({
             upColor: `#ff0000`,
@@ -177,13 +178,13 @@ const MainContent = () => {
   return (
     <div
       className="opacity-90"
-      style={{
-        gridRowStart: 2,
-        gridRowEnd: 3,
-        gridColumn: 1,
-      }}
+      // style={{
+      //   gridRowStart: 2,
+      //   gridRowEnd: 3,
+      //   gridColumn: 1,
+      // }}
     >
-      <div className="relative h-full" ref={wrapperRef}></div>
+      <div className="h-full w-full" ref={wrapperRef}></div>
     </div>
   );
 };

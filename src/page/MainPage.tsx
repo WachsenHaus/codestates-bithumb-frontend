@@ -1,3 +1,4 @@
+import { Container, Grid } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -6,6 +7,7 @@ import {
   tickerSocketState,
   transactionSocketState,
 } from '../atom/user.atom';
+import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
@@ -17,7 +19,7 @@ const MainPage = () => {
   useGenerateBitThumbSocket('ticker');
   useGenerateBitThumbSocket('transaction');
   useGenerateBitThumbSocket('orderbookdepth');
-  useChangeWebTitle();
+  // useChangeWebTitle();
 
   const tickerWs = useRecoilValue(tickerSocketState);
   const transactionWs = useRecoilValue(transactionSocketState);
@@ -30,32 +32,52 @@ const MainPage = () => {
     };
   }, []);
 
+  //xs :0
+  //sm :600
+  //md:900
+  //lg:1200
+  //xl:1536
   return (
-    <div
-      className={classNames(
-        `w-screen h-screen min-h-max min-w-max overflow-hidden`
-      )}
-      style={{
-        fontFamily: 'Courier',
-        letterSpacing: '0.01rem',
-      }}
-    >
-      <div
-        style={{
-          display: 'grid',
-          width: '100%',
-          height: '100%',
-          gridTemplateRows: '7% auto 40%',
-          gridTemplateColumns: '77% auto',
+    <>
+      <Header />
+      <Container
+        // disableGutters
+
+        maxWidth={false}
+        sx={{
+          background: 'rgba(222,222,222,0.1)',
+          // height: '100%',
+          fontFamily: 'Courier',
+          letterSpacing: '0.01rem',
         }}
       >
-        <MainHeader />
-        <MainContent />
-        <MainFooter />
-
-        <MainSideBar />
-      </div>
-    </div>
+        <Grid
+          container
+          spacing={0}
+          rowSpacing={0}
+          // gridgutt
+        >
+          <Grid item xs={7}>
+            <MainContent />
+            <MainFooter />
+          </Grid>
+          <Grid item xs={5}>
+            <MainSideBar />
+          </Grid>
+        </Grid>
+        {/* <div
+          style={{
+            display: 'grid',
+            width: '100%',
+            height: '100%',
+            gridTemplateRows: '7% auto 40%',
+            gridTemplateColumns: '77% auto',
+          }}
+        >
+            </div> */}
+        {/* <MainHeader /> */}
+      </Container>
+    </>
   );
 };
 

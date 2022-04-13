@@ -109,20 +109,20 @@ const MainFooter = () => {
 
   return (
     <div
-      className="h-full grid"
-      style={{
-        gridRowStart: 3,
-        gridRowEnd: 4,
-        gridColumn: 1,
-        gridTemplateRows: '20% 80%',
-        gridTemplateColumns: 'auto',
-      }}
+    // className="h-full grid"
+    // style={{
+    //   gridRowStart: 3,
+    //   gridRowEnd: 4,
+    //   gridColumn: 1,
+    //   gridTemplateRows: '20% 80%',
+    //   gridTemplateColumns: 'auto',
+    // }}
     >
       <div
-        className="w-full h-full grid"
-        style={{
-          gridTemplateColumns: 'auto',
-        }}
+      // className="w-full h-full grid"
+      // style={{
+      //   gridTemplateColumns: 'auto',
+      // }}
       >
         <Box
           direction="row"

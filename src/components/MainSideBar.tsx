@@ -49,11 +49,11 @@ const MainSideBar = () => {
 
   useEffect(() => {
     if (scrollRef) {
-      scrollRef?.current?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end',
-        inline: 'nearest',
-      });
+      // scrollRef?.current?.scrollIntoView({
+      //   behavior: 'smooth',
+      //   block: 'end',
+      //   inline: 'nearest',
+      // });
     }
   }, [transactionList]);
   /**
@@ -490,7 +490,7 @@ const MainSideBar = () => {
                   );
                 })}
             </div>
-            <div
+            {/* <div
               className="flex justify-center items-center  bg-no-repeat bg-contain"
               style={{
                 width: '100%',
@@ -501,7 +501,7 @@ const MainSideBar = () => {
               }}
             >
               최영훈
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

@@ -21,7 +21,7 @@ const MainHeader = () => {
         gridColumn: 1,
       }}
     >
-      <motion.div className={classNames(`h-full flex items-stretch  relative`)}>
+      {/* <motion.div className={classNames(`h-full flex items-stretch  relative`)}>
         <HeaderStyled
           whileHover={{
             scaleX: 0.9,
@@ -49,7 +49,7 @@ const MainHeader = () => {
           </span>
           <Clock className="right-2 absolute" type="digital" />
         </div>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 };
