@@ -1,4 +1,4 @@
-import { Container, Grid } from '@mui/material';
+import { Box, Container, Grid } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
@@ -13,6 +13,7 @@ import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
 import MainSideBar from '../components/MainSideBar';
 import Orderbook from '../components/Orderbook/Orderbook';
+import Transaction from '../components/Transaction/Transaction';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
@@ -40,46 +41,24 @@ const MainPage = () => {
   //xl:1536
   return (
     <>
-      <Header />
-      <Container
-        // disableGutters
-
-        maxWidth={false}
-        sx={{
-          background: 'rgba(222,222,222,0.1)',
-          // height: '100%',
-          fontFamily: 'Courier',
-          letterSpacing: '0.01rem',
+      <Box
+        className={classNames(`grid grid-cols-12 h-screen`)}
+        style={{
+          gridTemplateRows: 'auto 1fr',
         }}
       >
-        <Grid
-          container
-          spacing={0}
-          rowSpacing={0}
-          // gridgutt
-        >
-          <Grid item xs={7}>
-            <MainContent />
-            <MainFooter />
-          </Grid>
-          <Grid item xs={5}>
-            {/* <MainSideBar /> */}
-
-            <Orderbook />
-          </Grid>
-        </Grid>
-        {/* <div
-          style={{
-            display: 'grid',
-            width: '100%',
-            height: '100%',
-            gridTemplateRows: '7% auto 40%',
-            gridTemplateColumns: '77% auto',
-          }}
-        >
-            </div> */}
-        {/* <MainHeader /> */}
-      </Container>
+        <Box gridColumn={`span 12`}>
+          <Header />
+        </Box>
+        <Box gridColumn={`span 7`}>
+          <MainContent />
+          <MainFooter />
+        </Box>
+        <Box gridColumn={`span 5`}>
+          <Orderbook />
+          <Transaction />
+        </Box>
+      </Box>
     </>
   );
 };

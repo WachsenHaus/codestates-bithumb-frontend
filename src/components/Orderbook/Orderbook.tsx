@@ -18,6 +18,10 @@ import OrderbookRow from './OrderbookRow';
 const CONST_DISPALY_COUNT = 30;
 const CONST_LOADING_CNT = 16;
 
+/**
+ *
+ * @returns 호가창 컴포넌트
+ */
 const Orderbook = () => {
   const or = useRecoilValue(orderbookdepthReceiveState);
   const transaction = useRecoilValue(transactionReceiveState);
@@ -40,35 +44,6 @@ const Orderbook = () => {
       // });
     }
   }, [transactionList]);
-  /**
-   * 체결내역 함수
-   */
-  useEffect(() => {
-    const { list } = transaction.content;
-    if (list) {
-      if (transactionList.length === 0) {
-        setTransactionList(list);
-        return;
-      }
-      const next = produce(transactionList, (draft) => {
-        //result 원본배열
-        for (let i = 0; i < list.length; i++) {
-          const { symbol } = list[i];
-          for (let j = 0; j < draft.length; j++) {
-            if (draft[j].symbol !== symbol) {
-              draft.splice(0);
-              return;
-            }
-          }
-          draft.push(list[i]);
-          if (draft.length >= 40) {
-            draft.shift();
-          }
-        }
-      });
-      setTransactionList(next);
-    }
-  }, [transaction.content.list]);
 
   /**
    * 호가창 함수
@@ -176,13 +151,10 @@ const Orderbook = () => {
    * 값을 담는 오리지날 변수가 변경이 되었다면 그리기 위한 용도의 배열로 값을 변경하는 함수
    */
   useEffect(() => {
-    console.time('sort');
     const draw = produce(originData, (draft) => {
-      // const reuslt = quickSort(draft);
-      // return reuslt;
       draft.sort((a, b) => Number(b.price) - Number(a.price));
     });
-    console.timeEnd('sort');
+
     setSortData(draw);
   }, [originData]);
 
@@ -217,32 +189,30 @@ const Orderbook = () => {
         }
       });
       setDrawData(next);
-    } else {
-      console.log(a);
-      console.log({ ...drawData });
     }
+    // else {
+    //   console.log(a);
+    //   console.log({ ...drawData });
+    // }
   }, [sortData]);
 
   return (
-    <Box
-      className={classNames(``)}
-      sx={{
-        maxHeight: 514,
-        Height: 514,
-      }}
-    >
+    <Box className={classNames(`h-1/2 w-full`)}>
       <Typography align="center">호가창</Typography>
-
-      <Box className="flex justify-around items-center w-full font-bmjua">
+      <Box className="flex justify-around items-center font-bmjua">
         <Typography className="font-bmjua">가격(KRW)</Typography>
         <Typography>수량(DOGE)</Typography>
       </Box>
+
       <Box
+        // alignContent="stretch"
         sx={{
-          maxHeight: 480,
-          Height: 480,
+          //   minHeight: '440px',
+          height: 440,
+          // flex: '1 1 auto',
+          //   flex: '1 1 auto',
         }}
-        className={classNames(`overflow-y-scroll overfolw-x-hidden`)}
+        className={classNames(` overflow-y-scroll`)}
       >
         {/* {drawData.length < CONST_LOADING_CNT && (
           <motion.div
@@ -264,8 +234,8 @@ const Orderbook = () => {
           </motion.div>
         )} */}
 
-        {drawData.length > CONST_LOADING_CNT &&
-          drawData.map((item, index) => {
+        {drawData?.length > CONST_LOADING_CNT &&
+          drawData?.map((item, index) => {
             let mEventType: 'ask' | 'bid' | undefined;
             const recentPrice =
               transaction.content.list[transaction.content.list.length - 1]
