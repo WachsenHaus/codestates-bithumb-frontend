@@ -13,17 +13,25 @@ import {
 import { RecoilRoot, useRecoilState } from 'recoil';
 import PathRoutes from './Routes';
 import MainPage from './page/MainPage';
+import { StyledEngineProvider, CssBaseline } from '@mui/material';
+import { LocalizationProvider } from '@mui/lab';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
 
 const App = () => {
   return (
     <RecoilRoot>
-      <Grommet plain>
-        <Router>
-          <Routes>
-            <Route path={PathRoutes.HOME} element={<MainPage />} />
-          </Routes>
-        </Router>
-      </Grommet>
+      <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <StyledEngineProvider>
+          <CssBaseline />
+          <Grommet plain>
+            <Router>
+              <Routes>
+                <Route path={PathRoutes.HOME} element={<MainPage />} />
+              </Routes>
+            </Router>
+          </Grommet>
+        </StyledEngineProvider>
+      </LocalizationProvider>
     </RecoilRoot>
   );
 };
