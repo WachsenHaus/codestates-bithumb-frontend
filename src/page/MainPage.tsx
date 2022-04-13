@@ -12,6 +12,7 @@ import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import MainHeader from '../components/MainHeader';
 import MainSideBar from '../components/MainSideBar';
+import Orderbook from '../components/Orderbook/Orderbook';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
@@ -62,7 +63,9 @@ const MainPage = () => {
             <MainFooter />
           </Grid>
           <Grid item xs={5}>
-            <MainSideBar />
+            {/* <MainSideBar /> */}
+
+            <Orderbook />
           </Grid>
         </Grid>
         {/* <div
