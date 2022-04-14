@@ -1,37 +1,18 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
 import React, { useEffect, useState } from 'react';
+
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuid } from 'uuid';
 import produce from 'immer';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import styles from './animation.module.css';
-import {
-  IOrderBookReceiverTypes,
-  ITickerReceiverTypes,
-  ITransactionReceiverTypes,
-  orderbookdepthReceiveState,
-  orderbookdepthSenderState,
-  orderbookdepthSocketState,
-  SocketNamesType,
-  tickerReceiveState,
-  tickerSenderState,
-  tickerSocketState,
-  transactionReceiveState,
-  transactionSenderState,
-  transactionSocketState,
-} from '../atom/user.atom';
-import CONST from '../const';
 import classNames from 'classnames';
-import {
-  Box,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from 'grommet';
-import { atomDrawTicker } from '../atom/drawData.atom';
+import { Box, Button } from 'grommet';
+import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
 import { motion } from 'framer-motion';
+
+import { Column, Table } from 'react-virtualized';
+import { Paper } from '@mui/material';
 
 type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
 
@@ -79,6 +60,7 @@ const MainFooter = () => {
       }
     };
 
+  const cellRenderer = () => {};
   return (
     <div>
       <div>
@@ -108,8 +90,33 @@ const MainFooter = () => {
         </Box>
       </div>
       <div>
-        <Box background={'light-2'} width="100%" height="100%">
-          <Table>
+        <Paper
+          sx={{
+            height: 400,
+            width: '100%',
+          }}
+        >
+          <AutoSizer>
+            {({ width, height }) => (
+              <Table
+                width={400}
+                height={500}
+                headerHeight={200}
+                rowHeight={100}
+                rowCount={drawTicker.length}
+                rowGetter={({ index }) => {
+                  // console.log(drawTicker[index]);
+                  return drawTicker[index];
+                }}
+              >
+                <Column label="e" dataKey="코인" width={100} />
+                <Column width={200} label="실시간 시세" dataKey="e" />
+                <Column width={100} label="변화량" dataKey="r" />
+              </Table>
+            )}
+          </AutoSizer>
+
+          {/* <Table>
             <TableHeader>
               <TableRow>
                 <TableCell scope="col" border="bottom">
@@ -169,8 +176,8 @@ const MainFooter = () => {
                 );
               })}
             </TableBody>
-          </Table>
-        </Box>
+          </Table> */}
+        </Paper>
       </div>
     </div>
   );

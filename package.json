@@ -39,6 +39,7 @@
     "react-router-dom": "^6.2.2",
     "react-scripts": "5.0.0",
     "react-trading-ui": "^0.1.5",
+    "react-virtualized": "^9.22.3",
     "recoil": "^0.6.1",
     "socket.io-client": "^4.4.1",
     "styled-components": "^5.3.5",
@@ -71,6 +72,7 @@
     ]
   },
   "devDependencies": {
+    "@types/react-virtualized": "^9.21.21",
     "@types/styled-components": "^5.1.24",
     "autoprefixer": "^10.4.4",
     "postcss": "^8.4.12",
