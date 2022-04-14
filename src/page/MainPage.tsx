@@ -26,6 +26,7 @@ const MainPage = () => {
   // useGenerateBitThumbSocket('orderbookdepth');
   useGenerateBitThumbSocket('SUBSCRIBE');
   useGetCoinList();
+
   // ();
   // useChangeWebTitle();
 

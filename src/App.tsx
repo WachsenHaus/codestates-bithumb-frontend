@@ -1,4 +1,5 @@
 import React, { ReactNode, useEffect } from 'react';
+import qs from 'qs';
 import bmjua from './font/BMJUA_otf.otf';
 import bmjuaTTF from './font/BMJUA_ttf.ttf';
 import { Grommet, ThemeContext } from 'grommet';
@@ -17,8 +18,13 @@ import { StyledEngineProvider, CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import DebugObserver from './RecoilDebug';
+import axios from 'axios';
 
 const App = () => {
+  // axios.defaults.paramsSerializer = (params) => {
+  //   return qs.stringify(params);
+  // };
+
   return (
     <RecoilRoot>
       <DebugObserver />

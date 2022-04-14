@@ -14,6 +14,7 @@ import {
   TypeWebSocketSubscribeReturnType,
   TypeWebSocketTickerReturnType,
 } from '../atom/ws.type';
+import { atomDrawTicker } from '../atom/drawData.atom';
 
 /**
  *
@@ -25,6 +26,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     atomSubscribeWebSocektMessage
   );
   const [ticker, setTicker] = useRecoilState(atomTicker);
+  const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
   const [tickerObj, setTickerObj] = useState<TypeWebSocketTickerReturnType>();
   const [stObj, setStObj] = useState();
   const [transactionObj, setTransactionObj] = useState();
@@ -94,24 +96,42 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
 
   useEffect(() => {
     if (tickerObj) {
-      const next = produce(ticker, (draft) => {
-        if (draft.length === 0) {
-          draft.push(tickerObj);
-          return;
+      const next = produce(drawTicker, (draft) => {
+        const isExist = draft.findIndex(
+          (item) => item.coinType === tickerObj.c
+        );
+        if (tickerObj.c === 'C0101') {
+          console.log(tickerObj);
         }
-        const isExist = draft.findIndex((item) => item.c === tickerObj.c);
+        // console;
         if (isExist === -1) {
-          draft.push(tickerObj);
+          console.log('없는게 들어왔다고? ');
+          // draft.push(tickerObj);
         } else {
-          draft[isExist] = tickerObj;
+          draft[isExist] = { ...draft[isExist], ...tickerObj };
         }
       });
-      setTicker(next);
+
+      setDrawTicker(next);
+
+      // const next = produce(ticker, (draft) => {
+      //   if (draft.length === 0) {
+      //     draft.push(tickerObj);
+      //     return;
+      //   }
+      //   const isExist = draft.findIndex((item) => item.c === tickerObj.c);
+      //   if (isExist === -1) {
+      //     draft.push(tickerObj);
+      //   } else {
+      //     draft[isExist] = tickerObj;
+      //   }
+      // });
+      // setTicker(next);
     }
   }, [tickerObj]);
 
   useEffect(() => {
-    // console.log(ticker);
+    console.log(ticker);
   }, [ticker]);
 
   /** 유저아톰이 가지고있는 소켓 배열에 추가해준다. */

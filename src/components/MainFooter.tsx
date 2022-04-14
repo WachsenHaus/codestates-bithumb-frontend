@@ -30,6 +30,8 @@ import {
   TableHeader,
   TableRow,
 } from 'grommet';
+import { atomDrawTicker } from '../atom/drawData.atom';
+import { motion } from 'framer-motion';
 
 type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
 
@@ -38,37 +40,7 @@ type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
  * @returns 티커가 그려지는 메인 바텀 푸터입니다.
  */
 const MainFooter = () => {
-  const [rcvTicker, setRcvTicker] = useRecoilState(tickerReceiveState);
-  const [senderTicker, setSenderTicker] = useRecoilState(tickerSenderState);
-
-  const [drawData, setDrawData] = useState<ITickerReceiverTypes[]>([]);
-
-  /**
-   * 티커정보를 갱신함.
-   */
-  useEffect(() => {
-    if (rcvTicker) {
-      if (drawData.length === 0) {
-        if (rcvTicker.content.openPrice === '') {
-          return;
-        }
-        setDrawData([rcvTicker]);
-        return;
-      }
-      const next = produce(drawData, (draft) => {
-        const index = draft.findIndex(
-          (item) => item.content.symbol === rcvTicker.content.symbol
-        );
-        if (index !== -1) {
-          draft[index].content = rcvTicker.content;
-        } else {
-          draft.push(rcvTicker);
-        }
-      });
-      setDrawData(next);
-    }
-  }, [rcvTicker]);
-
+  const drawTicker = useRecoilValue(atomDrawTicker);
   /**
    * 해당 버튼을 클릭할 경우 type에 따라 웹소켓의 통신방식이 변경되어야겠네요
    */
@@ -81,23 +53,23 @@ const MainFooter = () => {
     ) => {
       switch (type) {
         case 'KRW':
-          setDrawData([]);
-          setSenderTicker((prevData) => {
-            return {
-              ...prevData,
-              symbols: CONST.ENABLE_KRW_SYMBOL,
-            };
-          });
+          // setDrawData([]);
+          // setSenderTicker((prevData) => {
+          //   return {
+          //     ...prevData,
+          //     symbols: CONST.ENABLE_KRW_SYMBOL,
+          //   };
+          // });
 
           break;
         case 'BTC':
-          setDrawData([]);
-          setSenderTicker((prevData) => {
-            return {
-              ...prevData,
-              symbols: CONST.ENABLE_BTC_SYMBOL,
-            };
-          });
+          // setDrawData([]);
+          // setSenderTicker((prevData) => {
+          //   return {
+          //     ...prevData,
+          //     symbols: CONST.ENABLE_BTC_SYMBOL,
+          //   };
+          // });
 
           break;
         case 'FAVOURITE':
@@ -108,22 +80,8 @@ const MainFooter = () => {
     };
 
   return (
-    <div
-    // className="h-full grid"
-    // style={{
-    //   gridRowStart: 3,
-    //   gridRowEnd: 4,
-    //   gridColumn: 1,
-    //   gridTemplateRows: '20% 80%',
-    //   gridTemplateColumns: 'auto',
-    // }}
-    >
-      <div
-      // className="w-full h-full grid"
-      // style={{
-      //   gridTemplateColumns: 'auto',
-      // }}
-      >
+    <div>
+      <div>
         <Box
           direction="row"
           background={'light-5'}
@@ -166,56 +124,48 @@ const MainFooter = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {drawData.map((item) => {
+              {drawTicker.map((item) => {
+                const upOrDown = item.r !== undefined ? parseFloat(item.r) : 0;
+                const cost =
+                  item.e !== undefined
+                    ? Number(item.e).toLocaleString('ko-kr')
+                    : null;
                 return (
-                  item.content.openPrice !== '' && (
-                    <TableRow>
-                      <TableCell scope="row">
-                        <strong>{item?.content.symbol}</strong>
-                      </TableCell>
-                      <TableCell scope="row">
-                        <strong
-                          className={classNames(
+                  <>
+                    {item.coinClassCode !== 'F' && (
+                      <TableRow key={item.e}>
+                        <TableCell scope="row">
+                          <strong>{item?.coinName}</strong>
+                        </TableCell>
+                        <TableCell scope="row">
+                          {cost !== null && (
+                            <motion.strong
+                              className={classNames(
+                                `border-b-2  border-opacity-0`,
+                                `
+                            ${upOrDown > 0 ? `${styles.upEffect}` : ''}
+                            `,
+                                `
+                            ${upOrDown < 0 ? `${styles.downEffect}` : ''}
                             `
-                          ${
-                            rcvTicker.content.symbol === item.content.symbol &&
-                            Number(item?.content.chgRate) > 0
-                              ? `${styles.upEffect}`
-                              : ''
-                          }
-                          `,
-                            `
-                          ${
-                            rcvTicker.content.symbol === item.content.symbol &&
-                            Number(item?.content.chgRate) < 0
-                              ? `${styles.downEffect}`
-                              : ''
-                          }
-                          `,
-                            `border-b-2  border-opacity-0`
+                              )}
+                            >
+                              {cost}원
+                            </motion.strong>
                           )}
-                        >
-                          {Number(item?.content.openPrice).toLocaleString(
-                            'ko-kr'
-                          )}
-                          원
-                        </strong>
-                      </TableCell>
-                      <TableCell scope="row">
-                        <strong
-                          className={classNames(`
-                        ${
-                          Number(item?.content.chgRate) > 0
-                            ? 'text-red-400'
-                            : ' text-blue-400'
-                        }
-                        `)}
-                        >
-                          {item?.content.chgRate}%
-                        </strong>
-                      </TableCell>
-                    </TableRow>
-                  )
+                        </TableCell>
+                        <TableCell scope="row">
+                          <strong
+                            className={classNames(`
+                     ${upOrDown > 0 ? 'text-red-400' : ' text-blue-400'}
+                     `)}
+                          >
+                            {item.r}%
+                          </strong>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
                 );
               })}
             </TableBody>

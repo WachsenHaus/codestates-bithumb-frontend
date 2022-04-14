@@ -193,3 +193,14 @@ export const transactionSenderState = atom<ITransactionSenderTypes>({
 //   key: 'userFavouriteState',
 //   default: [''],
 // });
+
+export const atomUserSelectCoin = atom<{
+  crncCd: string;
+  coin: string;
+}>({
+  key: 'atomUserSelectCoin',
+  default: {
+    crncCd: 'C0100',
+    coin: 'C0101',
+  },
+});

@@ -1,13 +1,12 @@
 export type TypeCoinKind = 'C0100 | C0101';
-export type TypeCoinName = '원화';
-export type TypeCoinNameEn = 'KRW';
 export type TypeCoinClassCode = 'F' | 'C';
 
 export type TypeCoinObj = {
   coinType: TypeCoinKind;
   coinClassCode: TypeCoinClassCode;
-  coinName: TypeCoinName;
-  coinNameEn: TypeCoinNameEn;
+  coinSymbol: string;
+  coinName: string;
+  coinNameEn: string;
   decimalDigits: number;
   canDeposit: boolean;
   canWithdrawal: boolean;
