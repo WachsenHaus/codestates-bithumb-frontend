@@ -7,7 +7,11 @@ import {
   TickTypes,
 } from '../type/coinTypes';
 
-export type SocketNamesType = 'ticker' | 'orderbookdepth' | 'transaction';
+export type SocketNamesType =
+  | 'ticker'
+  | 'orderbookdepth'
+  | 'transaction'
+  | 'SUBSCRIBE';
 export interface ITickerSenderTypes {
   type: 'ticker';
   symbols: CoinSymbolKRWTypes[] | CoinSymbolBTCTypes[];

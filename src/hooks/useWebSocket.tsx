@@ -1,50 +1,33 @@
 import stringify from 'fast-json-stable-stringify';
 import parse from 'fast-json-parse';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import _ from 'lodash';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import produce from 'immer';
+import { SocketNamesType } from '../atom/user.atom';
 import {
-  IOrderBookReceiverTypes,
-  orderbookdepthReceiveState,
-  orderbookdepthSenderState,
-  orderbookdepthSocketState,
-  SocketNamesType,
-  tickerReceiveState,
-  tickerSenderState,
-  tickerSocketState,
-  transactionReceiveState,
-  transactionSenderState,
-  transactionSocketState,
-} from '../atom/user.atom';
-import CONST from '../const';
-import io, { Manager } from 'socket.io-client';
-import { Windows } from 'grommet-icons';
-import { writeSync } from 'fs';
+  atomSubscribeWebSocektMessage,
+  atomSubscribeWebSocket,
+  atomTicker,
+} from '../atom/ws.atom';
+import {
+  TypeWebSocketSubscribeReturnType,
+  TypeWebSocketTickerReturnType,
+} from '../atom/ws.type';
 
 /**
  *
  * @returns 빗썸 웹소켓과 연결하고 웹소켓 객체를 반환합니다.
  */
 export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
-  const [wsTicker, setWsTicker] = useRecoilState(tickerSocketState);
-  const [rcvTicker, setRcvTicker] = useRecoilState(tickerReceiveState);
-  const [senderTicker, setSenderTicker] = useRecoilState(tickerSenderState);
-
-  const [wsOrder, setWsOrder] = useRecoilState(orderbookdepthSocketState);
-  const [rcvOrder, setRcvOrder] = useRecoilState(orderbookdepthReceiveState);
-  const [senderOrder, setSenderOrder] = useRecoilState(
-    orderbookdepthSenderState
+  const [wsSubscribe, setWsSubscribe] = useRecoilState(atomSubscribeWebSocket);
+  const [wsMessage, setWsMessage] = useRecoilState(
+    atomSubscribeWebSocektMessage
   );
-
-  const [wsTransaction, setWsTransaction] = useRecoilState(
-    transactionSocketState
-  );
-  const [rcvTransaction, setRcvTransaction] = useRecoilState(
-    transactionReceiveState
-  );
-  const [senderTransaction, setSenderTransaction] = useRecoilState(
-    transactionSenderState
-  );
+  const [ticker, setTicker] = useRecoilState(atomTicker);
+  const [tickerObj, setTickerObj] = useState<TypeWebSocketTickerReturnType>();
+  const [stObj, setStObj] = useState();
+  const [transactionObj, setTransactionObj] = useState();
 
   const generateOnError: any | null =
     (type: SocketNamesType) => (ev: Event) => {
@@ -58,112 +41,90 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     };
 
   const generateOnMessage: any | null =
-    (type: SocketNamesType) => (ev: MessageEvent<MessageEvent>) => {
+    (nameType: SocketNamesType) =>
+    (ev: MessageEvent<TypeWebSocketSubscribeReturnType>) => {
       if (ev) {
-        const resultData = parse(ev.data).value;
-        if (resultData.status === '0000') {
-          return;
-        }
-        // console.log(resultData);
-        switch (type) {
-          case 'ticker':
-            setRcvTicker(resultData);
-            break;
-          case 'orderbookdepth':
-            const data = resultData as IOrderBookReceiverTypes;
-            const next = produce(data, (draft) => {
-              draft.content.list.sort(
-                (a, b) => Number(b.price) - Number(a.price)
-              );
-            });
-
-            setRcvOrder(next);
-            break;
-          case 'transaction':
-            setRcvTransaction(resultData);
-
+        const { subtype, type, content }: TypeWebSocketSubscribeReturnType =
+          parse(ev.data).value;
+        switch (nameType) {
+          case 'SUBSCRIBE':
+            if (type === 'data') {
+              if (subtype === 'tk') {
+                setTickerObj(content);
+              } else if (subtype === 'st') {
+                setStObj(content);
+              } else if (subtype === 'tr') {
+                setTransactionObj(content);
+              }
+            }
             break;
           default:
             break;
         }
-        // setMessage(resultData);
+      }
+    };
+
+  const generateOnOpen: any | null =
+    (type: SocketNamesType, ws: WebSocket) => (ev: Event) => {
+      if (ev) {
+        console.log(`Connected WebSocket ${type}`);
+        switch (type) {
+          case 'SUBSCRIBE':
+            if (wsSubscribe) {
+              wsSubscribe.close();
+              console.warn(`Exist ${type} Socket`);
+            }
+            if (wsSubscribe?.CLOSED || wsSubscribe === undefined) {
+              setWsSubscribe(ws);
+              ws.send(stringify(wsMessage));
+            }
+            break;
+          default:
+            break;
+        }
       }
     };
 
   useEffect(() => {
-    if (wsTicker) {
-      const d = stringify(senderTicker);
-      console.log(d);
-      wsTicker.send(d);
+    if (wsSubscribe) {
+      const data = stringify(wsMessage);
+      wsSubscribe.send(data);
     }
-  }, [senderTicker]);
+  }, [wsMessage]);
+
   useEffect(() => {
-    if (wsTransaction) {
-      const d = stringify(senderTransaction);
-      console.log(d);
-      wsTransaction.send(d);
+    if (tickerObj) {
+      const next = produce(ticker, (draft) => {
+        if (draft.length === 0) {
+          draft.push(tickerObj);
+          return;
+        }
+        const isExist = draft.findIndex((item) => item.c === tickerObj.c);
+        if (isExist === -1) {
+          draft.push(tickerObj);
+        } else {
+          draft[isExist] = tickerObj;
+        }
+      });
+      setTicker(next);
     }
-  }, [senderTransaction]);
+  }, [tickerObj]);
+
   useEffect(() => {
-    if (wsOrder) {
-      const d = stringify(senderOrder);
-      console.log(d);
-      wsOrder.send(d);
-    }
-  }, [senderOrder]);
+    // console.log(ticker);
+  }, [ticker]);
+
   /** 유저아톰이 가지고있는 소켓 배열에 추가해준다. */
 
   useEffect(() => {
     try {
-      const ws = new WebSocket('wss://pubwss.bithumb.com/pub/ws');
       switch (type) {
-        case 'ticker':
-          ws.onopen = (e) => {
-            console.log(`Connected WebSocket ${type}`);
-            if (wsTicker) {
-              wsTicker.close();
-              console.warn(`Exist ${type} Socket`);
-            }
-            if (wsTicker?.CLOSED || wsTicker === undefined) {
-              setWsTicker(ws);
-              ws.send(stringify(senderTicker));
-            }
-          };
-
-          ws.onerror = generateOnError(type);
-          ws.onclose = generateOnCloser(type);
-          ws.onmessage = generateOnMessage(type);
-
-          break;
-        case 'transaction':
-          ws.onopen = (e) => {
-            console.log(`Connected WebSocket ${type}`);
-            if (wsTransaction) {
-              wsTransaction.close();
-              console.warn(`Exist ${type} Socket`);
-            }
-            setWsTransaction(ws);
-            ws.send(stringify(senderTransaction));
-          };
-          ws.onerror = generateOnError(type);
-          ws.onclose = generateOnCloser(type);
-          ws.onmessage = generateOnMessage(type);
-
-          break;
-        case 'orderbookdepth':
-          ws.onopen = (e) => {
-            console.log(`Connected WebSocket ${type}`);
-            if (wsOrder) {
-              wsOrder.close();
-              console.warn(`Exist ${type} Socket`);
-            }
-            setWsOrder(ws);
-            ws.send(stringify(senderOrder));
-          };
-          ws.onerror = generateOnError(type);
-          ws.onclose = generateOnCloser(type);
-          ws.onmessage = generateOnMessage(type);
-
+        case 'SUBSCRIBE':
+          const subWs = new WebSocket('wss://wss1.bithumb.com/public');
+          subWs.onopen = generateOnOpen(type, subWs);
+          subWs.onerror = generateOnError(type);
+          subWs.onclose = generateOnCloser(type);
+          subWs.onmessage = generateOnMessage(type);
           break;
         default:
           break;

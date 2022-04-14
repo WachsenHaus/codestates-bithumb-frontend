@@ -21,9 +21,10 @@ import useGetCoinList from '../hooks/useGetCoinList';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
-  useGenerateBitThumbSocket('ticker');
-  useGenerateBitThumbSocket('transaction');
-  useGenerateBitThumbSocket('orderbookdepth');
+  // useGenerateBitThumbSocket('ticker');
+  // useGenerateBitThumbSocket('transaction');
+  // useGenerateBitThumbSocket('orderbookdepth');
+  useGenerateBitThumbSocket('SUBSCRIBE');
   useGetCoinList();
   // ();
   // useChangeWebTitle();

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { atom, selector } from 'recoil';
-import { API_BITTHUMB } from '../api/bt.api';
+import { API_BITHUMB } from '../api/bt.api';
 import { ResponseVO } from '../type/api';
 
 import { Log } from '../utils/log';
@@ -16,7 +16,7 @@ export const atomGetCoinList = selector({
   get: async () => {
     try {
       const result = await axios.get<ResponseVO<ICoinList>>(
-        API_BITTHUMB.COIN_LIST
+        API_BITHUMB.COIN_LIST
       );
 
       return result.data;
