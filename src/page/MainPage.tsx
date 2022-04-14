@@ -2,6 +2,7 @@ import { Box, Container, Grid } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
+import { atomGetCoinList } from '../atom/coinList.atom';
 import {
   orderbookdepthSocketState,
   tickerSocketState,
@@ -15,17 +16,22 @@ import MainSideBar from '../components/MainSideBar';
 import Orderbook from '../components/Orderbook/Orderbook';
 import Transaction from '../components/Transaction/Transaction';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
+import useGetCoinList from '../hooks/useGetCoinList';
+
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
   useGenerateBitThumbSocket('ticker');
   useGenerateBitThumbSocket('transaction');
   useGenerateBitThumbSocket('orderbookdepth');
+  useGetCoinList();
+  // ();
   // useChangeWebTitle();
 
   const tickerWs = useRecoilValue(tickerSocketState);
   const transactionWs = useRecoilValue(transactionSocketState);
   const orderbookWs = useRecoilValue(orderbookdepthSocketState);
+
   useEffect(() => {
     return () => {
       tickerWs?.close();

@@ -1,6 +1,6 @@
+import React, { ReactNode, useEffect } from 'react';
 import bmjua from './font/BMJUA_otf.otf';
 import bmjuaTTF from './font/BMJUA_ttf.ttf';
-import React, { useEffect } from 'react';
 import { Grommet, ThemeContext } from 'grommet';
 import {
   BrowserRouter as Router,
@@ -10,16 +10,18 @@ import {
   useLocation,
 } from 'react-router-dom';
 
-import { RecoilRoot, useRecoilState } from 'recoil';
+import { RecoilRoot, useRecoilSnapshot, useRecoilState } from 'recoil';
 import PathRoutes from './Routes';
 import MainPage from './page/MainPage';
 import { StyledEngineProvider, CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import DebugObserver from './RecoilDebug';
 
 const App = () => {
   return (
     <RecoilRoot>
+      <DebugObserver />
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <StyledEngineProvider>
           <CssBaseline />
