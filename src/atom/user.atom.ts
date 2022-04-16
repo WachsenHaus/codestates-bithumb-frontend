@@ -198,7 +198,7 @@ export const atomUserSelectCoin = atom<{
   crncCd: string;
   coin: string;
 }>({
-  key: 'atomUserSelectCoin',
+  key: 'AtomUserSelectCoin',
   default: {
     crncCd: 'C0100',
     coin: 'C0101',

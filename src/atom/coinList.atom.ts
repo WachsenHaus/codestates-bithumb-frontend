@@ -6,6 +6,7 @@ import { ResponseVO } from '../type/api';
 
 import { Log } from '../utils/log';
 import { ICoinList } from './coinList.type';
+import { atomSelectCoin } from './selectCoin.atom';
 import { atomUserSelectCoin } from './user.atom';
 
 /**
@@ -13,7 +14,7 @@ import { atomUserSelectCoin } from './user.atom';
  * 한글이름, 코인코드, 클래스코드, 거래가능,.isLive, decimalDigits(모름))등의 정보를 가지고있음
  */
 export const atomCoinList = atom<ICoinList | undefined>({
-  key: 'atomCoinList',
+  key: 'AtomCoinList',
   default: undefined,
 });
 
@@ -21,13 +22,13 @@ export const atomCoinList = atom<ICoinList | undefined>({
  * 코인의 종류들을 받아옴.
  */
 export const atomGetCoinList = selector({
-  key: 'atomGetCoinList',
-  get: async () => {
+  key: 'AtomGetCoinList',
+  get: async ({ get }) => {
     try {
       const result = await axios.get<ResponseVO<ICoinList>>(
         API_BITHUMB.COIN_LIST
       );
-
+      // console.log(get(atomSelectCoin));
       return result.data;
     } catch (err) {
       // console.error(err)

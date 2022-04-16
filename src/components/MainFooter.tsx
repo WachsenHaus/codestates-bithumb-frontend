@@ -61,62 +61,8 @@ const MainFooter = () => {
     };
 
   const cellRenderer = () => {};
-  return (
-    <div>
-      <div>
-        <Box
-          direction="row"
-          background={'light-5'}
-          width="100%"
-          className={classNames('flex flex-row justify-start items-center')}
-        >
-          <Button
-            secondary
-            size="large"
-            margin="small"
-            label="원화 마켓"
-            type="button"
-            onClick={onClick('KRW')}
-          />
 
-          <Button
-            size="large"
-            type="button"
-            margin="small"
-            color="doc"
-            label="BTC 마켓"
-            onClick={onClick('BTC')}
-          />
-        </Box>
-      </div>
-      <div>
-        <Paper
-          sx={{
-            height: 400,
-            width: '100%',
-          }}
-        >
-          <AutoSizer>
-            {({ width, height }) => (
-              <Table
-                width={400}
-                height={500}
-                headerHeight={200}
-                rowHeight={100}
-                rowCount={drawTicker.length}
-                rowGetter={({ index }) => {
-                  // console.log(drawTicker[index]);
-                  return drawTicker[index];
-                }}
-              >
-                <Column label="e" dataKey="코인" width={100} />
-                <Column width={200} label="실시간 시세" dataKey="e" />
-                <Column width={100} label="변화량" dataKey="r" />
-              </Table>
-            )}
-          </AutoSizer>
-
-          {/* <Table>
+  /* <Table>
             <TableHeader>
               <TableRow>
                 <TableCell scope="col" border="bottom">
@@ -176,7 +122,95 @@ const MainFooter = () => {
                 );
               })}
             </TableBody>
-          </Table> */}
+          </Table> 
+          */
+
+  return (
+    <div>
+      <div>
+        <Box
+          direction="row"
+          background={'light-5'}
+          width="100%"
+          className={classNames('flex flex-row justify-start items-center')}
+        >
+          <Button
+            secondary
+            size="large"
+            margin="small"
+            label="원화 마켓"
+            type="button"
+            onClick={onClick('KRW')}
+          />
+
+          <Button
+            size="large"
+            type="button"
+            margin="small"
+            color="doc"
+            label="BTC 마켓"
+            onClick={onClick('BTC')}
+          />
+        </Box>
+      </div>
+      <div>
+        <Paper
+          sx={{
+            height: 400,
+            width: '100%',
+          }}
+        >
+          <AutoSizer>
+            {({ width, height }) => (
+              <Table
+                width={width}
+                height={height}
+                headerHeight={50}
+                rowHeight={50}
+                rowCount={drawTicker.length}
+                rowClassName={classNames(`flex`)}
+                rowGetter={({ index }) => {
+                  return drawTicker[index];
+                }}
+              >
+                <Column
+                  width={width * 0.2}
+                  label="자산"
+                  dataKey="coinName"
+                  cellRenderer={(e) => {
+                    return (
+                      <div>
+                        {e.cellData}
+                        <div>
+                          {e.rowData.coinSymbol}/
+                          {e.rowData.m === 'C0100' ? 'KRW' : ''}
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+                <Column width={width * 0.4} label="현재가" dataKey="e" />
+                <Column
+                  width={width * 0.15}
+                  label="변동률(당일)"
+                  dataKey="r"
+                  cellRenderer={(e) => {
+                    return (
+                      <div>
+                        {e.cellData}
+                        <div>{e.rowData.a}</div>
+                      </div>
+                    );
+                  }}
+                />
+                <Column
+                  width={width * 0.1}
+                  label="거래금액(24H)"
+                  dataKey="u24"
+                />
+              </Table>
+            )}
+          </AutoSizer>
         </Paper>
       </div>
     </div>

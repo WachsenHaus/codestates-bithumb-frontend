@@ -14,7 +14,8 @@ import {
   TypeWebSocketSubscribeReturnType,
   TypeWebSocketTickerReturnType,
 } from '../atom/ws.type';
-import { atomDrawTicker } from '../atom/drawData.atom';
+import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
+import { atomGetStChartData } from '../atom/tvChart.atom';
 
 /**
  *
@@ -28,7 +29,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   const [ticker, setTicker] = useRecoilState(atomTicker);
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
   const [tickerObj, setTickerObj] = useState<TypeWebSocketTickerReturnType>();
-  const [stObj, setStObj] = useState();
+  const [stObj, setStObj] = useRecoilState(atomGetStChartData);
   const [transactionObj, setTransactionObj] = useState();
 
   const generateOnError: any | null =
@@ -54,6 +55,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
               if (subtype === 'tk') {
                 setTickerObj(content);
               } else if (subtype === 'st') {
+                console.log(content);
                 setStObj(content);
               } else if (subtype === 'tr') {
                 setTransactionObj(content);
@@ -87,6 +89,9 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
       }
     };
 
+  /**
+   * 웹소켓의 구독 메세지가 변경되면 소켓에 전달합니다.
+   */
   useEffect(() => {
     if (wsSubscribe) {
       const data = stringify(wsMessage);
@@ -94,39 +99,38 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     }
   }, [wsMessage]);
 
+  /**
+   * 웹소켓으로 들어오는 티커 정보를 drawTicker에 갱신합니다.
+   * 함수 자리를 이동해야함.
+   */
   useEffect(() => {
-    if (tickerObj) {
-      const next = produce(drawTicker, (draft) => {
-        const isExist = draft.findIndex(
-          (item) => item.coinType === tickerObj.c
-        );
-        if (tickerObj.c === 'C0101') {
-          console.log(tickerObj);
-        }
-        // console;
-        if (isExist === -1) {
-          console.log('없는게 들어왔다고? ');
-          // draft.push(tickerObj);
+    if (tickerObj && drawTicker) {
+      const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
+        const next = produce(drawTicker, (draft) => {
+          const isExist = draft.findIndex(
+            (item) => item.coinType === tickerObj.c
+          );
+
+          if (isExist === -1) {
+            console.log('not coin');
+          } else {
+            draft[isExist] = { ...draft[isExist], ...tickerObj };
+          }
+        });
+        if (next) {
+          resolve(next);
         } else {
-          draft[isExist] = { ...draft[isExist], ...tickerObj };
+          reject('err');
         }
       });
 
-      setDrawTicker(next);
-
-      // const next = produce(ticker, (draft) => {
-      //   if (draft.length === 0) {
-      //     draft.push(tickerObj);
-      //     return;
-      //   }
-      //   const isExist = draft.findIndex((item) => item.c === tickerObj.c);
-      //   if (isExist === -1) {
-      //     draft.push(tickerObj);
-      //   } else {
-      //     draft[isExist] = tickerObj;
-      //   }
-      // });
-      // setTicker(next);
+      result
+        .then((d) => {
+          setDrawTicker(d);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
     }
   }, [tickerObj]);
 
@@ -134,8 +138,9 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     console.log(ticker);
   }, [ticker]);
 
-  /** 유저아톰이 가지고있는 소켓 배열에 추가해준다. */
-
+  /**
+   * 웹소켓을 생성합니다.
+   */
   useEffect(() => {
     try {
       switch (type) {

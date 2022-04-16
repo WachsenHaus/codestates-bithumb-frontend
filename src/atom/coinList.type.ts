@@ -1,4 +1,4 @@
-export type TypeCoinKind = 'C0100 | C0101';
+export type TypeCoinKind = 'C0100' | 'C0101';
 export type TypeCoinClassCode = 'F' | 'C';
 
 export type TypeCoinObj = {

@@ -11,20 +11,15 @@ import {
   useLocation,
 } from 'react-router-dom';
 
-import { RecoilRoot, useRecoilSnapshot, useRecoilState } from 'recoil';
+import { RecoilRoot } from 'recoil';
 import PathRoutes from './Routes';
 import MainPage from './page/MainPage';
 import { StyledEngineProvider, CssBaseline } from '@mui/material';
 import { LocalizationProvider } from '@mui/lab';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import DebugObserver from './RecoilDebug';
-import axios from 'axios';
 
 const App = () => {
-  // axios.defaults.paramsSerializer = (params) => {
-  //   return qs.stringify(params);
-  // };
-
   return (
     <RecoilRoot>
       <DebugObserver />
