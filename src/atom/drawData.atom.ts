@@ -1,9 +1,10 @@
 import { TypeCoinClassCode, TypeCoinKind, TypeCoinObj } from './coinList.type';
 import { atom } from 'recoil';
 import { TypeWebSocketTickerReturnType } from './ws.type';
+import { TypeTradeTransaction } from './tradeData.atom';
 
 export type TypeDrawTicker = {
-  coinType?: TypeCoinKind;
+  coinType?: string;
   coinName?: string;
   coinNameEn?: string;
   coinSymbol?: string;
@@ -13,5 +14,10 @@ export type TypeDrawTicker = {
 
 export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
   key: 'AtomDrawTicker',
+  default: [],
+});
+
+export const atomDrawTransaction = atom<Array<TypeTradeTransaction>>({
+  key: 'AtomDrawTransaction',
   default: [],
 });

@@ -5,8 +5,10 @@ export const API_BITHUMB = {
   GET_TRADE_DATA: `https://pub1.bithumb.com/trade-info/v1/getTradeData`,
   GET_CANDLESTICKNEW_TRVIEW:
     'https://pub2.bithumb.com/public/candlesticknew_trview',
+  GET_ORDERBOOK: `https://pub1.bithumb.com/trade-info/v1/orderbook/`,
 };
 
 export const API_BITHUMB_STATUS_CODE = {
   SUCCESS: 200,
+  SUCCESS_STR: 'Success',
 };

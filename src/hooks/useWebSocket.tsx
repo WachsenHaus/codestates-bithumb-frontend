@@ -14,8 +14,14 @@ import {
   TypeWebSocketSubscribeReturnType,
   TypeWebSocketTickerReturnType,
 } from '../atom/ws.type';
-import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
+import {
+  atomDrawTicker,
+  atomDrawTransaction,
+  TypeDrawTicker,
+} from '../atom/drawData.atom';
 import { atomGetStChartData } from '../atom/tvChart.atom';
+import { atomSelectCoin } from '../atom/selectCoin.atom';
+import { TypeCoinKind } from '../atom/coinList.type';
 
 /**
  *
@@ -26,11 +32,24 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   const [wsMessage, setWsMessage] = useRecoilState(
     atomSubscribeWebSocektMessage
   );
-  const [ticker, setTicker] = useRecoilState(atomTicker);
+
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
+  const selectCoin = useRecoilValue(atomSelectCoin);
+  const [drawTransaction, setDrawTransaction] =
+    useRecoilState(atomDrawTransaction);
   const [tickerObj, setTickerObj] = useState<TypeWebSocketTickerReturnType>();
   const [stObj, setStObj] = useRecoilState(atomGetStChartData);
-  const [transactionObj, setTransactionObj] = useState();
+  const [transactionObj, setTransactionObj] = useState<{
+    m: TypeCoinKind;
+    c: string;
+    l: {
+      o: string;
+      n: string;
+      p: string;
+      q: string;
+      t: string;
+    }[];
+  }>();
 
   const generateOnError: any | null =
     (type: SocketNamesType) => (ev: Event) => {
@@ -55,7 +74,6 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
               if (subtype === 'tk') {
                 setTickerObj(content);
               } else if (subtype === 'st') {
-                console.log(content);
                 setStObj(content);
               } else if (subtype === 'tr') {
                 setTransactionObj(content);
@@ -93,11 +111,20 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
    * 웹소켓의 구독 메세지가 변경되면 소켓에 전달합니다.
    */
   useEffect(() => {
-    if (wsSubscribe) {
-      const data = stringify(wsMessage);
+    if (wsSubscribe && wsMessage?.events) {
+      const message = _.cloneDeep(wsMessage?.events);
+      const filter = [selectCoin.siseCrncCd, selectCoin.coinType];
+      message.forEach((item) => {
+        if (item.type === 'tr') {
+          item.filters = filter;
+        } else if (item.type === 'st') {
+          item.filters = filter;
+        }
+      });
+      const data = stringify(message);
       wsSubscribe.send(data);
     }
-  }, [wsMessage]);
+  }, [selectCoin]);
 
   /**
    * 웹소켓으로 들어오는 티커 정보를 drawTicker에 갱신합니다.
@@ -107,9 +134,9 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     if (tickerObj && drawTicker) {
       const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
         const next = produce(drawTicker, (draft) => {
-          const isExist = draft.findIndex(
-            (item) => item.coinType === tickerObj.c
-          );
+          const isExist = draft.findIndex((item) => {
+            return item.coinType === tickerObj.c;
+          });
 
           if (isExist === -1) {
             console.log('not coin');
@@ -135,8 +162,36 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   }, [tickerObj]);
 
   useEffect(() => {
-    console.log(ticker);
-  }, [ticker]);
+    const next = produce(drawTransaction, (draft) => {
+      if (transactionObj === undefined) return;
+      const { m, c, l } = transactionObj;
+      for (let i = 0; i < l.length; i++) {
+        const { o, n, p, q, t } = transactionObj.l[i];
+        let color;
+        const prevPrice = draft[draft.length - 1].contPrice;
+        if (p === prevPrice) {
+          color = draft[draft.length - 1].buySellGb;
+        } else if (p > prevPrice) {
+          color = '2';
+        } else {
+          color = '1';
+        }
+        draft.push({
+          coinType: c,
+          contAmt: n,
+          crncCd: m,
+          buySellGb: color,
+          contPrice: p,
+          contQty: q,
+          contDtm: t,
+        });
+        if (draft.length > 10) {
+          draft.shift();
+        }
+      }
+    });
+    setDrawTransaction(next);
+  }, [transactionObj]);
 
   /**
    * 웹소켓을 생성합니다.

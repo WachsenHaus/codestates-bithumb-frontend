@@ -6,8 +6,6 @@ import { ResponseVO } from '../type/api';
 
 import { Log } from '../utils/log';
 import { ICoinList } from './coinList.type';
-import { atomSelectCoin } from './selectCoin.atom';
-import { atomUserSelectCoin } from './user.atom';
 
 /**
  * 코인의 종류들을 가지고있는 아톰
@@ -28,13 +26,10 @@ export const atomGetCoinList = selector({
       const result = await axios.get<ResponseVO<ICoinList>>(
         API_BITHUMB.COIN_LIST
       );
-      // console.log(get(atomSelectCoin));
       return result.data;
     } catch (err) {
-      // console.error(err)
       Log(err);
       return undefined;
-      // return
     }
   },
 });

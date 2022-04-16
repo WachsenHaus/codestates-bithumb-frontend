@@ -1,19 +1,21 @@
 import { Box, Container, Grid } from '@mui/material';
 import classNames from 'classnames';
-import { Transaction } from 'grommet-icons';
 import React, { useEffect } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import { atomGetCoinList } from '../atom/coinList.atom';
+import { atomTradeData } from '../atom/tradeData.atom';
 import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import Orderbook from '../components/Orderbook/Orderbook';
-import useGetCoinList from '../hooks/useGetCoinList';
+import Transaction from '../components/Transaction/Transaction';
+import { useGetCoinList, useGetTradeData } from '../hooks/useGetCoinList';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
-  useGenerateBitThumbSocket('SUBSCRIBE');
   useGetCoinList();
+  useGetTradeData();
+  useGenerateBitThumbSocket('SUBSCRIBE');
 
   //
   // useChangeWebTitle();

@@ -19,7 +19,6 @@ export const useGetChartDatas = () => {
       const result = await axios.get<ResponseVO<ICoinChart>>(
         `${API_BITHUMB.GET_CANDLESTICKNEW_TRVIEW}/${coinDataUrl}`
       );
-      console.log(result.data.data);
       setChartData(result.data.data);
     } catch (err) {
       Log(err);
@@ -27,14 +26,17 @@ export const useGetChartDatas = () => {
     }
   };
   useEffect(() => {
+    console.log('getChartData');
     getData();
-
     timerId.current = setInterval(async () => {
       getData();
     }, 60 * 1000);
 
     return () => {
-      timerId.current = null;
+      if (timerId.current) {
+        clearInterval(timerId.current);
+        timerId.current = null;
+      }
     };
   }, [selectCoin]);
 };

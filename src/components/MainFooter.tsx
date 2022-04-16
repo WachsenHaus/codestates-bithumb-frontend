@@ -13,6 +13,7 @@ import { motion } from 'framer-motion';
 
 import { Column, Table } from 'react-virtualized';
 import { Paper } from '@mui/material';
+import { atomSelectCoin } from '../atom/selectCoin.atom';
 
 type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
 
@@ -22,45 +23,10 @@ type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
  */
 const MainFooter = () => {
   const drawTicker = useRecoilValue(atomDrawTicker);
+  const setSelectCoin = useSetRecoilState(atomSelectCoin);
   /**
    * 해당 버튼을 클릭할 경우 type에 따라 웹소켓의 통신방식이 변경되어야겠네요
    */
-  const onClick =
-    (type: ButtonTypes) =>
-    (
-      e?:
-        | React.MouseEvent<HTMLAnchorElement, MouseEvent>
-        | React.MouseEvent<HTMLButtonElement, MouseEvent>
-    ) => {
-      switch (type) {
-        case 'KRW':
-          // setDrawData([]);
-          // setSenderTicker((prevData) => {
-          //   return {
-          //     ...prevData,
-          //     symbols: CONST.ENABLE_KRW_SYMBOL,
-          //   };
-          // });
-
-          break;
-        case 'BTC':
-          // setDrawData([]);
-          // setSenderTicker((prevData) => {
-          //   return {
-          //     ...prevData,
-          //     symbols: CONST.ENABLE_BTC_SYMBOL,
-          //   };
-          // });
-
-          break;
-        case 'FAVOURITE':
-          break;
-        default:
-          break;
-      }
-    };
-
-  const cellRenderer = () => {};
 
   /* <Table>
             <TableHeader>
@@ -125,6 +91,19 @@ const MainFooter = () => {
           </Table> 
           */
 
+  const onClick =
+    (data: any) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+      console.log(data);
+      setSelectCoin((prevData) => {
+        return {
+          ...prevData,
+          coinType: data.coinType,
+          coinSymbol: data.coinSymbol,
+          // marketSymbol: data.marketSymbol,
+        };
+      });
+    };
+
   return (
     <div>
       <div>
@@ -140,7 +119,6 @@ const MainFooter = () => {
             margin="small"
             label="원화 마켓"
             type="button"
-            onClick={onClick('KRW')}
           />
 
           <Button
@@ -149,7 +127,6 @@ const MainFooter = () => {
             margin="small"
             color="doc"
             label="BTC 마켓"
-            onClick={onClick('BTC')}
           />
         </Box>
       </div>
@@ -181,7 +158,7 @@ const MainFooter = () => {
                     return (
                       <div>
                         {e.cellData}
-                        <div>
+                        <div onClick={onClick(e.rowData)}>
                           {e.rowData.coinSymbol}/
                           {e.rowData.m === 'C0100' ? 'KRW' : ''}
                         </div>

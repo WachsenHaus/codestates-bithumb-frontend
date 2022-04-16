@@ -52,6 +52,14 @@ export interface iStChartData {
   v: string;
 }
 
+export type TypeChartData = {
+  time: UTCTimestamp;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+};
+
 export const atomGetStChartData = atom<iStChartData | undefined>({
   key: 'AtomGetStChartData',
   default: undefined,

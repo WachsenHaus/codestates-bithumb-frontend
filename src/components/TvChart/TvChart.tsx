@@ -4,7 +4,11 @@ import { createChart, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-import { atomChartData, atomGetStChartData } from '../../atom/tvChart.atom';
+import {
+  atomChartData,
+  atomGetStChartData,
+  TypeChartData,
+} from '../../atom/tvChart.atom';
 import { useGetChartDatas } from '../../hooks/useChart';
 
 const CONST_KR_UTC = 9 * 60 * 60 * 1000;
@@ -16,15 +20,7 @@ const TvChart = () => {
   const chartData = useRecoilValue(atomChartData);
 
   const [stObj, setStObj] = useRecoilState(atomGetStChartData);
-  const [chartObj, setChartObj] = useState<
-    {
-      time: UTCTimestamp;
-      open: string;
-      high: string;
-      low: string;
-      close: string;
-    }[]
-  >([]);
+  const [chartObj, setChartObj] = useState<Array<TypeChartData>>([]);
 
   const [currentBar, setCurrentBar] = useState<{
     time: UTCTimestamp;
@@ -72,27 +68,32 @@ const TvChart = () => {
   useEffect(() => {
     if (stObj) {
       const { c, h, l, o, t, e } = stObj;
-      console.log(stObj);
-      const time = ((moment(t, 'YYYYMMDDHHmmss').utc().valueOf() +
-        CONST_KR_UTC) /
-        1000) as UTCTimestamp;
-
       const lastIndex = chartObj.length - 1;
-      const lastData = chartObj[lastIndex];
+      const currentTime = moment(t, 'YYYYMMDDHHmmss')
+        .utc()
+        .valueOf() as UTCTimestamp;
+      const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) *
+        60) as UTCTimestamp;
+
+      const nextTime = int;
       if (currentBar === undefined) {
         setCurrentBar({
           close: e,
           high: e,
           low: e,
           open: e,
-          time: lastData.time,
+          time: nextTime,
         });
       } else if (currentBar?.open !== null) {
         const next = produce(currentBar, (draft) => {
           if (draft) {
             draft.close = e;
+            // draft.time = int;
             draft.high = Math.max(Number(draft?.high), Number(e)).toString();
-            draft.low = Math.max(Number(draft?.low), Number(e)).toString();
+            // draft.high = h;
+            draft.low = Math.min(Number(draft?.low), Number(e)).toString();
+            // draft.low = l;
+            draft.open = o;
           }
         });
         setCurrentBar(next);
@@ -109,20 +110,28 @@ const TvChart = () => {
   useEffect(() => {
     const { c, h, l, o, t, v } = chartData;
     const idx = t.length ? t.length : 0;
-    let obj = [];
 
-    for (let i = 0; i < idx; i++) {
-      const time = ((t[i] + CONST_KR_UTC) / 1000) as UTCTimestamp;
-      obj.push({
-        time: time,
-        open: o[i],
-        high: h[i],
-        low: l[i],
-        close: c[i],
-      });
-    }
-    setChartObj(obj);
-    setCurrentBar(undefined);
+    const result = new Promise<Array<TypeChartData>>((resolve, reject) => {
+      let obj = [];
+      for (let i = 0; i < idx; i++) {
+        // const time = moment(t[i] / 1000)
+        //   .utc()
+        //   .valueOf() as UTCTimestamp;
+        const time = ((t[i] + CONST_KR_UTC) / 1000) as UTCTimestamp;
+        obj.push({
+          time: time,
+          open: o[i],
+          high: h[i],
+          low: l[i],
+          close: c[i],
+        });
+      }
+      resolve(obj);
+    });
+    result.then((d) => {
+      setCurrentBar(undefined);
+      setChartObj(d);
+    });
   }, [chartData]);
 
   useEffect(() => {

@@ -5,6 +5,7 @@ import produce from 'immer';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import { atomDrawTransaction } from '../../atom/drawData.atom';
 import {
   orderbookdepthReceiveState,
   transactionReceiveState,
@@ -27,6 +28,8 @@ const Transaction = () => {
   const [middleIndex, setMiddleIndex] = useState(-1);
   const [sortData, setSortData] = useState<OrderBookReceiverListType[]>([]);
   const [drawData, setDrawData] = useState<OrderBookReceiverListType[]>([]);
+
+  const drawTransaction = useRecoilValue(atomDrawTransaction);
 
   useEffect(() => {
     if (scrollRef) {
@@ -102,35 +105,39 @@ const Transaction = () => {
           수량(BTC)
         </h1>
       </div>
-      {transactionList.length > 10 &&
-        transactionList.map((item, index) => {
-          return (
-            <motion.div
-              ref={index === transactionList.length - 1 ? scrollRef : null}
-              style={{
-                display: 'grid',
-                height: '30px',
-                gridTemplateColumns: '30% 40% 30%',
-              }}
-            >
-              <div className="flex justify-center items-center">
-                {moment(item.contDtm).format('HH:mm:ss')}
-              </div>
-              <div className="flex justify-center items-center">
-                {Number(item.contPrice).toLocaleString('ko-kr')}
-              </div>
-              <div
-                className={classNames(
-                  `${
-                    item.updn === 'up' ? 'text-red-400' : 'text-blue-400'
-                  } flex justify-center items-center"`
-                )}
+      {drawTransaction.length > 10 &&
+        drawTransaction
+          .slice(0)
+          .reverse()
+          .map((item, index) => {
+            return (
+              <motion.div
+                // key={item.contDtm}
+                ref={index === drawTransaction.length - 1 ? scrollRef : null}
+                style={{
+                  display: 'grid',
+                  height: '30px',
+                  gridTemplateColumns: '30% 40% 30%',
+                }}
               >
-                <span>{Number(item.contQty).toFixed(4)}</span>
-              </div>
-            </motion.div>
-          );
-        })}
+                <div className="flex justify-center items-center">
+                  {moment(item.contDtm).format('HH:mm:ss')}
+                </div>
+                <div className="flex justify-center items-center">
+                  {Number(item.contPrice).toLocaleString('ko-kr')}
+                </div>
+                <div
+                  className={classNames(
+                    `${
+                      item.buySellGb === '2' ? 'text-red-400' : 'text-blue-400'
+                    } flex justify-center items-center"`
+                  )}
+                >
+                  <span>{Number(item.contQty).toFixed(4)}</span>
+                </div>
+              </motion.div>
+            );
+          })}
     </Box>
   );
 };

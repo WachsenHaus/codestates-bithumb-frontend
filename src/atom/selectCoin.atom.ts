@@ -9,6 +9,8 @@ interface ISelectCoin {
   coinType: string;
   siseCrncCd: TypeCoinKind;
   chartTime: string;
+  coinSymbol: string;
+  marketSymbol: string;
 }
 
 export const atomSelectCoin = atom<ISelectCoin>({
@@ -17,5 +19,7 @@ export const atomSelectCoin = atom<ISelectCoin>({
     coinType: 'C0101',
     siseCrncCd: 'C0100',
     chartTime: '1M',
+    coinSymbol: 'BTC',
+    marketSymbol: 'KRW',
   },
 });
