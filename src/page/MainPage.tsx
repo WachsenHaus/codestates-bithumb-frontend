@@ -1,6 +1,7 @@
 import { Box, Container, Grid } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
+import CoinBar from '../components/CoinBar/CoinBar';
 import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
@@ -32,6 +33,7 @@ const MainPage = () => {
           <Header />
         </Box>
         <Box gridColumn={`span 7`}>
+          <CoinBar />
           <MainContent />
           <MainFooter />
         </Box>

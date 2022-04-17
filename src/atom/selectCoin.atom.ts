@@ -11,6 +11,12 @@ interface ISelectCoin {
   chartTime: string;
   coinSymbol: string;
   marketSymbol: string;
+  e?: string; // 현재가
+  v24?: string; // 거래량 24
+  u24?: string; // 거래금액 24
+  h?: string; // 고가
+  l?: string; // 저가
+  f?: string; // 전일종가
 }
 
 export const atomSelectCoin = atom<ISelectCoin>({

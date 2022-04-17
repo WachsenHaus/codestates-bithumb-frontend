@@ -31,24 +31,67 @@ const GetConsonant = ({
   if (result) {
     let data = '';
     for (let i = 0; i < result.length; i++) {
-      console.log(result[i][0]);
       data = data + result[i][0];
     }
     data.replace(' ', '');
     data += coinNameEn;
     data += coinSymbol;
+    data += coinName;
     return data;
   }
+};
+
+export type TypeMarketFavoritesCoin = 'marketFavoritesCoin';
+
+const encrypt = (theText: string) => {
+  let output = new String();
+  let TextSize = theText.length;
+  for (let i = 0; i < TextSize; i++) {
+    output += String(theText.charCodeAt(i));
+  }
+  return output;
+};
+
+const decrypt = (theText: string) => {
+  let output = new String();
+  let TextSize = theText.length;
+  for (let i = 0; i < TextSize; i += 2) {
+    const code = Number(theText[i] + theText[i + 1]);
+    output += String.fromCharCode(code);
+  }
+  return output;
+};
+
+export const setCookie = (
+  name: TypeMarketFavoritesCoin,
+  value: string[],
+  exp: number
+) => {
+  let date = new Date();
+  date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
+  // console.log()
+  document.cookie =
+    name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+};
+
+export const getCookie = (name: TypeMarketFavoritesCoin) => {
+  const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  return value ? value[2] : '';
 };
 
 export const useGetCoinList = () => {
   const [coinState, setCoinState] = useRecoilState(atomCoinList);
   const setDrawTicker = useSetRecoilState(atomDrawTicker);
   const queryResults = useRecoilValueLoadable(atomGetCoinList);
+
+  /**
+   * 최초 코인리스트를 받아오면 동작하는 기능.
+   */
   useEffect(() => {
     const { state, contents } = queryResults;
     if (state === 'hasValue') {
       if (contents?.status === API_BITHUMB_STATUS_CODE.SUCCESS) {
+        // setCookie('marketFavoritesCoin', ['BTC_KRW', 'ETH_KRW'], 1);
         setCoinState(contents?.data);
       }
     }
@@ -65,19 +108,26 @@ export const useGetCoinList = () => {
       const filteredData = rawData.filter(
         (item) => item.coinClassCode !== 'F' && item.isLive === true
       );
+      const cookieFavorites = getCookie('marketFavoritesCoin')?.split(',');
+
       const drawDummy = filteredData.map((item) => {
         const consonant = GetConsonant({
           coinName: item.coinName,
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
         });
+        const cookieCoinSymbol = cookieFavorites.find(
+          (i) => i.split('_')[0] === item.coinSymbol
+        );
         return {
+          isFavorite: cookieCoinSymbol ? true : false,
           coinClassCode: item.coinClassCode,
           coinName: item.coinName,
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
           coinType: item.coinType,
           isLive: item.isLive,
+          m: item.siseCrncCd,
           consonant,
         };
       });
@@ -184,7 +234,6 @@ export const useGetTradeData = () => {
           }
         }
       });
-      console.log();
       setDrawTransaction(next);
     }
   }, [flag, tradeData]);

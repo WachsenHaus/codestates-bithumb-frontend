@@ -167,15 +167,19 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
       const { m, c, l } = transactionObj;
       for (let i = 0; i < l.length; i++) {
         const { o, n, p, q, t } = transactionObj.l[i];
-        let color;
-        const prevPrice = draft[draft.length - 1].contPrice;
-        if (p === prevPrice) {
-          color = draft[draft.length - 1].buySellGb;
-        } else if (p > prevPrice) {
-          color = '2';
-        } else {
-          color = '1';
+        let color = '1';
+        let prevPrice;
+        if (draft[draft.length - 1]) {
+          prevPrice = draft[draft.length - 1].contPrice;
+          if (p === prevPrice) {
+            color = draft[draft.length - 1].buySellGb;
+          } else if (p > prevPrice) {
+            color = '2';
+          } else {
+            color = '1';
+          }
         }
+
         draft.push({
           coinType: c,
           contAmt: n,

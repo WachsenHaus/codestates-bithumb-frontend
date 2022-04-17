@@ -12,6 +12,7 @@ export type TypeDrawTicker = {
   coinClassCode?: TypeCoinClassCode & 'C';
   isLive?: true;
   consonant?: string;
+  isFavorite?: boolean;
 } & TypeWebSocketTickerReturnType;
 
 export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
