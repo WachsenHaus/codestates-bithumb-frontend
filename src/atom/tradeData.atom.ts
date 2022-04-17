@@ -5,7 +5,6 @@ import { selector } from 'recoil';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
 import { API_BITHUMB } from './../api/bt.api';
-import qs from 'qs';
 
 export type TypeTradeTikcer = {
   crncCd: TypeCoinKind;

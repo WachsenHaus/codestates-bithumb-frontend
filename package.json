@@ -27,6 +27,7 @@
     "framer-motion": "^6.2.8",
     "grommet": "^2.21.0",
     "grommet-icons": "^4.7.0",
+    "hangul-js": "^0.2.6",
     "immer": "^9.0.12",
     "lightweight-charts": "^3.8.0",
     "lodash": "^4.17.21",

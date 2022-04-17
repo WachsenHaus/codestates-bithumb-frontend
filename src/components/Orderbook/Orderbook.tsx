@@ -15,7 +15,7 @@ import {
   TransactionReceiverListType,
   IOrderBookReceiverTypes,
 } from '../../atom/user.atom';
-import { useGetOrderBook } from '../../hooks/useOrderBook';
+import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import styles from './../animation.module.css';
 import OrderbookRow from './OrderbookRow';
 
@@ -27,7 +27,7 @@ const CONST_LOADING_CNT = 16;
  * @returns 호가창 컴포넌트
  */
 const Orderbook = () => {
-  useGetOrderBook();
+  useGetOrderBookInterval();
   const orderBook = useRecoilValue(atomOrderBook);
   const { coinSymbol, siseCrncCd, marketSymbol } =
     useRecoilValue(atomSelectCoin);
@@ -62,8 +62,9 @@ const Orderbook = () => {
           .reverse()
           .map((item, index) => {
             return (
+              // <div key={item.p}>2</div>
               <OrderbookRow
-                key={item.p}
+                key={index}
                 price={item.p}
                 quantity={item.q}
                 orderType={'ask'}
@@ -74,7 +75,7 @@ const Orderbook = () => {
         {orderBook?.bid.map((item, index) => {
           return (
             <OrderbookRow
-              key={item.p}
+              key={index}
               price={item.p}
               quantity={item.q}
               orderType={'bid'}

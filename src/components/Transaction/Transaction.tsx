@@ -19,15 +19,9 @@ import {
  */
 const Transaction = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const or = useRecoilValue(orderbookdepthReceiveState);
-  const transaction = useRecoilValue(transactionReceiveState);
-  const [originData, setOriginData] = useState<OrderBookReceiverListType[]>([]);
   const [transactionList, setTransactionList] = useState<
     TransactionReceiverListType[]
   >([]);
-  const [middleIndex, setMiddleIndex] = useState(-1);
-  const [sortData, setSortData] = useState<OrderBookReceiverListType[]>([]);
-  const [drawData, setDrawData] = useState<OrderBookReceiverListType[]>([]);
 
   const drawTransaction = useRecoilValue(atomDrawTransaction);
 
@@ -40,36 +34,6 @@ const Transaction = () => {
       // });
     }
   }, [transactionList]);
-
-  /**
-   * 체결내역 함수
-   */
-  useEffect(() => {
-    const { list } = transaction.content;
-    if (list) {
-      if (transactionList.length === 0) {
-        setTransactionList(list);
-        return;
-      }
-      const next = produce(transactionList, (draft) => {
-        //result 원본배열
-        for (let i = 0; i < list.length; i++) {
-          const { symbol } = list[i];
-          for (let j = 0; j < draft.length; j++) {
-            if (draft[j].symbol !== symbol) {
-              draft.splice(0);
-              return;
-            }
-          }
-          draft.push(list[i]);
-          if (draft.length >= 40) {
-            draft.shift();
-          }
-        }
-      });
-      setTransactionList(next);
-    }
-  }, [transaction.content.list]);
 
   return (
     <Box className="h-1/2">

@@ -1,24 +1,24 @@
 import { Box, Container, Grid } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
-import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
-import { atomGetCoinList } from '../atom/coinList.atom';
-import { atomTradeData } from '../atom/tradeData.atom';
 import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
 import Orderbook from '../components/Orderbook/Orderbook';
 import Transaction from '../components/Transaction/Transaction';
+import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGetCoinList, useGetTradeData } from '../hooks/useGetCoinList';
+import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
   useGetCoinList();
   useGetTradeData();
   useGenerateBitThumbSocket('SUBSCRIBE');
+  useResetObserverDrawData();
 
   //
-  // useChangeWebTitle();
+  useChangeWebTitle();
 
   return (
     <>

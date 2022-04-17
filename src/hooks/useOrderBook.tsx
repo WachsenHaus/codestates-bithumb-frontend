@@ -8,10 +8,16 @@ import { atomChartData, ICoinChart } from '../atom/tvChart.atom';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
 
-export const useGetOrderBook = () => {
+/**
+ * 1초에 한번씩 호가창의 데이터를 받아옵니다.
+ */
+export const useGetOrderBookInterval = () => {
   const timerId = useRef<NodeJS.Timer | null>(null);
   const selectCoin = useRecoilValue(atomSelectCoin);
   const setOrderBookData = useSetRecoilState(atomOrderBook);
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
+  const isFetching = useRef(false);
   // const setChartData = useSetRecoilState(atomChartData);
 
   //   const getD = async () => {
@@ -24,23 +30,38 @@ export const useGetOrderBook = () => {
     const { coinSymbol, marketSymbol } = selectCoin;
     const url = `${coinSymbol}_${marketSymbol}/1`;
     try {
+      isFetching.current = true;
       const result = await axios.get<ResponseVO<IOrderBookData>>(
-        `${API_BITHUMB.GET_ORDERBOOK}/${url}`
+        `${API_BITHUMB.GET_ORDERBOOK}/${url}`,
+        {
+          cancelToken: source.token,
+        }
       );
       setOrderBookData(result.data.data);
+      isFetching.current = false;
     } catch (err) {
       Log(err);
       return undefined;
     }
   };
+
   useEffect(() => {
+    // source.cancel('호출취소');
     getData();
     timerId.current = setInterval(async () => {
+      if (isFetching.current) {
+        return;
+      }
       getData();
     }, 1000);
 
     return () => {
       if (timerId.current) {
+        source.cancel('호출취소');
+        setOrderBookData({
+          ask: [],
+          bid: [],
+        });
         clearInterval(timerId.current);
         timerId.current = null;
       }

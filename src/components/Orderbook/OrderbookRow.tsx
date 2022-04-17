@@ -50,4 +50,4 @@ const OrderbookRow = ({
   );
 };
 
-export default OrderbookRow;
+export default React.memo(OrderbookRow);

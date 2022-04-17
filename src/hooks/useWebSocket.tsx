@@ -112,9 +112,9 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
    */
   useEffect(() => {
     if (wsSubscribe && wsMessage?.events) {
-      const message = _.cloneDeep(wsMessage?.events);
+      const message = _.cloneDeep(wsMessage);
       const filter = [selectCoin.siseCrncCd, selectCoin.coinType];
-      message.forEach((item) => {
+      message?.events.forEach((item) => {
         if (item.type === 'tr') {
           item.filters = filter;
         } else if (item.type === 'st') {

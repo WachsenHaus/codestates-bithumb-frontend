@@ -4,6 +4,8 @@ import { createChart, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
+import { atomDrawChart } from '../../atom/drawData.atom';
+import { atomSelectCoin } from '../../atom/selectCoin.atom';
 import {
   atomChartData,
   atomGetStChartData,
@@ -19,8 +21,8 @@ const TvChart = () => {
   const candleChart = useRef<ISeriesApi<'Candlestick'> | null>();
   const chartData = useRecoilValue(atomChartData);
 
-  const [stObj, setStObj] = useRecoilState(atomGetStChartData);
-  const [chartObj, setChartObj] = useState<Array<TypeChartData>>([]);
+  const stObj = useRecoilValue(atomGetStChartData);
+  const [drawChart, setDrawChart] = useRecoilState(atomDrawChart);
 
   const [currentBar, setCurrentBar] = useState<{
     time: UTCTimestamp;
@@ -65,10 +67,12 @@ const TvChart = () => {
     };
   }, [wrapperRef]);
 
+  /**
+   * 웹소켓으로 st 객체가 들어오면 일봉스틱으로 변경함.
+   */
   useEffect(() => {
     if (stObj) {
-      const { c, h, l, o, t, e } = stObj;
-      const lastIndex = chartObj.length - 1;
+      const { o, t, e } = stObj;
       const currentTime = moment(t, 'YYYYMMDDHHmmss')
         .utc()
         .valueOf() as UTCTimestamp;
@@ -88,11 +92,8 @@ const TvChart = () => {
         const next = produce(currentBar, (draft) => {
           if (draft) {
             draft.close = e;
-            // draft.time = int;
             draft.high = Math.max(Number(draft?.high), Number(e)).toString();
-            // draft.high = h;
             draft.low = Math.min(Number(draft?.low), Number(e)).toString();
-            // draft.low = l;
             draft.open = o;
           }
         });
@@ -101,22 +102,23 @@ const TvChart = () => {
     }
   }, [stObj]);
 
+  /**
+   * 현재 스틱이 수정되면 그래프에 업데이트를 적용함
+   */
   useEffect(() => {
     if (currentBar) {
       candleChart.current?.update(currentBar);
     }
   }, [currentBar]);
 
+  /**
+   * 차트원본이 수정되면 그리는 차트데이터로 수정함.
+   */
   useEffect(() => {
     const { c, h, l, o, t, v } = chartData;
-    const idx = t.length ? t.length : 0;
-
     const result = new Promise<Array<TypeChartData>>((resolve, reject) => {
       let obj = [];
-      for (let i = 0; i < idx; i++) {
-        // const time = moment(t[i] / 1000)
-        //   .utc()
-        //   .valueOf() as UTCTimestamp;
+      for (let i = 0; i < t.length; i++) {
         const time = ((t[i] + CONST_KR_UTC) / 1000) as UTCTimestamp;
         obj.push({
           time: time,
@@ -130,15 +132,18 @@ const TvChart = () => {
     });
     result.then((d) => {
       setCurrentBar(undefined);
-      setChartObj(d);
+      setDrawChart(d);
     });
   }, [chartData]);
 
+  /**
+   * 그리는 차트 값이 변경되면 그래프에 적용함.
+   */
   useEffect(() => {
-    if (chartObj.length > 0) {
-      candleChart.current?.setData(chartObj);
+    if (drawChart.length > 0) {
+      candleChart.current?.setData(drawChart);
     }
-  }, [chartObj]);
+  }, [drawChart]);
 
   return <div className={classNames(`w-full h-full`)} ref={wrapperRef} />;
 };

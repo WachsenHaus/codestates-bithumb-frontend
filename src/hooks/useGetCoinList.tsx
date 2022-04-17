@@ -1,5 +1,6 @@
 import produce from 'immer';
 import React, { useEffect, useState } from 'react';
+import hangul from 'hangul-js';
 import {
   useRecoilState,
   useRecoilValue,
@@ -8,15 +9,37 @@ import {
 } from 'recoil';
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
 import { atomCoinList, atomGetCoinList } from '../atom/coinList.atom';
-import { TypeCoinObj } from '../atom/coinList.type';
 import {
   atomDrawTicker,
   atomDrawTransaction,
   TypeDrawTicker,
 } from '../atom/drawData.atom';
 import _ from 'lodash';
-import { atomTradeData, TypeTradeTransaction } from '../atom/tradeData.atom';
+import { atomTradeData } from '../atom/tradeData.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
+
+const GetConsonant = ({
+  coinName,
+  coinNameEn,
+  coinSymbol,
+}: {
+  coinName: string;
+  coinNameEn: string;
+  coinSymbol: string;
+}) => {
+  const result = hangul.d(coinName, true);
+  if (result) {
+    let data = '';
+    for (let i = 0; i < result.length; i++) {
+      console.log(result[i][0]);
+      data = data + result[i][0];
+    }
+    data.replace(' ', '');
+    data += coinNameEn;
+    data += coinSymbol;
+    return data;
+  }
+};
 
 export const useGetCoinList = () => {
   const [coinState, setCoinState] = useRecoilState(atomCoinList);
@@ -43,6 +66,11 @@ export const useGetCoinList = () => {
         (item) => item.coinClassCode !== 'F' && item.isLive === true
       );
       const drawDummy = filteredData.map((item) => {
+        const consonant = GetConsonant({
+          coinName: item.coinName,
+          coinNameEn: item.coinNameEn,
+          coinSymbol: item.coinSymbol,
+        });
         return {
           coinClassCode: item.coinClassCode,
           coinName: item.coinName,
@@ -50,6 +78,7 @@ export const useGetCoinList = () => {
           coinSymbol: item.coinSymbol,
           coinType: item.coinType,
           isLive: item.isLive,
+          consonant,
         };
       });
       if (drawDummy) {
@@ -144,7 +173,6 @@ export const useGetTradeData = () => {
           if (i !== 0) {
             const prevPrice = draft[i - 1].contPrice;
             const curPrice = draft[i].contPrice;
-            console.log(curPrice, prevPrice);
             if (curPrice === prevPrice) {
               color = draft[i - 1].buySellGb;
             } else if (curPrice > prevPrice) {
@@ -160,8 +188,4 @@ export const useGetTradeData = () => {
       setDrawTransaction(next);
     }
   }, [flag, tradeData]);
-
-  // useEffect(() => {
-  //   setDrawTicker(tempDrawTicker);
-  // }, [drawTicker]);
 };

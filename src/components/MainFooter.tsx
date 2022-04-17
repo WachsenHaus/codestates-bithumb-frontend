@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuid } from 'uuid';
@@ -10,10 +10,26 @@ import classNames from 'classnames';
 import { Box, Button } from 'grommet';
 import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
 import { motion } from 'framer-motion';
+import hangul from 'hangul-js';
+import { debounce } from 'lodash';
 
-import { Column, Table } from 'react-virtualized';
-import { Paper } from '@mui/material';
+import {
+  Column,
+  createTableMultiSort,
+  SortDirection,
+  Table,
+} from 'react-virtualized';
+import { Autocomplete, Input, Paper, TextField } from '@mui/material';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
+import { atomCoinList } from '../atom/coinList.atom';
+import {
+  createMultiSort,
+  SortIndicator,
+  TableHeaderProps,
+  TableHeaderRenderer,
+} from 'react-virtualized/dist/es/Table';
+
+import _ from 'lodash';
 
 type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
 
@@ -23,7 +39,16 @@ type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
  */
 const MainFooter = () => {
   const drawTicker = useRecoilValue(atomDrawTicker);
-  const setSelectCoin = useSetRecoilState(atomSelectCoin);
+  const [selectCoin, setSelectCoin] = useRecoilState(atomSelectCoin);
+  const [sortBy, setSortBy] = useState<any>('coinName');
+  const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC');
+
+  const [sortList, setSortList] = useState<Array<TypeDrawTicker>>([]);
+
+  const keywordRef = useRef('');
+  const [flag, setFlag] = useState(false);
+
+  // const coinList = useRecoilValue(atomCoinList);
   /**
    * 해당 버튼을 클릭할 경우 type에 따라 웹소켓의 통신방식이 변경되어야겠네요
    */
@@ -93,16 +118,89 @@ const MainFooter = () => {
 
   const onClick =
     (data: any) => (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-      console.log(data);
+      if (data.coinType === selectCoin.coinSymbol) {
+        return;
+      }
       setSelectCoin((prevData) => {
         return {
           ...prevData,
           coinType: data.coinType,
           coinSymbol: data.coinSymbol,
-          // marketSymbol: data.marketSymbol,
         };
       });
     };
+
+  // const sortState = createMultiSort(sort);
+
+  // const HeaderRenderer: TableHeaderRenderer = (e: TableHeaderProps) => {
+  //   console.log(e);
+
+  //   const showSortIndicator = sortState.sortBy.includes(e.dataKey);
+  //   console.log(showSortIndicator);
+  //   return (
+  //     <>
+  //       <span>{e.label}</span>
+  //       {showSortIndicator && (
+  //         <SortIndicator sortDirection={sortState.sortDirection[e.dataKey]} />
+  //       )}
+  //     </>
+  //   );
+  // };
+
+  useEffect(() => {
+    const r = sortFn({
+      sortBy,
+      sortDirection,
+      // keyword,
+    });
+    setSortList(r);
+  }, [drawTicker]);
+
+  // useEffect(() => {
+  //   if (keywordRef.current.length === 0) {
+  //     setFlag(false);
+  //   } else {
+  //     setFlag(true);
+  //   }
+  // }, [keywordRef.current]);
+
+  /**
+   *
+   * @param param0
+   * @returns
+   */
+  const sortFn = ({
+    sortBy,
+    sortDirection,
+    keyword,
+  }: {
+    sortBy: any;
+    sortDirection: any;
+    keyword?: string;
+  }) => {
+    // draw하는부분에다가 속성으로 검색용 키워드를 집어넣어야겠네,
+    const a = _.filter(drawTicker, (i) => {
+      return i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1;
+    });
+
+    return a;
+  };
+
+  // const sort = ({
+  //   sortBy,
+  //   sortDirection,
+  // }: {
+  //   sortBy: any;
+  //   sortDirection: any;
+  // }) => {
+  //   setSortDirection('ASC');
+  //   const sortedList = sortFn({
+  //     sortBy,
+  //     sortDirection,
+  //   });
+  //   setSortList(sortedList);
+  //   setSortBy(sortBy);
+  // };
 
   return (
     <div>
@@ -128,6 +226,34 @@ const MainFooter = () => {
             color="doc"
             label="BTC 마켓"
           />
+          <TextField
+            onChange={(e) => {
+              // console.log(e.target.value);
+              keywordRef.current = e.target.value;
+            }}
+            // value={keywordRef.current}
+            // onke
+            // onChange={(e) => {
+            //   console.log(e.target.);
+            //   console.log(e.currentTarget);
+            // }}
+
+            // onChange={(e) => {
+            //   // console.log(e.nativeEvent);
+            //   // keywordRef.current = e.key;
+            //   console.log(keywordRef.current.valueOf());
+            // }}
+
+            // disablePortal
+            // id="combo-box-demo"
+            // spellCheck={'true'}
+            // options={[
+            //   { label: '이더리움ㅇㄷㄹㅇ', year: 1994, spell: 'ㅇㄷㄹㅇ' },
+            //   { label: 'The Godfather', year: 1972 },
+            // ]}
+            // sx={{ width: 300 }}
+            // renderInput={(params) => <TextField {...params} label="aa" />}
+          />
         </Box>
       </div>
       <div>
@@ -140,25 +266,39 @@ const MainFooter = () => {
           <AutoSizer>
             {({ width, height }) => (
               <Table
+                // sort={sort}
+
+                sortBy={sortBy}
+                sortDirection={sortDirection}
                 width={width}
                 height={height}
                 headerHeight={50}
                 rowHeight={50}
-                rowCount={drawTicker.length}
+                rowCount={sortList.length}
                 rowClassName={classNames(`flex`)}
                 rowGetter={({ index }) => {
-                  return drawTicker[index];
+                  // return drawTicker[index];
+                  return sortList[index];
                 }}
               >
                 <Column
                   width={width * 0.2}
                   label="자산"
                   dataKey="coinName"
+                  // headerRenderer={HeaderRenderer}
+                  // columnData={{
+                  //   coinName: 'aa',
+                  // }}
                   cellRenderer={(e) => {
+                    // setMKey({
+                    //   coinName: e.rowData.coinName,
+                    //   coinNameEn: e.rowData.coinNameEn,
+                    //   coinSymbol: e.rowData.coinSymbol,
+                    // });
                     return (
-                      <div>
+                      <div onClick={onClick(e.rowData)}>
                         {e.cellData}
-                        <div onClick={onClick(e.rowData)}>
+                        <div>
                           {e.rowData.coinSymbol}/
                           {e.rowData.m === 'C0100' ? 'KRW' : ''}
                         </div>
@@ -166,7 +306,12 @@ const MainFooter = () => {
                     );
                   }}
                 />
-                <Column width={width * 0.4} label="현재가" dataKey="e" />
+                <Column
+                  width={width * 0.4}
+                  label="현재가"
+                  dataKey="e"
+                  // headerRenderer={HeaderRenderer}
+                />
                 <Column
                   width={width * 0.15}
                   label="변동률(당일)"
