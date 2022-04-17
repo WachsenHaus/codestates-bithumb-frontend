@@ -15,6 +15,7 @@ import {
   TypeWebSocketTickerReturnType,
 } from '../atom/ws.type';
 import {
+  atomDrawCoinInfo,
   atomDrawTicker,
   atomDrawTransaction,
   TypeDrawTicker,
@@ -34,6 +35,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   );
 
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
+  const [drawCoin, setDrawCoin] = useRecoilState(atomDrawCoinInfo);
   const selectCoin = useRecoilValue(atomSelectCoin);
   const [drawTransaction, setDrawTransaction] =
     useRecoilState(atomDrawTransaction);
@@ -137,7 +139,20 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
           const isExist = draft.findIndex((item) => {
             return item.coinType === tickerObj.c;
           });
-
+          // 현재 코인과 선택된 코인의 정보가 같다면 티커에서 들어오는 정보를 drawcoin에도 넣어줌.
+          if (tickerObj.c === drawCoin.coinType) {
+            setDrawCoin((prevData) => {
+              return {
+                ...prevData,
+                e: tickerObj.e,
+                u24: tickerObj.u24,
+                v24: tickerObj.v24,
+                h: tickerObj.h,
+                l: tickerObj.l,
+                f: tickerObj.f,
+              };
+            });
+          }
           if (isExist === -1) {
             console.log('not coin');
           } else {

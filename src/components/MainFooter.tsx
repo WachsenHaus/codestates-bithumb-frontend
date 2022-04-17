@@ -215,12 +215,6 @@ const MainFooter = () => {
         >
           <Button
             variant={viewMode === 'normal' ? 'outlined' : undefined}
-            // primary={viewMode === 'normal'}
-            // active={viewMode === 'normal'}
-            // size="large"
-            // margin="small"
-
-            // type="button"
             onClick={(e) => {
               setViewMode('normal');
             }}
@@ -230,12 +224,6 @@ const MainFooter = () => {
 
           <Button
             variant={viewMode === 'favorite' ? 'outlined' : undefined}
-            // primary={viewMode === 'normal'}
-            // active={viewMode === 'normal'}
-            // size="large"
-            // margin="small"
-
-            // type="button"
             onClick={(e) => {
               setViewMode('favorite');
             }}
@@ -245,7 +233,6 @@ const MainFooter = () => {
 
           <TextField
             onChange={(e) => {
-              // console.log(e.target.value);
               keywordRef.current = e.target.value;
             }}
           />
@@ -271,7 +258,6 @@ const MainFooter = () => {
                 rowCount={sortList.length}
                 rowClassName={classNames(`flex`)}
                 rowGetter={({ index }) => {
-                  // return drawTicker[index];
                   return sortList[index];
                 }}
               >

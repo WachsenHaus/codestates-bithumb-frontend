@@ -77,6 +77,7 @@ const Transaction = () => {
             return (
               <motion.div
                 // key={item.contDtm}
+                key={index}
                 ref={index === drawTransaction.length - 1 ? scrollRef : null}
                 style={{
                   display: 'grid',

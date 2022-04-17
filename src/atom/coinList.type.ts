@@ -14,7 +14,7 @@ export type TypeCoinObj = {
   hasSecondAddr: boolean;
   secondAddrName: string;
   secondAddrNameEn: string;
-  siseCrncCd: string;
+  siseCrncCd: TypeCoinKind;
   isLive: boolean;
 };
 export type TypeMarketObj = {

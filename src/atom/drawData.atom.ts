@@ -13,6 +13,7 @@ export type TypeDrawTicker = {
   isLive?: true;
   consonant?: string;
   isFavorite?: boolean;
+  siseCrncCd?: TypeCoinKind;
 } & TypeWebSocketTickerReturnType;
 
 export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
@@ -28,4 +29,25 @@ export const atomDrawTransaction = atom<Array<TypeTradeTransaction>>({
 export const atomDrawChart = atom<Array<TypeChartData>>({
   key: 'AtomDrawChart',
   default: [],
+});
+
+export const atomDrawCoinInfo = atom<TypeDrawTicker>({
+  key: 'AtomDrawCoinInfo',
+  default: {
+    a: '', //변화금액
+    c: '', //코인번호
+    e: '', //현재가
+    f: '', //f전일가
+    h: '', //고가(당일)
+    k: '', //MID
+    l: '', //저가(당일)
+    m: '', //원화코인
+    o: '', //?시작가로 추정됨
+    r: '', //변동률(퍼센트)
+    u: '', //거래금액
+    u24: '', //24시간 거래금액
+    v: '', //거래량
+    v24: '', //24시간 거래량
+    w: '', // 모르겠음
+  },
 });

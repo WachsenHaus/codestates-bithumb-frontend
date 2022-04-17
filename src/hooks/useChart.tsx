@@ -34,7 +34,6 @@ export const useGetChartDatas = () => {
     }
   };
   useEffect(() => {
-    console.log('getChartData');
     getData();
     timerId.current = setInterval(async () => {
       if (isFetching.current) {

@@ -10,11 +10,12 @@ import {
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
 import { atomCoinList, atomGetCoinList } from '../atom/coinList.atom';
 import {
+  atomDrawCoinInfo,
   atomDrawTicker,
   atomDrawTransaction,
   TypeDrawTicker,
 } from '../atom/drawData.atom';
-import _ from 'lodash';
+import _, { iteratee } from 'lodash';
 import { atomTradeData } from '../atom/tradeData.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 
@@ -70,12 +71,14 @@ export const setCookie = (
   let date = new Date();
   date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
   // console.log()
+
   document.cookie =
     name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
 };
 
 export const getCookie = (name: TypeMarketFavoritesCoin) => {
   const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+  // const result = ;
   return value ? value[2] : '';
 };
 
@@ -121,6 +124,7 @@ export const useGetCoinList = () => {
         );
         return {
           isFavorite: cookieCoinSymbol ? true : false,
+          siseCrncCd: item.siseCrncCd === 'C0100' ? 'KRW' : 'BTC',
           coinClassCode: item.coinClassCode,
           coinName: item.coinName,
           coinNameEn: item.coinNameEn,
@@ -147,10 +151,14 @@ export const useGetCoinList = () => {
   return undefined;
 };
 
+/**
+ * 선택된 코인이 변화되면 해당 거래정보를 한번에 다 받아옵니다.
+ */
 export const useGetTradeData = () => {
   const tradeData = useRecoilValueLoadable(atomTradeData);
-  const { siseCrncCd } = useRecoilValue(atomSelectCoin);
+  const selectCoin = useRecoilValue(atomSelectCoin);
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
+  const [drawCoinInfo, setDrawCoinInfo] = useRecoilState(atomDrawCoinInfo);
   const [flag, setFlag] = useState(false);
 
   useEffect(() => {
@@ -169,8 +177,10 @@ export const useGetTradeData = () => {
       tradeData.state === 'hasValue' &&
       tradeData?.contents?.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR
     ) {
-      const tickerData = tradeData.contents.data[siseCrncCd]['ticker'];
+      const tickerData =
+        tradeData.contents.data[selectCoin.siseCrncCd]['ticker'];
       const tickerKeys = Object.keys(tickerData);
+      let defaultObj: TypeDrawTicker = {};
       const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
         const next = produce(drawTicker, (draft) => {
           for (let i = 0; i < tickerKeys.length - 1; i++) {
@@ -181,17 +191,39 @@ export const useGetTradeData = () => {
               chgRate,
               openPrice,
               volume24H,
+              value24H,
+              prevClosePrice,
+              highPrice,
+              lowPrice,
+              closePrice,
             } = tickerData[tickerKeys[i]];
             const isExist = draft.findIndex(
               (item) => item.coinType === coinType
             );
+
+            const selectIdx = draft.findIndex(
+              (item) => item.coinSymbol === selectCoin.coinSymbol
+            );
+            if (coinType === selectCoin.coinType) {
+              defaultObj = {
+                coinType: draft[selectIdx].coinType,
+                coinSymbol: draft[selectIdx].coinSymbol,
+                e: openPrice,
+                u24: value24H,
+                v24: volume24H,
+                h: highPrice,
+                l: lowPrice,
+                f: closePrice,
+                siseCrncCd: draft[selectIdx].siseCrncCd,
+              };
+            }
 
             if (isExist === -1) {
               console.log('not coin');
             } else {
               draft[isExist] = {
                 ...draft[isExist],
-                u24: volume24H,
+                u24: value24H,
                 r: chgRate,
                 e: openPrice,
                 a: chgAmt,
@@ -208,13 +240,14 @@ export const useGetTradeData = () => {
       result
         .then((d) => {
           setDrawTicker(d);
+          setDrawCoinInfo(defaultObj);
         })
         .catch((e) => {
           console.error(e);
         });
 
       const transactionData =
-        tradeData.contents.data[siseCrncCd]['transaction'];
+        tradeData.contents.data[selectCoin.siseCrncCd]['transaction'];
       const transactionKeys = Object.keys(transactionData);
       const data = transactionData[transactionKeys[0]];
       const next = produce(data, (draft) => {
@@ -236,5 +269,5 @@ export const useGetTradeData = () => {
       });
       setDrawTransaction(next);
     }
-  }, [flag, tradeData]);
+  }, [flag, tradeData, selectCoin]);
 };
