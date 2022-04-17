@@ -30,6 +30,7 @@ import {
 
 import _ from 'lodash';
 import { getCookie, setCookie } from '../hooks/useGetCoinList';
+import { Item } from 'framer-motion/types/components/Reorder/Item';
 
 type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
 
@@ -269,22 +270,24 @@ const MainFooter = () => {
                     return (
                       <div
                         onClick={() => {
-                          // const length = getCookie('marketFavoritesCoin').split(
-                          //   ','
-                          // ).length;
-                          // console.log(length);
-                          const list = getCookie('marketFavoritesCoin').split(
-                            ','
+                          const list = getCookie('marketFavoritesCoin');
+                          const parseList = list
+                            .replace('[', '')
+                            .replace(']', '')
+                            .replace(/\"/g, '')
+                            .split(',');
+                          const coin = `${e.rowData.coinType}_${e.rowData.m}`;
+                          const isIndex = parseList.findIndex(
+                            (item) => item === coin
                           );
-                          const { length } = list;
-                          const set = new Set(length === 1 ? [''] : list);
-                          const coin = `${e.rowData.coinSymbol}_${
-                            e.rowData.m === 'C0100' ? 'KRW' : e.rowData.m
-                          },`;
-                          set.add(coin);
-                          setCookie('marketFavoritesCoin', [...set], 1);
-                          console.log('쿠키..');
-
+                          if (isIndex !== -1) {
+                            parseList.splice(isIndex, 1);
+                          } else {
+                            const coin = `"${e.rowData.coinType}_${e.rowData.m}"`;
+                            parseList.push(coin);
+                          }
+                          const cookieValue = `[${parseList}]`;
+                          setCookie('marketFavoritesCoin', cookieValue, 1);
                           const next = produce(drawTicker, (item) => {
                             const a = item.find(
                               (item) => item.coinSymbol === e.rowData.coinSymbol
@@ -294,7 +297,6 @@ const MainFooter = () => {
                             }
                           });
                           setDrawTicker(next);
-                          // e.rowData.isFavorite = true;
                         }}
                       >
                         {e.rowData.isFavorite ? (

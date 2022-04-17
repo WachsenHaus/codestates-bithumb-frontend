@@ -65,21 +65,23 @@ const decrypt = (theText: string) => {
 
 export const setCookie = (
   name: TypeMarketFavoritesCoin,
-  value: string[],
+  value: string,
   exp: number
 ) => {
   let date = new Date();
   date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
   // console.log()
+  const eValue = encodeURI(value);
+  console.log(eValue);
 
   document.cookie =
-    name + '=' + value + ';expires=' + date.toUTCString() + ';path=/';
+    name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
 };
 
 export const getCookie = (name: TypeMarketFavoritesCoin) => {
   const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
   // const result = ;
-  return value ? value[2] : '';
+  return value ? decodeURI(value[2]) : '';
 };
 
 export const useGetCoinList = () => {
@@ -111,7 +113,12 @@ export const useGetCoinList = () => {
       const filteredData = rawData.filter(
         (item) => item.coinClassCode !== 'F' && item.isLive === true
       );
-      const cookieFavorites = getCookie('marketFavoritesCoin')?.split(',');
+      const cookieFavorites = getCookie('marketFavoritesCoin');
+      const parseCookies = cookieFavorites
+        .replace('[', '')
+        .replace(']', '')
+        .replace(/\"/g, '')
+        .split(',');
 
       const drawDummy = filteredData.map((item) => {
         const consonant = GetConsonant({
@@ -119,8 +126,8 @@ export const useGetCoinList = () => {
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
         });
-        const cookieCoinSymbol = cookieFavorites.find(
-          (i) => i.split('_')[0] === item.coinSymbol
+        const cookieCoinSymbol = parseCookies.find(
+          (i) => i.split('_')[0] === item.coinType
         );
         return {
           isFavorite: cookieCoinSymbol ? true : false,
