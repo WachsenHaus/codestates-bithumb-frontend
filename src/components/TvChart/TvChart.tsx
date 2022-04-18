@@ -71,35 +71,37 @@ const TvChart = () => {
    * 웹소켓으로 st 객체가 들어오면 일봉스틱으로 변경함.
    */
   useEffect(() => {
-    if (stObj) {
-      const { o, t, e } = stObj;
-      const currentTime = moment(t, 'YYYYMMDDHHmmss')
-        .utc()
-        .valueOf() as UTCTimestamp;
-      const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) *
-        60) as UTCTimestamp;
+    (async () => {
+      if (stObj) {
+        const { o, t, e } = stObj;
+        const currentTime = moment(t, 'YYYYMMDDHHmmss')
+          .utc()
+          .valueOf() as UTCTimestamp;
+        const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) *
+          60) as UTCTimestamp;
 
-      const nextTime = int;
-      if (currentBar === undefined) {
-        setCurrentBar({
-          close: e,
-          high: e,
-          low: e,
-          open: e,
-          time: nextTime,
-        });
-      } else if (currentBar?.open !== null) {
-        const next = produce(currentBar, (draft) => {
-          if (draft) {
-            draft.close = e;
-            draft.high = Math.max(Number(draft?.high), Number(e)).toString();
-            draft.low = Math.min(Number(draft?.low), Number(e)).toString();
-            draft.open = o;
-          }
-        });
-        setCurrentBar(next);
+        const nextTime = int;
+        if (currentBar === undefined) {
+          setCurrentBar({
+            close: e,
+            high: e,
+            low: e,
+            open: e,
+            time: nextTime,
+          });
+        } else if (currentBar?.open !== null) {
+          const result = await produce(currentBar, (draft) => {
+            if (draft) {
+              draft.close = e;
+              draft.high = Math.max(Number(draft?.high), Number(e)).toString();
+              draft.low = Math.min(Number(draft?.low), Number(e)).toString();
+              draft.open = o;
+            }
+          });
+          setCurrentBar(result);
+        }
       }
-    }
+    })();
   }, [stObj]);
 
   /**

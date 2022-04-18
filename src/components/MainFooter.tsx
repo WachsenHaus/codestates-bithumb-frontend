@@ -31,6 +31,8 @@ import {
 import _ from 'lodash';
 import { getCookie, setCookie } from '../hooks/useGetCoinList';
 import { Item } from 'framer-motion/types/components/Reorder/Item';
+import { ConvertStringPriceToKRW } from '../utils/utils';
+import { resolve } from 'path';
 
 type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
 
@@ -143,37 +145,41 @@ const MainFooter = () => {
       });
     };
   useEffect(() => {
-    const r = sortFn({
-      sortBy,
-      sortDirection,
-      // keyword,
-    });
-    setSortList(r);
+    (async () => {
+      const r = await sortFn({
+        sortBy,
+        sortDirection,
+        // keyword,
+      });
+      setSortList(r);
+    })();
   }, [drawTicker]);
 
   useEffect(() => {
-    if (viewMode === 'favorite') {
-      setSortBy(['isFavorite']);
-      const r = sortFn({
-        sortBy: ['isFavorite'],
-        sortDirection,
-      });
-      setSortList(r);
-    } else {
-      setSortBy(['coinName']);
-      const r = sortFn({
-        sortBy: ['coinName'],
-        sortDirection,
-      });
-      setSortList(r);
-    }
+    (async () => {
+      if (viewMode === 'favorite') {
+        setSortBy(['isFavorite']);
+        const r = await sortFn({
+          sortBy: ['isFavorite'],
+          sortDirection,
+        });
+        setSortList(r);
+      } else {
+        setSortBy(['coinName']);
+        const r = await sortFn({
+          sortBy: ['coinName'],
+          sortDirection,
+        });
+        setSortList(r);
+      }
+    })();
   }, [viewMode]);
   /**
    *
    * @param param0
    * @returns
    */
-  const sortFn = ({
+  const sortFn = async ({
     sortBy,
     sortDirection,
   }: {
@@ -270,33 +276,43 @@ const MainFooter = () => {
                     return (
                       <div
                         onClick={() => {
-                          const list = getCookie('marketFavoritesCoin');
-                          const parseList = list
-                            .replace('[', '')
-                            .replace(']', '')
-                            .replace(/\"/g, '')
-                            .split(',');
-                          const coin = `${e.rowData.coinType}_${e.rowData.m}`;
-                          const isIndex = parseList.findIndex(
-                            (item) => item === coin
-                          );
-                          if (isIndex !== -1) {
-                            parseList.splice(isIndex, 1);
-                          } else {
-                            const coin = `"${e.rowData.coinType}_${e.rowData.m}"`;
-                            parseList.push(coin);
-                          }
-                          const cookieValue = `[${parseList}]`;
-                          setCookie('marketFavoritesCoin', cookieValue, 1);
-                          const next = produce(drawTicker, (item) => {
-                            const a = item.find(
-                              (item) => item.coinSymbol === e.rowData.coinSymbol
+                          (async () => {
+                            const list = getCookie('marketFavoritesCoin');
+                            const parseList = list
+                              .replace('[', '')
+                              .replace(']', '')
+                              .replace(/\"/g, '')
+                              .split(',');
+                            const coin = `${e.rowData.coinType}_${e.rowData.m}`;
+                            const isIndex = parseList.findIndex(
+                              (item) => item === coin
                             );
-                            if (a) {
-                              a.isFavorite = !a.isFavorite;
+                            if (isIndex !== -1) {
+                              parseList.splice(isIndex, 1);
+                            } else {
+                              const coin = `"${e.rowData.coinType}_${e.rowData.m}"`;
+                              parseList.push(coin);
                             }
-                          });
-                          setDrawTicker(next);
+                            const cookieValue = `[${parseList}]`;
+                            setCookie('marketFavoritesCoin', cookieValue, 1);
+                            const getFavorites = new Promise<TypeDrawTicker[]>(
+                              (resolve, reject) => {
+                                const next = produce(drawTicker, (item) => {
+                                  const a = item.find(
+                                    (item) =>
+                                      item.coinSymbol === e.rowData.coinSymbol
+                                  );
+                                  if (a) {
+                                    a.isFavorite = !a.isFavorite;
+                                  }
+                                });
+                                resolve(next);
+                              }
+                            );
+                            getFavorites.then((result) => {
+                              setDrawTicker(result);
+                            });
+                          })();
                         }}
                       >
                         {e.rowData.isFavorite ? (
@@ -328,6 +344,9 @@ const MainFooter = () => {
                   width={width * 0.4}
                   label="현재가"
                   dataKey="e"
+                  cellRenderer={(e) => {
+                    return <div>{ConvertStringPriceToKRW(e.cellData)}</div>;
+                  }}
                   // headerRenderer={HeaderRenderer}
                 />
                 <Column

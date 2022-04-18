@@ -3,19 +3,21 @@ import { useRecoilValue } from 'recoil';
 import { atomDrawCoinInfo } from '../atom/drawData.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 
+/**
+ * 선택된 코인에 대한 정보를 타이틀에 표기합니다.
+ */
 const useChangeWebTitle = () => {
-  const drawCoinInfo = useRecoilValue(atomDrawCoinInfo);
+  const { e, coinSymbol, siseCrncCd } = useRecoilValue(atomDrawCoinInfo);
 
   useEffect(() => {
     const htmlTitle = document.querySelector('title');
-    // ${Number(rcvTicker.content.openPrice).toLocaleString(
-    //   'ko-kr'
-    // )}
-    const title = `${drawCoinInfo.e} ${drawCoinInfo.coinSymbol}/${drawCoinInfo.siseCrncCd} `;
+    const koreaCost = `${Number(e).toLocaleString('ko-kr')}`;
+    const title = `${koreaCost} ${coinSymbol}/${siseCrncCd} `;
+
     if (htmlTitle) {
       htmlTitle.innerHTML = title;
     }
-  }, [drawCoinInfo]);
+  }, [e, coinSymbol, siseCrncCd]);
 };
 
 export default useChangeWebTitle;

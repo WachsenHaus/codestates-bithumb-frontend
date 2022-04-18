@@ -1,108 +1,49 @@
-import { Box } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import classNames from 'classnames';
-import { motion } from 'framer-motion';
-import produce from 'immer';
-import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { atomDrawTransaction } from '../../atom/drawData.atom';
-import {
-  orderbookdepthReceiveState,
-  transactionReceiveState,
-  OrderBookReceiverListType,
-  TransactionReceiverListType,
-} from '../../atom/user.atom';
+import { atomSelectCoin } from '../../atom/selectCoin.atom';
+
+import TransactionRow from './TransactionRow';
 
 /**
  *
  * @returns 실시간 체결내역 컴포넌트
  */
 const Transaction = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [transactionList, setTransactionList] = useState<
-    TransactionReceiverListType[]
-  >([]);
-
   const drawTransaction = useRecoilValue(atomDrawTransaction);
-
-  useEffect(() => {
-    if (scrollRef) {
-      // scrollRef?.current?.scrollIntoView({
-      //   behavior: 'smooth',
-      //   block: 'end',
-      //   inline: 'nearest',
-      // });
-    }
-  }, [transactionList]);
+  const { coinSymbol, marketSymbol } = useRecoilValue(atomSelectCoin);
 
   return (
-    <Box className="h-1/2">
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '30% 40% auto',
-          gridTemplateRows: 'auto',
+    <Box className={classNames(`w-full`)}>
+      <Typography align="center">체결내역</Typography>
+      <Box className="flex justify-around items-center font-bmjua">
+        <Typography className="font-bmjua">시간</Typography>
+        <Typography className="font-bmjua">가격({marketSymbol})</Typography>
+        <Typography>수량({coinSymbol})</Typography>
+      </Box>
+      <Box
+        sx={{
+          height: { sm: 200, md: 330 },
         }}
+        className={classNames(`scrollbar-hide overflow-y-auto`)}
       >
-        <h1
-          style={{
-            fontFamily: 'bmjua',
-          }}
-          className="w-full flex justify-center items-center"
-        >
-          시간
-        </h1>
-        <h1
-          style={{
-            fontFamily: 'bmjua',
-          }}
-          className="w-full flex justify-center items-center"
-        >
-          가격
-        </h1>
-        <h1
-          style={{
-            fontFamily: 'bmjua',
-          }}
-          className="w-full flex justify-center items-center"
-        >
-          수량(BTC)
-        </h1>
-      </div>
-      {drawTransaction.length > 10 &&
-        drawTransaction
+        {drawTransaction
           .slice(0)
           .reverse()
-          .map((item, index) => {
+          .map((item) => {
             return (
-              <motion.div
-                // key={item.contDtm}
-                key={index}
-                ref={index === drawTransaction.length - 1 ? scrollRef : null}
-                style={{
-                  display: 'grid',
-                  height: '30px',
-                  gridTemplateColumns: '30% 40% 30%',
-                }}
-              >
-                <div className="flex justify-center items-center">
-                  {moment(item.contDtm).format('HH:mm:ss')}
-                </div>
-                <div className="flex justify-center items-center">
-                  {Number(item.contPrice).toLocaleString('ko-kr')}
-                </div>
-                <div
-                  className={classNames(
-                    `${
-                      item.buySellGb === '2' ? 'text-red-400' : 'text-blue-400'
-                    } flex justify-center items-center"`
-                  )}
-                >
-                  <span>{Number(item.contQty).toFixed(4)}</span>
-                </div>
-              </motion.div>
+              <TransactionRow
+                key={item.contDtm + '1'}
+                time={item.contDtm}
+                price={item.contPrice}
+                contQty={item.contQty}
+                buySellGb={item.buySellGb}
+              />
             );
           })}
+      </Box>
     </Box>
   );
 };

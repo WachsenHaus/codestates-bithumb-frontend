@@ -147,6 +147,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
                 e: tickerObj.e,
                 u24: tickerObj.u24,
                 v24: tickerObj.v24,
+                r: tickerObj.r,
                 h: tickerObj.h,
                 l: tickerObj.l,
                 f: tickerObj.f,
@@ -177,39 +178,74 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   }, [tickerObj]);
 
   useEffect(() => {
-    const next = produce(drawTransaction, (draft) => {
-      if (transactionObj === undefined) return;
-      const { m, c, l } = transactionObj;
-      for (let i = 0; i < l.length; i++) {
-        const { o, n, p, q, t } = transactionObj.l[i];
-        let color = '1';
-        let prevPrice;
-        if (draft[draft.length - 1]) {
-          prevPrice = draft[draft.length - 1].contPrice;
-          if (p === prevPrice) {
-            color = draft[draft.length - 1].buySellGb;
-          } else if (p > prevPrice) {
-            color = '2';
-          } else {
-            color = '1';
+    (async () => {
+      const result = await produce(drawTransaction, (draft) => {
+        if (transactionObj === undefined) return;
+        const { m, c, l } = transactionObj;
+        for (let i = 0; i < l.length; i++) {
+          const { o, n, p, q, t } = transactionObj.l[i];
+          let color = '1';
+          let prevPrice;
+          if (draft[draft.length - 1]) {
+            prevPrice = draft[draft.length - 1].contPrice;
+            if (p === prevPrice) {
+              color = draft[draft.length - 1].buySellGb;
+            } else if (p > prevPrice) {
+              color = '2';
+            } else {
+              color = '1';
+            }
+          }
+
+          draft.push({
+            coinType: c,
+            contAmt: n,
+            crncCd: m,
+            buySellGb: color,
+            contPrice: p,
+            contQty: q,
+            contDtm: t,
+          });
+          if (draft.length > 10) {
+            draft.shift();
           }
         }
+      });
+      setDrawTransaction(result);
+    })();
+    // const next = produce(drawTransaction, (draft) => {
+    //   if (transactionObj === undefined) return;
+    //   const { m, c, l } = transactionObj;
+    //   for (let i = 0; i < l.length; i++) {
+    //     const { o, n, p, q, t } = transactionObj.l[i];
+    //     let color = '1';
+    //     let prevPrice;
+    //     if (draft[draft.length - 1]) {
+    //       prevPrice = draft[draft.length - 1].contPrice;
+    //       if (p === prevPrice) {
+    //         color = draft[draft.length - 1].buySellGb;
+    //       } else if (p > prevPrice) {
+    //         color = '2';
+    //       } else {
+    //         color = '1';
+    //       }
+    //     }
 
-        draft.push({
-          coinType: c,
-          contAmt: n,
-          crncCd: m,
-          buySellGb: color,
-          contPrice: p,
-          contQty: q,
-          contDtm: t,
-        });
-        if (draft.length > 10) {
-          draft.shift();
-        }
-      }
-    });
-    setDrawTransaction(next);
+    //     draft.push({
+    //       coinType: c,
+    //       contAmt: n,
+    //       crncCd: m,
+    //       buySellGb: color,
+    //       contPrice: p,
+    //       contQty: q,
+    //       contDtm: t,
+    //     });
+    //     if (draft.length > 10) {
+    //       draft.shift();
+    //     }
+    //   }
+    // });
+    // setDrawTransaction(next);
   }, [transactionObj]);
 
   /**

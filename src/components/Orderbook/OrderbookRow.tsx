@@ -1,8 +1,6 @@
 import { Box } from '@mui/material';
 import classNames from 'classnames';
-import { motion } from 'framer-motion';
-import { Meter } from 'grommet';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import styles from '../../components/animation.module.css';
 
 const OrderbookRow = ({
@@ -16,8 +14,23 @@ const OrderbookRow = ({
   eventType: 'ask' | 'bid' | undefined;
   quantity: string;
 }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isCurrentTargetRef = eventType !== undefined ? scrollRef : undefined;
+  useEffect(() => {
+    if (scrollRef && eventType !== undefined) {
+      scrollRef?.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+    }
+  }, [eventType]);
+
   return (
-    <Box className="flex justify-around items-center w-full ">
+    <Box
+      className="flex justify-around items-center w-full "
+      ref={isCurrentTargetRef}
+    >
       <Box
         className={classNames(
           `w-1/2`,

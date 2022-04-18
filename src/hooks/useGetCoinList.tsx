@@ -44,25 +44,6 @@ const GetConsonant = ({
 
 export type TypeMarketFavoritesCoin = 'marketFavoritesCoin';
 
-const encrypt = (theText: string) => {
-  let output = new String();
-  let TextSize = theText.length;
-  for (let i = 0; i < TextSize; i++) {
-    output += String(theText.charCodeAt(i));
-  }
-  return output;
-};
-
-const decrypt = (theText: string) => {
-  let output = new String();
-  let TextSize = theText.length;
-  for (let i = 0; i < TextSize; i += 2) {
-    const code = Number(theText[i] + theText[i + 1]);
-    output += String.fromCharCode(code);
-  }
-  return output;
-};
-
 export const setCookie = (
   name: TypeMarketFavoritesCoin,
   value: string,
@@ -72,8 +53,6 @@ export const setCookie = (
   date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
   // console.log()
   const eValue = encodeURI(value);
-  console.log(eValue);
-
   document.cookie =
     name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
 };
@@ -84,6 +63,10 @@ export const getCookie = (name: TypeMarketFavoritesCoin) => {
   return value ? decodeURI(value[2]) : '';
 };
 
+/**
+ *
+ * @returns 코인 리스트들을 받아옵니다.
+ */
 export const useGetCoinList = () => {
   const [coinState, setCoinState] = useRecoilState(atomCoinList);
   const setDrawTicker = useSetRecoilState(atomDrawTicker);
@@ -219,6 +202,7 @@ export const useGetTradeData = () => {
                 u24: value24H,
                 v24: volume24H,
                 h: highPrice,
+                r: chgRate,
                 l: lowPrice,
                 f: closePrice,
                 siseCrncCd: draft[selectIdx].siseCrncCd,
