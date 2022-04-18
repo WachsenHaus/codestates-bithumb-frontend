@@ -7,7 +7,11 @@ import {
   TickTypes,
 } from '../type/coinTypes';
 
-export type SocketNamesType = 'ticker' | 'orderbookdepth' | 'transaction';
+export type SocketNamesType =
+  | 'ticker'
+  | 'orderbookdepth'
+  | 'transaction'
+  | 'SUBSCRIBE';
 export interface ITickerSenderTypes {
   type: 'ticker';
   symbols: CoinSymbolKRWTypes[] | CoinSymbolBTCTypes[];
@@ -189,3 +193,14 @@ export const transactionSenderState = atom<ITransactionSenderTypes>({
 //   key: 'userFavouriteState',
 //   default: [''],
 // });
+
+export const atomUserSelectCoin = atom<{
+  crncCd: string;
+  coin: string;
+}>({
+  key: 'AtomUserSelectCoin',
+  default: {
+    crncCd: 'C0100',
+    coin: 'C0101',
+  },
+});

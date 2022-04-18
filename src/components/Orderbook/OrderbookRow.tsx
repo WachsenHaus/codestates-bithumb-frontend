@@ -41,7 +41,6 @@ const OrderbookRow = ({
           className={classNames(`absolute left-0`)}
           sx={{
             width: `${(Number(quantity) * 50) % 100}%`,
-
             height: '100%',
             backgroundColor: '#ee424219',
           }}
@@ -51,4 +50,4 @@ const OrderbookRow = ({
   );
 };
 
-export default OrderbookRow;
+export default React.memo(OrderbookRow);

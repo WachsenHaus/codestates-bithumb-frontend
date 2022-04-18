@@ -1,28 +1,12 @@
-export type TypeCoinKind = 'C0100 | C0101';
-export type TypeCoinName = '원화';
-export type TypeCoinNameEn = 'KRW';
+export type TypeCoinKind = 'C0100' | 'C0101';
 export type TypeCoinClassCode = 'F' | 'C';
-
-// "coinType": "C0100",
-// "coinClassCode": "F",
-// "coinSymbol": "KRW",
-// "coinName": "원화",
-// "coinNameEn": "KRW",
-// "decimalDigits": 6,
-// "canDeposit": true,
-// "canWithdrawal": true,
-// "displayInOut": true,
-// "hasSecondAddr": false,
-// "secondAddrName": "",
-// "secondAddrNameEn": "",
-// "siseCrncCd": "-",
-// "isLive": false
 
 export type TypeCoinObj = {
   coinType: TypeCoinKind;
   coinClassCode: TypeCoinClassCode;
-  coinName: TypeCoinName;
-  coinNameEn: TypeCoinNameEn;
+  coinSymbol: string;
+  coinName: string;
+  coinNameEn: string;
   decimalDigits: number;
   canDeposit: boolean;
   canWithdrawal: boolean;
@@ -30,15 +14,9 @@ export type TypeCoinObj = {
   hasSecondAddr: boolean;
   secondAddrName: string;
   secondAddrNameEn: string;
-  siseCrncCd: string;
+  siseCrncCd: TypeCoinKind;
   isLive: boolean;
 };
-
-// "crncCd": "C0100",
-// "marketSymbol": "KRW",
-// "minFeeAmt": "0.01",
-// "marketSiseOrd": "1",
-// "isOpened": true
 export type TypeMarketObj = {
   crncCd: TypeCoinKind;
   marketSymbol: 'KRW' | 'BTC' | 'ETH';
@@ -46,10 +24,33 @@ export type TypeMarketObj = {
   marketSiseOrd: string;
   isOpened: boolean;
 };
+export type TypeCoinsOnMaretListObj = {
+  crncCd: string;
+  coinType: string;
+  canTrad: boolean;
+  hasEven: boolean;
+  coinSymbol: string;
+  coinName: string;
+  coinNameEn: string;
+  closeExceptedDate: number;
+  sellOpenDate: string;
+  buyOpenDate: string;
+  listedLowerLimitRate: number;
+  listedUpperLimitRate: number;
+  listedPrice: number;
+  disClosur: boolean;
+  topFixedNe: boolean;
+  isListedNe: boolean;
+  isStakin: boolean;
+  isInvestmen: boolean;
+  isKakaoPixe: boolean;
+};
 
 export interface ICoinList {
   version: string;
   coinList: Array<TypeCoinObj>;
-  marketList: string;
-  coinsOnMarketList: string;
+  marketList: Array<TypeMarketObj>;
+  coinsOnMarketList: {
+    [key in TypeCoinKind]: Array<TypeCoinsOnMaretListObj>;
+  };
 }

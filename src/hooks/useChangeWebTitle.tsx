@@ -1,19 +1,21 @@
 import React, { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
-import { tickerReceiveState } from '../atom/user.atom';
+import { atomDrawCoinInfo } from '../atom/drawData.atom';
+import { atomSelectCoin } from '../atom/selectCoin.atom';
 
 const useChangeWebTitle = () => {
-  const rcvTicker = useRecoilValue(tickerReceiveState);
+  const drawCoinInfo = useRecoilValue(atomDrawCoinInfo);
 
   useEffect(() => {
     const htmlTitle = document.querySelector('title');
-    const title = `${Number(rcvTicker.content.openPrice).toLocaleString(
-      'ko-kr'
-    )} / ${rcvTicker.content.symbol}`;
+    // ${Number(rcvTicker.content.openPrice).toLocaleString(
+    //   'ko-kr'
+    // )}
+    const title = `${drawCoinInfo.e} ${drawCoinInfo.coinSymbol}/${drawCoinInfo.siseCrncCd} `;
     if (htmlTitle) {
       htmlTitle.innerHTML = title;
     }
-  }, [rcvTicker]);
+  }, [drawCoinInfo]);
 };
 
 export default useChangeWebTitle;

@@ -1,44 +1,26 @@
 import { Box, Container, Grid } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
-import { useRecoilValue } from 'recoil';
-import {
-  orderbookdepthSocketState,
-  tickerSocketState,
-  transactionSocketState,
-} from '../atom/user.atom';
+import CoinBar from '../components/CoinBar/CoinBar';
 import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
 import MainFooter from '../components/MainFooter';
-import MainHeader from '../components/MainHeader';
-import MainSideBar from '../components/MainSideBar';
 import Orderbook from '../components/Orderbook/Orderbook';
 import Transaction from '../components/Transaction/Transaction';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
+import { useGetCoinList, useGetTradeData } from '../hooks/useGetCoinList';
+import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 
 const MainPage = () => {
-  useGenerateBitThumbSocket('ticker');
-  useGenerateBitThumbSocket('transaction');
-  useGenerateBitThumbSocket('orderbookdepth');
-  // useChangeWebTitle();
+  useGetCoinList();
+  useGetTradeData();
+  useGenerateBitThumbSocket('SUBSCRIBE');
+  useResetObserverDrawData();
 
-  const tickerWs = useRecoilValue(tickerSocketState);
-  const transactionWs = useRecoilValue(transactionSocketState);
-  const orderbookWs = useRecoilValue(orderbookdepthSocketState);
-  useEffect(() => {
-    return () => {
-      tickerWs?.close();
-      transactionWs?.close();
-      orderbookWs?.close();
-    };
-  }, []);
+  //
+  useChangeWebTitle();
 
-  //xs :0
-  //sm :600
-  //md:900
-  //lg:1200
-  //xl:1536
   return (
     <>
       <Box
@@ -51,6 +33,7 @@ const MainPage = () => {
           <Header />
         </Box>
         <Box gridColumn={`span 7`}>
+          <CoinBar />
           <MainContent />
           <MainFooter />
         </Box>
