@@ -5,7 +5,7 @@ import { TypeCoinKind } from './coinList.type';
 //siseCrncCd 코인이 등록된시장
 //chartTime 1M 차트에서 보고싶은 데이터
 
-interface ISelectCoin {
+export interface ISelectCoin {
   coinType: string;
   siseCrncCd: TypeCoinKind;
   chartTime: string;

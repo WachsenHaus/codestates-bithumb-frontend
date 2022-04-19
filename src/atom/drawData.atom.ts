@@ -13,6 +13,8 @@ export type TypeDrawTicker = {
   isLive?: true;
   consonant?: string;
   isFavorite?: boolean;
+
+  isUp?: boolean | undefined; //custom
   siseCrncCd?: TypeCoinKind;
 } & TypeWebSocketTickerReturnType;
 

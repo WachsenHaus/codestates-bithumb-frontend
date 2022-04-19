@@ -28,7 +28,7 @@ const CoinRate = ({
             `font-thin font-bmjua  text-white rounded-2xl px-3 p-1`
           )}
         >
-          {rate}
+          {rate}%
         </motion.div>
       )}
     </>

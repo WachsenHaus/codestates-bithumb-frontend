@@ -139,7 +139,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
           const isExist = draft.findIndex((item) => {
             return item.coinType === tickerObj.c;
           });
-          // 현재 코인과 선택된 코인의 정보가 같다면 티커에서 들어오는 정보를 drawcoin에도 넣어줌.
+          // 현재 코인(ticker)과 선택된 코인(drawCoin)의 정보가 같다면 티커에서 들어오는 정보를 drawcoin에도 넣어줌.
           if (tickerObj.c === drawCoin.coinType) {
             setDrawCoin((prevData) => {
               return {
@@ -157,7 +157,18 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
           if (isExist === -1) {
             console.log('not coin');
           } else {
-            draft[isExist] = { ...draft[isExist], ...tickerObj };
+            let isUp;
+            const currentPrice = Number(tickerObj.e);
+            const prevPrice = Number(draft[isExist].e);
+            if (currentPrice > prevPrice) {
+              isUp = true;
+            } else if (currentPrice === prevPrice) {
+              isUp = undefined;
+            } else {
+              isUp = false;
+            }
+
+            draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
           }
         });
         if (next) {
@@ -213,39 +224,6 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
       });
       setDrawTransaction(result);
     })();
-    // const next = produce(drawTransaction, (draft) => {
-    //   if (transactionObj === undefined) return;
-    //   const { m, c, l } = transactionObj;
-    //   for (let i = 0; i < l.length; i++) {
-    //     const { o, n, p, q, t } = transactionObj.l[i];
-    //     let color = '1';
-    //     let prevPrice;
-    //     if (draft[draft.length - 1]) {
-    //       prevPrice = draft[draft.length - 1].contPrice;
-    //       if (p === prevPrice) {
-    //         color = draft[draft.length - 1].buySellGb;
-    //       } else if (p > prevPrice) {
-    //         color = '2';
-    //       } else {
-    //         color = '1';
-    //       }
-    //     }
-
-    //     draft.push({
-    //       coinType: c,
-    //       contAmt: n,
-    //       crncCd: m,
-    //       buySellGb: color,
-    //       contPrice: p,
-    //       contQty: q,
-    //       contDtm: t,
-    //     });
-    //     if (draft.length > 10) {
-    //       draft.shift();
-    //     }
-    //   }
-    // });
-    // setDrawTransaction(next);
   }, [transactionObj]);
 
   /**

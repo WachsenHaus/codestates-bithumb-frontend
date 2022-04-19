@@ -35,7 +35,7 @@ const TvChart = () => {
   useEffect(() => {
     if (wrapperRef.current) {
       const chart = createChart(wrapperRef.current, {
-        height: 400,
+        height: 340,
         crosshair: {
           mode: 0,
         },

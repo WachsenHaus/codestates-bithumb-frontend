@@ -18,6 +18,7 @@ import {
 import _, { iteratee } from 'lodash';
 import { atomTradeData } from '../atom/tradeData.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
+import { getCookie } from '../utils/utils';
 
 const GetConsonant = ({
   coinName,
@@ -42,27 +43,6 @@ const GetConsonant = ({
   }
 };
 
-export type TypeMarketFavoritesCoin = 'marketFavoritesCoin';
-
-export const setCookie = (
-  name: TypeMarketFavoritesCoin,
-  value: string,
-  exp: number
-) => {
-  let date = new Date();
-  date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
-  // console.log()
-  const eValue = encodeURI(value);
-  document.cookie =
-    name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
-};
-
-export const getCookie = (name: TypeMarketFavoritesCoin) => {
-  const value = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
-  // const result = ;
-  return value ? decodeURI(value[2]) : '';
-};
-
 /**
  *
  * @returns 코인 리스트들을 받아옵니다.
@@ -81,6 +61,7 @@ export const useGetCoinList = () => {
       if (contents?.status === API_BITHUMB_STATUS_CODE.SUCCESS) {
         // setCookie('marketFavoritesCoin', ['BTC_KRW', 'ETH_KRW'], 1);
         setCoinState(contents?.data);
+        console.log(contents?.data);
       }
     }
   }, [queryResults.state]);
@@ -94,7 +75,10 @@ export const useGetCoinList = () => {
        * 코인타입이고 사용중인 코인만 필터링합니다.
        */
       const filteredData = rawData.filter(
-        (item) => item.coinClassCode !== 'F' && item.isLive === true
+        (item) =>
+          item.coinClassCode !== 'F' &&
+          item.siseCrncCd !== 'C0101' &&
+          item.isLive === true
       );
       const cookieFavorites = getCookie('marketFavoritesCoin');
       const parseCookies = cookieFavorites
@@ -173,7 +157,7 @@ export const useGetTradeData = () => {
       let defaultObj: TypeDrawTicker = {};
       const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
         const next = produce(drawTicker, (draft) => {
-          for (let i = 0; i < tickerKeys.length - 1; i++) {
+          for (let i = 0; i < tickerKeys.length; i++) {
             const {
               coinType,
               buyVolume,

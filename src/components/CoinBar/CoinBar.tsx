@@ -33,33 +33,33 @@ const CoinBar = () => {
       // }}
       // transition={{ type: 'tween' }}
     >
-      <div>{coinSymbol}</div>
+      <div className="font-bmjua">{coinSymbol}</div>
       <div>{ConvertStringPriceToKRW(e)}</div>
       <CoinRate rate={r} />
       <CoinColumn>
-        <h1>거래량(24H)</h1>
+        <h1 className="font-bmjua">거래량(24H)</h1>
         <span>
           {ConvertStringToVolume24(v24)}
           {coinSymbol}
         </span>
       </CoinColumn>
       <CoinColumn>
-        <h1>거래금액(24H)</h1>
+        <h1 className="font-bmjua">거래금액(24H)</h1>
         <span>
           {Math.floor(Number(u24))}
           {siseCrncCd}
         </span>
       </CoinColumn>
       <CoinColumn>
-        <h1>고가(당일)</h1>
+        <h1 className="font-bmjua">고가(당일)</h1>
         <span>{ConvertStringPriceToKRW(h)}</span>
       </CoinColumn>
       <CoinColumn>
-        <h1>저가(당일)</h1>
+        <h1 className="font-bmjua">저가(당일)</h1>
         <span>{ConvertStringPriceToKRW(l)}</span>
       </CoinColumn>
       <CoinColumn>
-        <h1>전일종가</h1>
+        <h1 className="font-bmjua">전일종가</h1>
         <span>{ConvertStringPriceToKRW(f)}</span>
       </CoinColumn>
     </motion.div>
