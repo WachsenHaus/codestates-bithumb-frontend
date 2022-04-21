@@ -41,10 +41,10 @@ const Transaction = () => {
         {drawTransaction
           .slice(0)
           .reverse()
-          .map((item) => {
+          .map((item, index) => {
             return (
               <TransactionRow
-                key={item.contDtm + '1'}
+                key={index}
                 time={item.contDtm}
                 price={item.contPrice}
                 contQty={item.contQty}

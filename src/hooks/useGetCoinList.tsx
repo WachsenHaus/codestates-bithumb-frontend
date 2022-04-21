@@ -59,9 +59,7 @@ export const useGetCoinList = () => {
     const { state, contents } = queryResults;
     if (state === 'hasValue') {
       if (contents?.status === API_BITHUMB_STATUS_CODE.SUCCESS) {
-        // setCookie('marketFavoritesCoin', ['BTC_KRW', 'ETH_KRW'], 1);
         setCoinState(contents?.data);
-        console.log(contents?.data);
       }
     }
   }, [queryResults.state]);

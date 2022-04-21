@@ -3,7 +3,14 @@ import React, { useState } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
 import { Column, Table } from 'react-virtualized';
-import { Autocomplete, Button, Paper, TextField } from '@mui/material';
+import {
+  Autocomplete,
+  Button,
+  InputAdornment,
+  Paper,
+  TextField,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 import _ from 'lodash';
 import {
   HeaderCoinName,
@@ -90,6 +97,13 @@ const Ticker = () => {
 
           <TextField
             placeholder="검색"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }}
             onChange={(e) => {
               keywordRef.current = e.target.value;
             }}
@@ -114,7 +128,7 @@ const Ticker = () => {
                 headerHeight={50}
                 rowHeight={50}
                 rowCount={sortList.length}
-                rowClassName={classNames(`flex border-b`)}
+                rowClassName={classNames(`flex border-b `)}
                 rowGetter={({ index }) => {
                   return sortList[index];
                 }}
@@ -143,6 +157,7 @@ const Ticker = () => {
                     <HeaderPrice
                       e={e}
                       direction={sortDirection}
+                      arrowActive={orderMode === 'e'}
                       onClick={onClick('e')}
                     />
                   )}
@@ -157,13 +172,14 @@ const Ticker = () => {
                     <HeaderRateOfChange
                       e={e}
                       direction={sortDirection}
+                      arrowActive={orderMode === 'r'}
                       onClick={onClick('r')}
                     />
                   )}
                   headerClassName="flex items-center"
                 />
                 <Column
-                  width={width * 0.1}
+                  width={width * 0.2}
                   label="거래금액(24H)"
                   dataKey="u24"
                   cellRenderer={(e) => <RenderU24 {...e} />}
@@ -171,6 +187,7 @@ const Ticker = () => {
                     <HeaderVolume
                       e={e}
                       direction={sortDirection}
+                      arrowActive={orderMode === 'u24'}
                       onClick={onClick('u24')}
                     />
                   )}

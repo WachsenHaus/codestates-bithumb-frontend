@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 import produce from 'immer';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarRateIcon from '@mui/icons-material/StarRate';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { atomDrawTicker, TypeDrawTicker } from '../../atom/drawData.atom';
 import { atomSelectCoin } from '../../atom/selectCoin.atom';
 import {
@@ -184,61 +186,83 @@ export const RenderU24 = (e: TableCellProps) => {
 };
 
 export const HeaderCoinName = (e: TableHeaderProps) => {
-  return <div>자산</div>;
+  return <div className="font-bmjua">자산</div>;
 };
-
-const Header =
-  ({
-    e,
-    onClick,
-    direction,
-  }: {
-    e: TableHeaderProps;
-    onClick: () => void;
-    direction: 'desc' | 'asc';
-  }) =>
-  (type: 'price' | 'rateOfChnage' | 'volume') => {
-    return (
-      <>
-        {type === 'price' && <div onClick={onClick}>현재가</div>}
-        {type === 'rateOfChnage' && <div onClick={onClick}> 변동률(당일)</div>}
-        {type === 'volume' && <div onClick={onClick}>거래금액(24H)</div>}
-      </>
-    );
-  };
 
 export const HeaderPrice = ({
   e,
   onClick,
   direction,
+  arrowActive,
 }: {
   e: TableHeaderProps;
   onClick: () => void;
   direction: 'desc' | 'asc';
+  arrowActive: boolean;
 }) => {
-  return <div onClick={onClick}>현재가</div>;
+  return (
+    <div className="flex justify-center items-center font-bmjua">
+      <div onClick={onClick}>현재가</div>
+      <SortArrow direction={direction} active={arrowActive} />
+    </div>
+  );
 };
 
 export const HeaderRateOfChange = ({
   e,
   onClick,
   direction,
+  arrowActive,
 }: {
   e: TableHeaderProps;
   onClick: () => void;
   direction: 'desc' | 'asc';
+  arrowActive: boolean;
 }) => {
-  return <div onClick={onClick}> 변동률(당일)</div>;
+  return (
+    <div className="flex justify-center items-center font-bmjua">
+      <div onClick={onClick}>변동률(당일)</div>
+      <SortArrow direction={direction} active={arrowActive} />
+    </div>
+  );
 };
 
 export const HeaderVolume = ({
   e,
   onClick,
   direction,
+  arrowActive,
 }: {
   e: TableHeaderProps;
   onClick: () => void;
   direction: 'desc' | 'asc';
+  arrowActive: boolean;
 }) => {
-  return <div onClick={onClick}>거래금액(24H)</div>;
+  return (
+    <div className="flex justify-center items-center font-bmjua">
+      <div onClick={onClick}>거래금액(24H)</div>
+      <SortArrow direction={direction} active={arrowActive} />
+    </div>
+  );
 };
+
+const SortArrow = ({
+  direction,
+  active,
+}: {
+  direction: 'desc' | 'asc';
+  active: boolean;
+}) => (
+  <div className="flex flex-col justify-center items-center opacity-50">
+    <ArrowDropUpIcon
+      className={classNames(
+        direction === 'asc' && active ? `opacity-100` : 'opacity-50'
+      )}
+    />
+    <ArrowDropDownIcon
+      className={classNames(
+        direction === 'desc' && active ? `opacity-100` : 'opacity-50'
+      )}
+    />
+  </div>
+);
