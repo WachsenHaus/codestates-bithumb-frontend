@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import { atomDrawCoinInfo, atomDrawTransaction } from '../../atom/drawData.atom';
-import { atomOrderBook } from '../../atom/orderBook.atom';
+import { atomOrderBook, TypeOrderObj } from '../../atom/orderBook.atom';
 import { atomSelectCoin } from '../../atom/selectCoin.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import OrderbookRow from './OrderbookRow';
@@ -23,25 +23,27 @@ const Orderbook = () => {
   const { f, coinSymbol } = useRecoilValue(atomDrawCoinInfo);
   const [maxQuantity, setMaxQuantity] = useState('0');
 
-  // useEffect(() => {
-  //   let baseQuantity = 0;
-  //   if (orderBook.ask.length === 0 && orderBook.bid.length === 0) {
-  //     return;
-  //   }
-  //   for (let i = 0; i < orderBook.ask.length; i++) {
-  //     const { q } = orderBook.ask[i];
-  //     if (Number(q) >= baseQuantity) {
-  //       baseQuantity = Number(q);
-  //     }
-  //   }
-  //   for (let i = 0; i < orderBook.bid.length; i++) {
-  //     const { q } = orderBook.bid[i];
-  //     if (Number(q) >= baseQuantity) {
-  //       baseQuantity = Number(q);
-  //     }
-  //   }
-  //   setMaxQuantity(baseQuantity.toString());
-  // }, [orderBook]);
+  const getMaxValueOrderBook = async (baseValue: string, values: TypeOrderObj[]) => {
+    let base = Number(baseValue);
+    for (let i = 0; i < values.length; i++) {
+      const { q } = values[i];
+      if (Number(q) >= base) {
+        base = Number(q);
+      }
+    }
+    return base.toString();
+  };
+
+  const calcQuantity = async (ask: TypeOrderObj[], bid: TypeOrderObj[]) => {
+    let baseQuantity = '0';
+    const firstMaxValue = await getMaxValueOrderBook(baseQuantity, ask);
+    const lastMaxValue = await getMaxValueOrderBook(firstMaxValue, bid);
+    setMaxQuantity(lastMaxValue.toString());
+  };
+
+  useEffect(() => {
+    calcQuantity(orderBook.ask, orderBook.bid);
+  }, [orderBook]);
 
   const getEventType = useCallback((targetPrice: string, basePrice: string, targetBuySellGb: string) => {
     if (targetPrice === basePrice) {
