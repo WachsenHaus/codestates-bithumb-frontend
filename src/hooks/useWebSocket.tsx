@@ -129,7 +129,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
                 r: tickerObj.r,
                 h: tickerObj.h,
                 l: tickerObj.l,
-                m: tickerObj.m,
+                // m: tickerObj.m,
                 f: tickerObj.f,
               };
             });
