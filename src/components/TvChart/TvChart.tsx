@@ -1,3 +1,4 @@
+import { width } from '@mui/material/node_modules/@mui/system';
 import classNames from 'classnames';
 import produce from 'immer';
 import { createChart, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
@@ -6,11 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { atomDrawChart } from '../../atom/drawData.atom';
 import { atomSelectCoin } from '../../atom/selectCoin.atom';
-import {
-  atomChartData,
-  atomGetStChartData,
-  TypeChartData,
-} from '../../atom/tvChart.atom';
+import { atomChartData, atomGetStChartData, TypeChartData } from '../../atom/tvChart.atom';
 import { useGetChartDatas } from '../../hooks/useChart';
 
 const CONST_KR_UTC = 9 * 60 * 60 * 1000;
@@ -44,10 +41,17 @@ const TvChart = () => {
           borderColor: 'rgba(197, 203, 206, 0.8)',
         },
       });
+
       chart.applyOptions({
         timeScale: {
           timeVisible: true,
         },
+      });
+
+      window.addEventListener('resize', () => {
+        if (wrapperRef.current) {
+          chart.resize(wrapperRef?.current?.offsetWidth, 340);
+        }
       });
       candleChart.current = chart.addCandlestickSeries();
       candleChart.current.applyOptions({
@@ -74,11 +78,8 @@ const TvChart = () => {
     (async () => {
       if (stObj) {
         const { o, t, e } = stObj;
-        const currentTime = moment(t, 'YYYYMMDDHHmmss')
-          .utc()
-          .valueOf() as UTCTimestamp;
-        const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) *
-          60) as UTCTimestamp;
+        const currentTime = moment(t, 'YYYYMMDDHHmmss').utc().valueOf() as UTCTimestamp;
+        const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) * 60) as UTCTimestamp;
 
         const nextTime = int;
         if (currentBar === undefined) {

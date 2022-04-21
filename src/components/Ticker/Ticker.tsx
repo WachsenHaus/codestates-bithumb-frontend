@@ -1,34 +1,26 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React, { useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import React from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
-import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
 import { Column, Table } from 'react-virtualized';
-import { Autocomplete, Button, Input, Paper, TextField } from '@mui/material';
-import { atomSelectCoin } from '../atom/selectCoin.atom';
-import { createMultiSort } from 'react-virtualized/dist/es/Table';
-
+import { Autocomplete, Button, Paper, TextField } from '@mui/material';
 import _ from 'lodash';
 import {
   HeaderTest,
+  HeaderCoinName,
+  HeaderVolume,
+  HeaderPrice,
+  HeaderRateOfChange,
   RenderCurrentPriceColumn,
   RenderFavoriteColumn,
   RenderNameColumn,
   RenderRateOfChange,
-} from './Ticker/TickerBody';
-import useGetSortTicker from '../hooks/useGetSortTicker';
+  RenderU24,
+} from './../Ticker/TickerBody';
+import useGetSortTicker from '../../hooks/useGetSortTicker';
 
-type ButtonTypes = 'KRW' | 'BTC' | 'FAVOURITE';
-
-/**
- *
- * @returns 티커가 그려지는 메인 바텀 푸터입니다.
- */
-const MainFooter = () => {
-  const [sortFn, sortList, viewMode, setViewMode, keywordRef] =
-    useGetSortTicker();
-  const sortState = createMultiSort(sortFn);
+const Ticker = () => {
+  const [sortFn, sortList, viewMode, setViewMode, keywordRef] = useGetSortTicker();
 
   return (
     <div>
@@ -39,9 +31,7 @@ const MainFooter = () => {
             gridTemplateColumns: '40% auto',
           }}
         >
-          <div
-            className={classNames(`w-full`, `flex items-center justify-around`)}
-          >
+          <div className={classNames(`w-full`, `flex items-center justify-around`)}>
             <Button
               variant={viewMode === 'normal' ? 'outlined' : undefined}
               onClick={(e) => {
@@ -91,17 +81,14 @@ const MainFooter = () => {
                   return sortList[index];
                 }}
               >
-                <Column
-                  width={width * 0.05}
-                  label=""
-                  dataKey="isFavorite"
-                  cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
-                />
+                <Column width={width * 0.05} label="" dataKey="isFavorite" cellRenderer={(e) => <RenderFavoriteColumn {...e} />} />
                 <Column
                   width={width * 0.2}
                   label="자산"
                   dataKey="coinName"
                   cellRenderer={(e) => <RenderNameColumn {...e} />}
+                  headerRenderer={(e) => <HeaderCoinName {...e} />}
+                  headerClassName="flex items-center"
                 />
                 <Column
                   width={width * 0.2}
@@ -109,19 +96,24 @@ const MainFooter = () => {
                   dataKey="e"
                   className="flex"
                   cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
+                  headerRenderer={(e) => <HeaderPrice {...e} />}
+                  headerClassName="flex items-center"
                 />
                 <Column
                   width={width * 0.15}
                   label="변동률(당일)"
                   dataKey="r"
-                  headerRenderer={(e) => <HeaderTest {...e} />}
-                  headerClassName="flex items-center"
                   cellRenderer={(e) => <RenderRateOfChange {...e} />}
+                  headerRenderer={(e) => <HeaderRateOfChange {...e} />}
+                  headerClassName="flex items-center"
                 />
                 <Column
                   width={width * 0.1}
                   label="거래금액(24H)"
                   dataKey="u24"
+                  cellRenderer={(e) => <RenderU24 {...e} />}
+                  headerRenderer={(e) => <HeaderVolume {...e} />}
+                  headerClassName="flex items-center"
                 />
               </Table>
             )}
@@ -131,4 +123,4 @@ const MainFooter = () => {
     </div>
   );
 };
-export default MainFooter;
+export default Ticker;

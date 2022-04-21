@@ -8,30 +8,41 @@ import { TypeDrawTicker } from '../atom/drawData.atom';
  * @param value 문자열 숫자
  * @returns 한국식 숫자를 표기해줌. value가 없으면 빈 문자열
  */
-export const ConvertStringPriceToKRW = (value?: string) =>
-  value ? Number(value).toLocaleString('ko-kr') : '';
+export const convertStringPriceToKRW = (value?: string) => (value ? Number(value).toLocaleString('ko-kr') : '');
+
+const CONST_DIVIDE_WON_MILLION = 8;
+export const convertStringPriceWON = (value?: string) => {
+  if (value) {
+    const numberValue = Number(value);
+    let price;
+    if (value.length < CONST_DIVIDE_WON_MILLION) {
+      price = (numberValue / 1000) | 0;
+      price = `${price.toLocaleString('ko-kr')}천원`;
+    } else {
+      price = (numberValue / 1000 / 1000) | 0;
+      price = `${price.toLocaleString('ko-kr')}백만원`;
+    }
+    return price;
+  } else {
+    return undefined;
+  }
+};
 
 /**
  *
  * @param value 24시간 볼륨을 인자로받음
  * @returns 소숫점 4자리까지 반올림하여 반환함.
  */
-export const ConvertStringToVolume24 = (value?: string) =>
-  value ? Number(value).toFixed(4) : '';
+export const convertStringToVolume24 = (value?: string) => (value ? Number(value).toFixed(4) : '');
 
 export type TypeMarketFavoritesCoin = 'marketFavoritesCoin';
 
-export const setCookie = (
-  name: TypeMarketFavoritesCoin,
-  value: string,
-  exp: number
-) => {
+export const setCookie = (name: TypeMarketFavoritesCoin, value: string, exp: number) => {
   let date = new Date();
   date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
   // console.log()
   const eValue = encodeURI(value);
-  document.cookie =
-    name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
+  document.cookie = name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
 };
 
 export const getCookie = (name: TypeMarketFavoritesCoin) => {
@@ -59,9 +70,7 @@ export const pushCookie = (
   if (cookies?.length === 1 && cookies[0] === '') {
     cookies = [selectCoinName];
   } else {
-    const isExist = cookies.findIndex(
-      (cookieName) => cookieName === selectCoinName
-    );
+    const isExist = cookies.findIndex((cookieName) => cookieName === selectCoinName);
     if (isExist !== -1) {
       cookies.splice(isExist, 1);
     } else {

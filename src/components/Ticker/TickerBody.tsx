@@ -1,23 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { TableCellProps, TableHeaderProps } from 'react-virtualized';
-import { SetterOrUpdater, useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { AnimatePresence, motion } from 'framer-motion';
 import produce from 'immer';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarRateIcon from '@mui/icons-material/StarRate';
 import { atomDrawTicker, TypeDrawTicker } from '../../atom/drawData.atom';
-import { atomSelectCoin, ISelectCoin } from '../../atom/selectCoin.atom';
-import {
-  applyCookie,
-  ConvertStringPriceToKRW,
-  getCookie,
-  packCookie,
-  pushCookie,
-  unpackCookie,
-} from '../../utils/utils';
+import { atomSelectCoin } from '../../atom/selectCoin.atom';
+import { applyCookie, convertStringPriceToKRW, convertStringPriceWON, getCookie, packCookie, pushCookie, unpackCookie } from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
-import { stubFalse } from 'lodash';
 
 export const RenderFavoriteColumn = (e: TableCellProps) => {
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
@@ -106,44 +98,14 @@ export const RenderNameColumn = (e: TableCellProps) => {
 };
 
 export const RenderCurrentPriceColumn = (e: TableCellProps) => {
-  const [isUp, setIsUp] = useState('1px solid white');
-  useEffect(() => {
-    // console.log(e.rowData.isUp);
-    if (e.rowData.isUp) {
-      setIsUp('1px solid red');
-    } else if (e.rowData.isUp === false) {
-      setIsUp('1px solid blue');
-    } else {
-    }
-  }, [e]);
   return (
     <motion.div className="flex items-center">
       <div>
-        {ConvertStringPriceToKRW(e.cellData)}
+        {convertStringPriceToKRW(e.cellData)}
         <AnimatePresence>
-          {e.rowData.isUp && (
-            <motion.div
-              className={classNames(
-                `${styles.upEffect}`,
-                `border-2 border-white`,
-                `h-1`
-              )}
-            />
-          )}
-          {e.rowData.isUp === false && (
-            <motion.div
-              className={classNames(
-                `${styles.downEffect}`,
-                `border-2 border-white`,
-                `h-1`
-              )}
-            />
-          )}
-          {e.rowData.isUp === undefined && (
-            <motion.div
-              className={classNames(`border-2 border-white`, `h-1`)}
-            />
-          )}
+          {e.rowData.isUp && <motion.div className={classNames(`${styles.upEffect}`, `border-2 border-white`, `h-1`)} />}
+          {e.rowData.isUp === false && <motion.div className={classNames(`${styles.downEffect}`, `border-2 border-white`, `h-1`)} />}
+          {e.rowData.isUp === undefined && <motion.div className={classNames(`border-2 border-white`, `h-1`)} />}
         </AnimatePresence>
       </div>
     </motion.div>
@@ -159,7 +121,7 @@ export const RenderRateOfChange = (e: TableCellProps) => {
       setIsUp(true);
     }
   }, [e]);
-  let price = ConvertStringPriceToKRW(e.rowData.a);
+  let price = convertStringPriceToKRW(e.rowData.a);
   if (isUp) {
     price = `+${price}`;
   } else {
@@ -167,18 +129,36 @@ export const RenderRateOfChange = (e: TableCellProps) => {
   }
 
   return (
-    <motion.div
-      className={classNames(
-        `flex flex-col w-full h-full`,
-        `${isUp ? `text-red-500` : `text-blue-500`}`
-      )}
-    >
+    <motion.div className={classNames(`flex flex-col justify-center items-start`, `w-full h-full`, `${isUp ? `text-red-500` : `text-blue-500`}`)}>
       <motion.div className="">{e.cellData}%</motion.div>
       <motion.div className="ml-4 text-sm">{price}</motion.div>
     </motion.div>
   );
 };
 
+export const RenderU24 = (e: TableCellProps) => {
+  return (
+    <motion.div className={classNames(`flex flex-col items-start justify-center`, `w-full h-full`)}>
+      <motion.div className="">{convertStringPriceWON(e.cellData)}</motion.div>
+    </motion.div>
+  );
+};
+
 export const HeaderTest = (e: TableHeaderProps) => {
   return <div>변동률(당일)</div>;
+};
+
+export const HeaderCoinName = (e: TableHeaderProps) => {
+  return <div>자산</div>;
+};
+
+export const HeaderPrice = (e: TableHeaderProps) => {
+  return <div>현재가</div>;
+};
+export const HeaderRateOfChange = (e: TableHeaderProps) => {
+  return <div>변동률(당일)</div>;
+};
+
+export const HeaderVolume = (e: TableHeaderProps) => {
+  return <div>거래금액(24H)</div>;
 };

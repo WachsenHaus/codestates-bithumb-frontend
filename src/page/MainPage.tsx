@@ -4,8 +4,8 @@ import React, { useEffect } from 'react';
 import CoinBar from '../components/CoinBar/CoinBar';
 import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
-import MainFooter from '../components/MainFooter';
 import Orderbook from '../components/Orderbook/Orderbook';
+import Ticker from '../components/Ticker/Ticker';
 import Transaction from '../components/Transaction/Transaction';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGetCoinList, useGetTradeData } from '../hooks/useGetCoinList';
@@ -21,11 +21,8 @@ const MainPage = () => {
   useGenerateBitThumbSocket('SUBSCRIBE');
   // 4.선택된 코인에 대한 정보가 바뀌면 그리는 데이터들을 초기화하는 옵저버.
   useResetObserverDrawData();
-
   // 5.선택된 코인에 따라 가격정보가 해당 웹타이틀에 표시되는 훅스
   useChangeWebTitle();
-
-  // aa();
 
   return (
     <>
@@ -41,7 +38,7 @@ const MainPage = () => {
         <Box gridColumn={`span 7`}>
           <CoinBar />
           <MainContent />
-          <MainFooter />
+          <Ticker />
         </Box>
         <Box gridColumn={`span 5`}>
           <Orderbook />

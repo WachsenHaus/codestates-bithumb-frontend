@@ -1,18 +1,18 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
 import _ from 'lodash';
 
 const useGetSortTicker = () => {
-  const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
+  const drawTicker = useRecoilValue(atomDrawTicker);
   const [sortList, setSortList] = useState<Array<TypeDrawTicker>>([]);
   const [viewMode, setViewMode] = useState<'normal' | 'favorite'>('normal');
-  const [sortBy, setSortBy] = useState<Array<'coinName' | 'isFavorite'>>(['coinName', 'isFavorite']);
-  const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC');
+  // const [sortBy, setSortBy] = useState<Array<'coinName' | 'isFavorite'>>(['coinName', 'isFavorite']);
+  // const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC');
 
   const keywordRef = useRef('');
 
-  const sort = ({ sortBy, sortDirection }: { sortBy: any; sortDirection: any }) => {
+  const sort = ({ sortBy, sortDirection = 'DESC' }: { sortBy: any; sortDirection: any }) => {
     if (viewMode === 'normal' && keywordRef.current === '') {
       return drawTicker;
     }
@@ -31,7 +31,7 @@ const useGetSortTicker = () => {
     const soryBy = viewMode === 'favorite' ? ['isFavorite'] : ['coinName'];
     const result = sort({
       sortBy: soryBy,
-      sortDirection,
+      sortDirection: 'DESC',
     });
     setSortList(result);
   }, [drawTicker, viewMode]);
