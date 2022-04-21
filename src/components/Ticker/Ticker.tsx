@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React from 'react';
+import React, { useState } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
 import { Column, Table } from 'react-virtualized';
 import { Autocomplete, Button, Paper, TextField } from '@mui/material';
 import _ from 'lodash';
 import {
-  HeaderTest,
   HeaderCoinName,
   HeaderVolume,
   HeaderPrice,
@@ -20,7 +19,32 @@ import {
 import useGetSortTicker from '../../hooks/useGetSortTicker';
 
 const Ticker = () => {
-  const [sortFn, sortList, viewMode, setViewMode, keywordRef] = useGetSortTicker();
+  const [viewMode, setViewMode] = useState<'normal' | 'favorite'>('normal');
+  const [orderMode, setOrderMode] = useState<'e' | 'r' | 'u24'>('u24');
+  const [sortBy, setSortBy] = useState<
+    Array<'isFavorit' | 'coinName' | 'e' | 'r' | 'u24'>
+  >([]);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+
+  const [sortFn, sortList, keywordRef] = useGetSortTicker(
+    viewMode,
+    orderMode,
+    sortBy,
+    sortDirection
+  );
+
+  const onClick = (type: 'e' | 'r' | 'u24') => () => {
+    let direction: 'desc' | 'asc' = 'desc';
+    if (orderMode === type) {
+      direction = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      direction = 'desc';
+    }
+
+    setOrderMode(type);
+    setSortBy([type]);
+    setSortDirection(direction);
+  };
 
   return (
     <div>
@@ -31,23 +55,37 @@ const Ticker = () => {
             gridTemplateColumns: '40% auto',
           }}
         >
-          <div className={classNames(`w-full`, `flex items-center justify-around`)}>
-            <Button
-              variant={viewMode === 'normal' ? 'outlined' : undefined}
+          <div
+            className={classNames(
+              `w-full h-full`,
+              `flex items-center justify-around`
+            )}
+          >
+            <button
+              // variant={viewMode === 'normal' ? 'outlined' : undefined}
+              className={classNames(
+                viewMode === 'normal' && `border-b-4 font-bold`,
+                `border-b-black`,
+                `h-full`
+              )}
               onClick={(e) => {
                 setViewMode('normal');
               }}
             >
-              원화 마켓
-            </Button>
-            <Button
-              variant={viewMode === 'favorite' ? 'outlined' : undefined}
+              원화마켓
+            </button>
+            <button
+              className={classNames(
+                viewMode === 'favorite' && `border-b-4 font-bold `,
+                `border-b-black`,
+                `h-full`
+              )}
               onClick={(e) => {
                 setViewMode('favorite');
               }}
             >
               즐겨찾기
-            </Button>
+            </button>
           </div>
 
           <TextField
@@ -76,12 +114,17 @@ const Ticker = () => {
                 headerHeight={50}
                 rowHeight={50}
                 rowCount={sortList.length}
-                rowClassName={classNames(`flex border-t-2`)}
+                rowClassName={classNames(`flex border-b`)}
                 rowGetter={({ index }) => {
                   return sortList[index];
                 }}
               >
-                <Column width={width * 0.05} label="" dataKey="isFavorite" cellRenderer={(e) => <RenderFavoriteColumn {...e} />} />
+                <Column
+                  width={width * 0.05}
+                  label=""
+                  dataKey="isFavorite"
+                  cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
+                />
                 <Column
                   width={width * 0.2}
                   label="자산"
@@ -96,7 +139,13 @@ const Ticker = () => {
                   dataKey="e"
                   className="flex"
                   cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
-                  headerRenderer={(e) => <HeaderPrice {...e} />}
+                  headerRenderer={(e) => (
+                    <HeaderPrice
+                      e={e}
+                      direction={sortDirection}
+                      onClick={onClick('e')}
+                    />
+                  )}
                   headerClassName="flex items-center"
                 />
                 <Column
@@ -104,7 +153,13 @@ const Ticker = () => {
                   label="변동률(당일)"
                   dataKey="r"
                   cellRenderer={(e) => <RenderRateOfChange {...e} />}
-                  headerRenderer={(e) => <HeaderRateOfChange {...e} />}
+                  headerRenderer={(e) => (
+                    <HeaderRateOfChange
+                      e={e}
+                      direction={sortDirection}
+                      onClick={onClick('r')}
+                    />
+                  )}
                   headerClassName="flex items-center"
                 />
                 <Column
@@ -112,7 +167,13 @@ const Ticker = () => {
                   label="거래금액(24H)"
                   dataKey="u24"
                   cellRenderer={(e) => <RenderU24 {...e} />}
-                  headerRenderer={(e) => <HeaderVolume {...e} />}
+                  headerRenderer={(e) => (
+                    <HeaderVolume
+                      e={e}
+                      direction={sortDirection}
+                      onClick={onClick('u24')}
+                    />
+                  )}
                   headerClassName="flex items-center"
                 />
               </Table>

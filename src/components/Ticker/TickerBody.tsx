@@ -7,7 +7,15 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarRateIcon from '@mui/icons-material/StarRate';
 import { atomDrawTicker, TypeDrawTicker } from '../../atom/drawData.atom';
 import { atomSelectCoin } from '../../atom/selectCoin.atom';
-import { applyCookie, convertStringPriceToKRW, convertStringPriceWON, getCookie, packCookie, pushCookie, unpackCookie } from '../../utils/utils';
+import {
+  applyCookie,
+  convertStringPriceToKRW,
+  convertStringPriceWON,
+  getCookie,
+  packCookie,
+  pushCookie,
+  unpackCookie,
+} from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
 
@@ -55,24 +63,24 @@ export const RenderFavoriteColumn = (e: TableCellProps) => {
 export const RenderNameColumn = (e: TableCellProps) => {
   const [selectCoin, setSelectCoin] = useRecoilState(atomSelectCoin);
   const onSelectClick = async (e: any) => {
-    const selectCoinInfo = e.rowData;
-    if (selectCoinInfo === undefined) {
+    const clickedCoinInfo = e.rowData;
+    if (clickedCoinInfo === undefined) {
       return;
     }
-    if (selectCoinInfo.coinType === selectCoin.coinSymbol) {
+    if (clickedCoinInfo.coinSymbol === selectCoin.coinSymbol) {
       return;
     }
     await setSelectCoin((prevData) => {
       return {
         ...prevData,
-        coinType: selectCoinInfo.coinType,
-        coinSymbol: selectCoinInfo.coinSymbol,
-        e: selectCoinInfo.e,
-        v24: selectCoinInfo.v24,
-        u24: selectCoinInfo.u24,
-        h: selectCoinInfo.h,
-        l: selectCoinInfo.l,
-        f: selectCoinInfo.f,
+        coinType: clickedCoinInfo.coinType,
+        coinSymbol: clickedCoinInfo.coinSymbol,
+        e: clickedCoinInfo.e,
+        v24: clickedCoinInfo.v24,
+        u24: clickedCoinInfo.u24,
+        h: clickedCoinInfo.h,
+        l: clickedCoinInfo.l,
+        f: clickedCoinInfo.f,
       };
     });
   };
@@ -103,9 +111,29 @@ export const RenderCurrentPriceColumn = (e: TableCellProps) => {
       <div>
         {convertStringPriceToKRW(e.cellData)}
         <AnimatePresence>
-          {e.rowData.isUp && <motion.div className={classNames(`${styles.upEffect}`, `border-2 border-white`, `h-1`)} />}
-          {e.rowData.isUp === false && <motion.div className={classNames(`${styles.downEffect}`, `border-2 border-white`, `h-1`)} />}
-          {e.rowData.isUp === undefined && <motion.div className={classNames(`border-2 border-white`, `h-1`)} />}
+          {e.rowData.isUp && (
+            <motion.div
+              className={classNames(
+                `${styles.upEffect}`,
+                `border-2 border-white`,
+                `h-1`
+              )}
+            />
+          )}
+          {e.rowData.isUp === false && (
+            <motion.div
+              className={classNames(
+                `${styles.downEffect}`,
+                `border-2 border-white`,
+                `h-1`
+              )}
+            />
+          )}
+          {e.rowData.isUp === undefined && (
+            <motion.div
+              className={classNames(`border-2 border-white`, `h-1`)}
+            />
+          )}
         </AnimatePresence>
       </div>
     </motion.div>
@@ -129,7 +157,13 @@ export const RenderRateOfChange = (e: TableCellProps) => {
   }
 
   return (
-    <motion.div className={classNames(`flex flex-col justify-center items-start`, `w-full h-full`, `${isUp ? `text-red-500` : `text-blue-500`}`)}>
+    <motion.div
+      className={classNames(
+        `flex flex-col justify-center items-start`,
+        `w-full h-full`,
+        `${isUp ? `text-red-500` : `text-blue-500`}`
+      )}
+    >
       <motion.div className="">{e.cellData}%</motion.div>
       <motion.div className="ml-4 text-sm">{price}</motion.div>
     </motion.div>
@@ -138,27 +172,73 @@ export const RenderRateOfChange = (e: TableCellProps) => {
 
 export const RenderU24 = (e: TableCellProps) => {
   return (
-    <motion.div className={classNames(`flex flex-col items-start justify-center`, `w-full h-full`)}>
+    <motion.div
+      className={classNames(
+        `flex flex-col items-start justify-center`,
+        `w-full h-full`
+      )}
+    >
       <motion.div className="">{convertStringPriceWON(e.cellData)}</motion.div>
     </motion.div>
   );
-};
-
-export const HeaderTest = (e: TableHeaderProps) => {
-  return <div>변동률(당일)</div>;
 };
 
 export const HeaderCoinName = (e: TableHeaderProps) => {
   return <div>자산</div>;
 };
 
-export const HeaderPrice = (e: TableHeaderProps) => {
-  return <div>현재가</div>;
-};
-export const HeaderRateOfChange = (e: TableHeaderProps) => {
-  return <div>변동률(당일)</div>;
+const Header =
+  ({
+    e,
+    onClick,
+    direction,
+  }: {
+    e: TableHeaderProps;
+    onClick: () => void;
+    direction: 'desc' | 'asc';
+  }) =>
+  (type: 'price' | 'rateOfChnage' | 'volume') => {
+    return (
+      <>
+        {type === 'price' && <div onClick={onClick}>현재가</div>}
+        {type === 'rateOfChnage' && <div onClick={onClick}> 변동률(당일)</div>}
+        {type === 'volume' && <div onClick={onClick}>거래금액(24H)</div>}
+      </>
+    );
+  };
+
+export const HeaderPrice = ({
+  e,
+  onClick,
+  direction,
+}: {
+  e: TableHeaderProps;
+  onClick: () => void;
+  direction: 'desc' | 'asc';
+}) => {
+  return <div onClick={onClick}>현재가</div>;
 };
 
-export const HeaderVolume = (e: TableHeaderProps) => {
-  return <div>거래금액(24H)</div>;
+export const HeaderRateOfChange = ({
+  e,
+  onClick,
+  direction,
+}: {
+  e: TableHeaderProps;
+  onClick: () => void;
+  direction: 'desc' | 'asc';
+}) => {
+  return <div onClick={onClick}> 변동률(당일)</div>;
+};
+
+export const HeaderVolume = ({
+  e,
+  onClick,
+  direction,
+}: {
+  e: TableHeaderProps;
+  onClick: () => void;
+  direction: 'desc' | 'asc';
+}) => {
+  return <div onClick={onClick}>거래금액(24H)</div>;
 };

@@ -3,15 +3,32 @@ import { AnimatePresence, motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { atomDrawCoinInfo } from '../../atom/drawData.atom';
-import { convertStringPriceToKRW, convertStringPriceWON, convertStringToVolume24 } from '../../utils/utils';
+import {
+  convertStringPriceToKRW,
+  convertStringPriceWON,
+  convertStringToVolume24,
+} from '../../utils/utils';
 import CoinRate from './CoinRate';
 
-const CoinColumn = ({ children }: { children: React.ReactNode }) => <div className={`flex flex-col justify-center items-center`}>{children}</div>;
+const CoinColumn = ({ children }: { children: React.ReactNode }) => (
+  <div className={`flex flex-col justify-center items-center`}>{children}</div>
+);
 
 const CoinBar = () => {
-  const { coinSymbol, r, e, v24, u24, h, l, f, siseCrncCd } = useRecoilValue(atomDrawCoinInfo);
+  const {
+    coinSymbol = '',
+    r = '',
+    e = '',
+    v24 = '',
+    u24 = '',
+    h = '',
+    l = '',
+    f = ' ',
+  } = useRecoilValue(atomDrawCoinInfo);
   return (
-    <motion.div className={classNames(`flex  justify-around items-center`)}>
+    <motion.div
+      className={classNames(`flex  justify-around items-center my-4`)}
+    >
       <div className="font-bmjua">{coinSymbol}</div>
       <div>{convertStringPriceToKRW(e)}</div>
       <CoinRate rate={r} />

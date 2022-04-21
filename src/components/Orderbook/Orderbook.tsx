@@ -2,7 +2,10 @@ import { Box, Typography } from '@mui/material';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
-import { atomDrawCoinInfo, atomDrawTransaction } from '../../atom/drawData.atom';
+import {
+  atomDrawCoinInfo,
+  atomDrawTransaction,
+} from '../../atom/drawData.atom';
 import { atomOrderBook, TypeOrderObj } from '../../atom/orderBook.atom';
 import { atomSelectCoin } from '../../atom/selectCoin.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
@@ -23,7 +26,10 @@ const Orderbook = () => {
   const { f, coinSymbol } = useRecoilValue(atomDrawCoinInfo);
   const [maxQuantity, setMaxQuantity] = useState('0');
 
-  const getMaxValueOrderBook = async (baseValue: string, values: TypeOrderObj[]) => {
+  const getMaxValueOrderBook = async (
+    baseValue: string,
+    values: TypeOrderObj[]
+  ) => {
     let base = Number(baseValue);
     for (let i = 0; i < values.length; i++) {
       const { q } = values[i];
@@ -45,11 +51,14 @@ const Orderbook = () => {
     calcQuantity(orderBook.ask, orderBook.bid);
   }, [orderBook]);
 
-  const getEventType = useCallback((targetPrice: string, basePrice: string, targetBuySellGb: string) => {
-    if (targetPrice === basePrice) {
-      return targetBuySellGb === '2' ? 'bid' : 'ask';
-    }
-  }, []);
+  const getEventType = useCallback(
+    (targetPrice: string, basePrice: string, targetBuySellGb: string) => {
+      if (targetPrice === basePrice) {
+        return targetBuySellGb === '2' ? 'bid' : 'ask';
+      }
+    },
+    []
+  );
 
   const getRateOfChange = useCallback((f: string | undefined, e: string) => {
     if (f === undefined) {
@@ -74,10 +83,12 @@ const Orderbook = () => {
 
   return (
     <Box className={classNames(`w-full`)}>
-      <Typography align="center">호가창</Typography>
-      <Box className="flex justify-around items-center font-bmjua">
-        <Typography className="font-bmjua">가격({marketSymbol})</Typography>
-        <Typography>수량({coinSymbol})</Typography>
+      <Box className={classNames(` py-4`, `shadow-sm`, `font-bmjua`)}>
+        <p className="text-center">호가창</p>
+        <Box className="mt-2 flex justify-around items-center text-sm">
+          <p className="">가격({marketSymbol})</p>
+          <p className="">수량({coinSymbol})</p>
+        </Box>
       </Box>
 
       <Box
@@ -95,7 +106,11 @@ const Orderbook = () => {
             if (lastTransaction === undefined) {
               return;
             }
-            const eventType = getEventType(lastTransaction.contPrice, item.p, lastTransaction.buySellGb);
+            const eventType = getEventType(
+              lastTransaction.contPrice,
+              item.p,
+              lastTransaction.buySellGb
+            );
             const r = getRateOfChange(f, item.p);
 
             return (
@@ -115,7 +130,11 @@ const Orderbook = () => {
           if (lastTransaction === undefined) {
             return;
           }
-          const eventType = getEventType(lastTransaction.contPrice, item.p, lastTransaction.buySellGb);
+          const eventType = getEventType(
+            lastTransaction.contPrice,
+            item.p,
+            lastTransaction.buySellGb
+          );
           const r = getRateOfChange(f, item.p);
           return (
             <OrderbookRow

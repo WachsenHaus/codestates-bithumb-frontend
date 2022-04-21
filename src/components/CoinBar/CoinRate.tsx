@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import classNames from 'classnames';
 
 const CoinRate = ({
-  rate,
+  rate = '0',
   children,
 }: {
   rate?: string;
@@ -13,7 +13,7 @@ const CoinRate = ({
 }) => {
   return (
     <>
-      {rate && (
+      {
         <motion.div
           initial={{
             opacity: 0,
@@ -30,7 +30,7 @@ const CoinRate = ({
         >
           {rate}%
         </motion.div>
-      )}
+      }
     </>
   );
 };

@@ -3,40 +3,75 @@ import { useRecoilState, useRecoilValue } from 'recoil';
 import { atomDrawTicker, TypeDrawTicker } from '../atom/drawData.atom';
 import _ from 'lodash';
 
-const useGetSortTicker = () => {
+const useGetSortTicker = (
+  viewMode: 'normal' | 'favorite' | 'e' | 'r' | 'u24',
+  orderMode: 'e' | 'r' | 'u24',
+  sortBy: Array<'isFavorit' | 'coinName' | 'e' | 'r' | 'u24'>,
+  sortDirection: 'asc' | 'desc'
+) => {
   const drawTicker = useRecoilValue(atomDrawTicker);
   const [sortList, setSortList] = useState<Array<TypeDrawTicker>>([]);
-  const [viewMode, setViewMode] = useState<'normal' | 'favorite'>('normal');
-  // const [sortBy, setSortBy] = useState<Array<'coinName' | 'isFavorite'>>(['coinName', 'isFavorite']);
-  // const [sortDirection, setSortDirection] = useState<'ASC' | 'DESC'>('DESC');
-
   const keywordRef = useRef('');
 
-  const sort = ({ sortBy, sortDirection = 'DESC' }: { sortBy: any; sortDirection: any }) => {
-    if (viewMode === 'normal' && keywordRef.current === '') {
-      return drawTicker;
-    }
+  const sort = async ({
+    sortBy,
+    sortDirection,
+  }: {
+    sortBy: any;
+    sortDirection: any;
+  }) => {
     if (viewMode === 'normal') {
-      return _.filter(drawTicker, (i) => i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1);
-    } else {
+      let normals;
       if (keywordRef.current === '') {
-        return _.filter(drawTicker, (i) => i.isFavorite === true);
+        normals = drawTicker;
       } else {
-        return _.filter(drawTicker, (i) => i.isFavorite === true && i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1);
+        normals = _.filter(
+          drawTicker,
+          (i) => i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
+        );
+      }
+      if (orderMode === 'e') {
+        return _.orderBy(normals, [(e) => Number(e.e)], [sortDirection]);
+      } else if (orderMode === 'r') {
+        return _.orderBy(normals, [(e) => Number(e.r)], [sortDirection]);
+      } else {
+        return _.orderBy(normals, [(e) => Number(e.u24)], [sortDirection]);
+      }
+    } else {
+      let favorites;
+      if (keywordRef.current === '') {
+        favorites = _.filter(drawTicker, (i) => i.isFavorite === true);
+      } else {
+        favorites = _.filter(
+          drawTicker,
+          (i) =>
+            i.isFavorite === true &&
+            i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
+        );
+      }
+      if (orderMode === 'e') {
+        return _.orderBy(favorites, [(e) => Number(e.e)], [sortDirection]);
+      } else if (orderMode === 'r') {
+        return _.orderBy(favorites, [(e) => Number(e.r)], [sortDirection]);
+      } else {
+        return _.orderBy(favorites, [(e) => Number(e.u24)], [sortDirection]);
       }
     }
   };
 
-  useEffect(() => {
-    const soryBy = viewMode === 'favorite' ? ['isFavorite'] : ['coinName'];
-    const result = sort({
-      sortBy: soryBy,
-      sortDirection: 'DESC',
+  const getSort = async () => {
+    sort({
+      sortBy,
+      sortDirection,
+    }).then((result) => {
+      setSortList(result);
     });
-    setSortList(result);
-  }, [drawTicker, viewMode]);
+  };
+  useEffect(() => {
+    getSort();
+  }, [drawTicker]);
 
-  return [sort, sortList, viewMode, setViewMode, keywordRef] as const;
+  return [sort, sortList, keywordRef] as const;
 };
 
 export default useGetSortTicker;

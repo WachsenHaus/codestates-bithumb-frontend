@@ -17,15 +17,24 @@ const Transaction = () => {
 
   return (
     <Box className={classNames(`w-full`)}>
-      <Typography align="center">체결내역</Typography>
-      <Box className="flex justify-around items-center font-bmjua">
-        <Typography className="font-bmjua">시간</Typography>
-        <Typography className="font-bmjua">가격({marketSymbol})</Typography>
-        <Typography>수량({coinSymbol})</Typography>
+      <Box
+        className={classNames(
+          `py-4`,
+          `font-bmjua`,
+          `shadow-sm flex flex-col items-stretch`
+        )}
+      >
+        <p className="text-center">체결내역</p>
+        <Box className="mt-4 flex justify-around items-center text-sm">
+          <p>시간</p>
+          <p>가격({marketSymbol})</p>
+          <p>수량({coinSymbol})</p>
+        </Box>
       </Box>
+
       <Box
         sx={{
-          height: { sm: 200, md: 330 },
+          height: { sm: 200, md: 250 },
         }}
         className={classNames(`scrollbar-hide overflow-y-auto`)}
       >
