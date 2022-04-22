@@ -30,39 +30,36 @@ const useGetSortTicker = (
     []
   );
 
-  const sort = async ({
-    sortBy,
-    sortDirection,
-  }: {
-    sortBy: any;
-    sortDirection: any;
-  }) => {
-    if (viewMode === 'normal') {
-      let normals;
-      if (keywordRef.current === '') {
-        normals = drawTicker;
+  const sort = useCallback(
+    async ({ sortBy, sortDirection }: { sortBy: any; sortDirection: any }) => {
+      if (viewMode === 'normal') {
+        let normals;
+        if (keywordRef.current === '') {
+          normals = drawTicker;
+        } else {
+          normals = _.filter(
+            drawTicker,
+            (i) => i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
+          );
+        }
+        return order(orderMode, normals, sortDirection);
       } else {
-        normals = _.filter(
-          drawTicker,
-          (i) => i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
-        );
+        let favorites;
+        if (keywordRef.current === '') {
+          favorites = _.filter(drawTicker, (i) => i.isFavorite === true);
+        } else {
+          favorites = _.filter(
+            drawTicker,
+            (i) =>
+              i.isFavorite === true &&
+              i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
+          );
+        }
+        return order(orderMode, favorites, sortDirection);
       }
-      return order(orderMode, normals, sortDirection);
-    } else {
-      let favorites;
-      if (keywordRef.current === '') {
-        favorites = _.filter(drawTicker, (i) => i.isFavorite === true);
-      } else {
-        favorites = _.filter(
-          drawTicker,
-          (i) =>
-            i.isFavorite === true &&
-            i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
-        );
-      }
-      return order(orderMode, favorites, sortDirection);
-    }
-  };
+    },
+    [drawTicker, order, orderMode, viewMode]
+  );
 
   const getSort = async () => {
     sort({

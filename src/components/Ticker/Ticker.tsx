@@ -210,7 +210,7 @@ const Ticker = () => {
                     width,
                     height,
                   }}
-                  className={'flex justify-center items-center'}
+                  className={'flex justify-center items-center font-bmjua'}
                 >
                   '{keywordRef.current}'로 검색된 가상자산이 없습니다.
                 </div>
