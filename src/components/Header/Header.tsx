@@ -40,13 +40,6 @@ const Header = () => {
           }}
         />
         <Box sx={{ flexGrow: 1 }} />
-        {/* <Box
-          sx={{
-            marginRight: 4,
-          }}
-        >
-          <Clock type="digital" run={true} precision={'seconds'} />
-        </Box> */}
       </Toolbar>
     </AppBar>
   );

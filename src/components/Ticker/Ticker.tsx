@@ -38,8 +38,20 @@ const Ticker = () => {
     Array<'isFavorit' | 'coinName' | 'e' | 'r' | 'u24'>
   >([]);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [sortFn, sortList, keywordRef] = useGetSortTicker(
+    viewMode,
+    orderMode,
+    sortBy,
+    sortDirection
+  );
+
+  const rowHeight = 50;
+  const headerHeight = 50;
+  const rowCount = sortList.length;
+  const [height, setHeight] = useState(350);
   const [page, setPage] = useState(0);
-  const [perPage, setPerPage] = useState(6);
+  const [perPage, setPerPage] = useState(height / rowHeight);
+  const pageCount = Math.ceil(rowCount / perPage);
   const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(
     undefined
   );
@@ -64,16 +76,6 @@ const Ticker = () => {
     },
     []
   );
-  const [sortFn, sortList, keywordRef] = useGetSortTicker(
-    viewMode,
-    orderMode,
-    sortBy,
-    sortDirection
-  );
-  const rowHieght = 50;
-  const headerHeight = 50;
-  const rowCount = sortList.length;
-  const pageCount = Math.ceil(rowCount / perPage);
 
   const [isExist, setIsExist] = useState(false);
   useEffect(() => {
@@ -157,8 +159,9 @@ const Ticker = () => {
 
       <div>
         <Paper
+          className="will-change-contents"
           sx={{
-            height: 350,
+            height: height,
             width: '100%',
           }}
         >
@@ -172,7 +175,7 @@ const Ticker = () => {
                   width={width}
                   height={height}
                   headerHeight={headerHeight}
-                  rowHeight={rowHieght}
+                  rowHeight={rowHeight}
                   rowCount={rowCount}
                   scrollToIndex={scrollToIndex}
                   onRowsRendered={handleRowsScroll}

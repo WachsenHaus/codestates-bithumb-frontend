@@ -1,7 +1,7 @@
 import { TypeCoinKind } from './coinList.type';
 import { atomSelectCoin } from './selectCoin.atom';
 import axios from 'axios';
-import { selector } from 'recoil';
+import { atom, selector } from 'recoil';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
 import { API_BITHUMB } from './../api/bt.api';
@@ -50,10 +50,18 @@ export type ITradeData = {
   };
 };
 
+export const forceReloadTradeData = atom<number | undefined>({
+  key: 'ForceReloadTradeData',
+  default: 0,
+});
+
 export const atomTradeData = selector({
   key: 'AtomTradeData',
   get: async ({ get }) => {
     try {
+      get(forceReloadTradeData);
+      console.log('get');
+      console.log(`${get(atomSelectCoin).coinType}`);
       const url = {
         type: 'custom',
         crncCd: get(atomSelectCoin).siseCrncCd,
@@ -75,5 +83,9 @@ export const atomTradeData = selector({
       return undefined;
       // return
     }
+  },
+  set: ({ set }) => {
+    console.log('set');
+    set(forceReloadTradeData, Math.random());
   },
 });

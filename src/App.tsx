@@ -30,6 +30,10 @@ const App = () => {
             <Router>
               <Routes>
                 <Route path={PathRoutes.HOME} element={<MainPage />} />
+                <Route
+                  path={`${PathRoutes.HOME}/:coinName`}
+                  element={<MainPage />}
+                />
               </Routes>
             </Router>
           </Grommet>

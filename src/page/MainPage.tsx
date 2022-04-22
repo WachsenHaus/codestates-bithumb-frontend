@@ -11,10 +11,17 @@ import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import { useGetCoinList, useGetTradeData } from '../hooks/useGetCoinList';
 import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
+import { Routes, Route, useParams } from 'react-router-dom';
+import useGetTradeParam from '../hooks/useGetTradeParam';
+import { useRecoilState } from 'recoil';
+import { atomCommonConfig } from '../atom/commonConfig.atom';
 
 const MainPage = () => {
   // 1.코인정보를 받아옴
   useGetCoinList();
+
+  useGetTradeParam();
+
   // 2.처음 디스플레이되는 거래 데이터들을 받아옴.
   useGetTradeData();
   // 3.웹소켓을 실행시킴 웹소켓은 트랜잭션,티커,차트봉에 대한 정보를 받아온다.
