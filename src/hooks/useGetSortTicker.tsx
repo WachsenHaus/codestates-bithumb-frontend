@@ -32,6 +32,13 @@ const useGetSortTicker = (
 
   const sort = useCallback(
     async ({ sortBy, sortDirection }: { sortBy: any; sortDirection: any }) => {
+      const err = drawTicker.find(
+        (item) => item.e === undefined || item.e === ''
+      );
+      if (err) {
+        console.log(err);
+      }
+
       if (viewMode === 'normal') {
         let normals;
         if (keywordRef.current === '') {
@@ -61,17 +68,18 @@ const useGetSortTicker = (
     [drawTicker, order, orderMode, viewMode]
   );
 
-  const getSort = async () => {
+  const getSort = useCallback(async () => {
     sort({
       sortBy,
       sortDirection,
     }).then((result) => {
       setSortList(result);
     });
-  };
+  }, [sort, sortBy, sortDirection]);
+
   useEffect(() => {
     getSort();
-  }, [drawTicker]);
+  }, [drawTicker, viewMode]);
 
   return [sort, sortList, keywordRef] as const;
 };

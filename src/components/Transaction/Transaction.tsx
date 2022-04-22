@@ -44,6 +44,7 @@ const Transaction = () => {
           .map((item, index) => {
             return (
               <TransactionRow
+                coinSymbol={coinSymbol}
                 key={index}
                 time={item.contDtm}
                 price={item.contPrice}

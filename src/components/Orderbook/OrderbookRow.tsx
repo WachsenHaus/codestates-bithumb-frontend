@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
 import styles from '../../components/animation.module.css';
+import { convertStringPriceToKRW } from '../../utils/utils';
 
 const OrderbookRow = ({
   price,
@@ -42,8 +43,14 @@ const OrderbookRow = ({
           `bg-opacity-5`
         )}
       >
-        <span className={classNames(`${eventType === 'ask' ? `${styles.askEffect}` : ''}`, `${eventType === 'bid' ? `${styles.bidEffect}` : ''}`)}>
-          {Number(price).toLocaleString('ko-kr')}
+        <span
+          className={classNames(
+            `text-left`,
+            `${eventType === 'ask' ? `${styles.askEffect}` : ''}`,
+            `${eventType === 'bid' ? `${styles.bidEffect}` : ''}`
+          )}
+        >
+          {convertStringPriceToKRW(price)}
         </span>
         <span>{r}%</span>
       </Box>
@@ -52,11 +59,11 @@ const OrderbookRow = ({
         <Box
           className={classNames(`absolute left-0`)}
           sx={{
-            // width: `${(Number(quantity) * 50) % 100}%`,
             width: `${quantityRatio}%`,
             height: '100%',
-            backgroundColor: `${orderType === 'ask' ? '#416ac25e;' : '#ff000021;'}`,
-            // backgroundColor: `rgba(65, 106, 194, 0.369)`,
+            backgroundColor: `${
+              orderType === 'ask' ? '#416ac25e;' : '#ff000021;'
+            }`,
           }}
         />
       </Box>

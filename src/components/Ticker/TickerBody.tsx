@@ -72,6 +72,7 @@ export const RenderNameColumn = (e: TableCellProps) => {
     if (clickedCoinInfo.coinSymbol === selectCoin.coinSymbol) {
       return;
     }
+
     await setSelectCoin((prevData) => {
       return {
         ...prevData,
@@ -108,6 +109,9 @@ export const RenderNameColumn = (e: TableCellProps) => {
 };
 
 export const RenderCurrentPriceColumn = (e: TableCellProps) => {
+  // if (e.cellData === undefined || e.cellData === '0') {
+  //   console.log(e);
+  // }
   return (
     <motion.div className="flex items-center">
       <div>
@@ -151,7 +155,8 @@ export const RenderRateOfChange = (e: TableCellProps) => {
       setIsUp(true);
     }
   }, [e]);
-  let price = convertStringPriceToKRW(e.rowData.a);
+  // console.log(e.rowData.a);
+  let price = Number(e.rowData.a).toLocaleString('ko-kr');
   if (isUp) {
     price = `+${price}`;
   } else {
@@ -201,7 +206,7 @@ export const HeaderPrice = ({
   arrowActive: boolean;
 }) => {
   return (
-    <div className="flex justify-center items-center font-bmjua">
+    <div className="flex justify-center items-center font-bmjua  cursor-pointer">
       <div onClick={onClick}>현재가</div>
       <SortArrow direction={direction} active={arrowActive} />
     </div>
@@ -220,7 +225,7 @@ export const HeaderRateOfChange = ({
   arrowActive: boolean;
 }) => {
   return (
-    <div className="flex justify-center items-center font-bmjua">
+    <div className="flex justify-center items-center font-bmjua  cursor-pointer">
       <div onClick={onClick}>변동률(당일)</div>
       <SortArrow direction={direction} active={arrowActive} />
     </div>
@@ -239,7 +244,7 @@ export const HeaderVolume = ({
   arrowActive: boolean;
 }) => {
   return (
-    <div className="flex justify-center items-center font-bmjua">
+    <div className="flex justify-center items-center font-bmjua  cursor-pointer">
       <div onClick={onClick}>거래금액(24H)</div>
       <SortArrow direction={direction} active={arrowActive} />
     </div>

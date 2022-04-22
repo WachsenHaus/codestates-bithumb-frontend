@@ -1,17 +1,20 @@
 import classNames from 'classnames';
 import moment from 'moment';
 import React from 'react';
+import { convertStringPriceToKRW } from '../../utils/utils';
 
 const TransactionRow = ({
   time,
   price,
   contQty,
   buySellGb,
+  coinSymbol,
 }: {
   time: string;
   price: string;
   contQty: string;
   buySellGb: string;
+  coinSymbol: string;
 }) => {
   return (
     <div
@@ -25,16 +28,18 @@ const TransactionRow = ({
         {moment(time).format('HH:mm:ss')}
       </div>
       <div className="flex justify-center items-center">
-        {Number(price).toLocaleString('ko-kr')}
+        {convertStringPriceToKRW(price)}
       </div>
       <div
         className={classNames(
-          `${
-            buySellGb === '2' ? 'text-red-400' : 'text-blue-400'
-          } flex justify-center items-center"`
+          `${buySellGb === '2' ? 'text-red-400' : 'text-blue-400'}`
         )}
       >
-        <span>{Number(contQty).toFixed(4)}</span>
+        <div className="relative">
+          <span className="absolute right-5">
+            {Number(contQty).toFixed(4)} {coinSymbol}
+          </span>
+        </div>
       </div>
     </div>
   );

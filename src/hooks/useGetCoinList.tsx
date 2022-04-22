@@ -16,9 +16,10 @@ import {
   TypeDrawTicker,
 } from '../atom/drawData.atom';
 import _, { iteratee } from 'lodash';
-import { atomTradeData } from '../atom/tradeData.atom';
+import { atomTradeData, TypeTradeTransaction } from '../atom/tradeData.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
-import { getCookie } from '../utils/utils';
+import { getCookie, unpackCookie } from '../utils/utils';
+import { atomCommonConfig } from '../atom/commonConfig.atom';
 
 const GetConsonant = ({
   coinName,
@@ -64,6 +65,9 @@ export const useGetCoinList = () => {
     }
   }, [queryResults.state]);
 
+  /**
+   * coinState라는 임시 상태값에 코인이 들어왔다면 drawTicker아톰에 값을 할당함.
+   */
   useEffect(() => {
     // 받아온 코인리스트에서 그리기위한 정보만 집어넣음.
     const result = new Promise((resolve, reject) => {
@@ -80,11 +84,12 @@ export const useGetCoinList = () => {
           item.isLive === true
       );
       const cookieFavorites = getCookie('marketFavoritesCoin');
-      const parseCookies = cookieFavorites
-        .replace('[', '')
-        .replace(']', '')
-        .replace(/\"/g, '')
-        .split(',');
+      const unPackCookie = unpackCookie(cookieFavorites);
+      // const parseCookies = cookieFavorites
+      //   .replace('[', '')
+      //   .replace(']', '')
+      //   .replace(/\"/g, '')
+      //   .split(',');
 
       const drawDummy = filteredData.map((item) => {
         const consonant = GetConsonant({
@@ -92,7 +97,7 @@ export const useGetCoinList = () => {
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
         });
-        const cookieCoinSymbol = parseCookies.find(
+        const cookieCoinSymbol = unPackCookie.find(
           (i) => i.split('_')[0] === item.coinType
         );
         return {
@@ -119,8 +124,6 @@ export const useGetCoinList = () => {
       })
       .catch((err) => console.error(err));
   }, [coinState]);
-
-  return undefined;
 };
 
 /**
@@ -130,7 +133,9 @@ export const useGetTradeData = () => {
   const tradeData = useRecoilValueLoadable(atomTradeData);
   const selectCoin = useRecoilValue(atomSelectCoin);
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
-  const [drawCoinInfo, setDrawCoinInfo] = useRecoilState(atomDrawCoinInfo);
+  const setDrawCoinInfo = useSetRecoilState(atomDrawCoinInfo);
+  const setCommonConfig = useSetRecoilState(atomCommonConfig);
+  const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
   const [flag, setFlag] = useState(false);
 
   useEffect(() => {
@@ -138,10 +143,6 @@ export const useGetTradeData = () => {
       setFlag(true);
     }
   }, [drawTicker]);
-  const [drawTransaction, setDrawTransaction] =
-    useRecoilState(atomDrawTransaction);
-
-  const [tempDrawTicker, setTempDrawTicker] = useState<any>([]);
 
   useEffect(() => {
     if (
@@ -153,7 +154,8 @@ export const useGetTradeData = () => {
         tradeData.contents.data[selectCoin.siseCrncCd]['ticker'];
       const tickerKeys = Object.keys(tickerData);
       let defaultObj: TypeDrawTicker = {};
-      const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
+
+      const tickerPromise = new Promise<TypeDrawTicker[]>((resolve, reject) => {
         const next = produce(drawTicker, (draft) => {
           for (let i = 0; i < tickerKeys.length; i++) {
             const {
@@ -180,26 +182,24 @@ export const useGetTradeData = () => {
               defaultObj = {
                 coinType: draft[selectIdx].coinType,
                 coinSymbol: draft[selectIdx].coinSymbol,
-                e: openPrice,
+                e: closePrice,
                 u24: value24H,
                 v24: volume24H,
                 h: highPrice,
                 r: chgRate,
                 l: lowPrice,
-                f: closePrice,
+                f: prevClosePrice,
                 siseCrncCd: draft[selectIdx].siseCrncCd,
               };
             }
 
             if (isExist === -1) {
-              console.log(tickerData[tickerKeys[i]]);
-              console.log('not coin');
             } else {
               draft[isExist] = {
                 ...draft[isExist],
                 u24: value24H,
                 r: chgRate,
-                e: openPrice === '0' ? closePrice : openPrice,
+                e: closePrice,
                 a: chgAmt,
               };
             }
@@ -211,37 +211,48 @@ export const useGetTradeData = () => {
           reject('err');
         }
       });
-      result
-        .then((d) => {
-          setDrawTicker(d);
-          setDrawCoinInfo(defaultObj);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
 
       const transactionData =
         tradeData.contents.data[selectCoin.siseCrncCd]['transaction'];
       const transactionKeys = Object.keys(transactionData);
       const data = transactionData[transactionKeys[0]];
-      const next = produce(data, (draft) => {
-        let color;
-        for (let i = 0; i < draft.length; i++) {
-          if (i !== 0) {
-            const prevPrice = draft[i - 1].contPrice;
-            const curPrice = draft[i].contPrice;
-            if (curPrice === prevPrice) {
-              color = draft[i - 1].buySellGb;
-            } else if (curPrice > prevPrice) {
-              color = '2';
-            } else {
-              color = '1';
+
+      const transactionPromise = new Promise<TypeTradeTransaction[]>(
+        (resolve, reject) => {
+          const next = produce(data, (draft) => {
+            let color;
+            for (let i = 0; i < draft.length; i++) {
+              if (i !== 0) {
+                const prevPrice = draft[i - 1].contPrice;
+                const curPrice = draft[i].contPrice;
+                if (curPrice === prevPrice) {
+                  color = draft[i - 1].buySellGb;
+                } else if (curPrice > prevPrice) {
+                  color = '2';
+                } else {
+                  color = '1';
+                }
+                draft[i].buySellGb = color;
+              }
             }
-            draft[i].buySellGb = color;
+          });
+          if (next) {
+            resolve(next);
+          } else {
+            reject(undefined);
           }
         }
+      );
+
+      Promise.all([tickerPromise, transactionPromise]).then((values) => {
+        const [ticker, transaction] = values;
+        setDrawTicker(ticker);
+        setDrawCoinInfo(defaultObj);
+        setDrawTransaction(transaction);
+        setCommonConfig({
+          isInit: true,
+        });
       });
-      setDrawTransaction(next);
     }
   }, [flag, tradeData, selectCoin]);
 };

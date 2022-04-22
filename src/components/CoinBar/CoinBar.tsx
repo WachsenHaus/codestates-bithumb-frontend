@@ -17,14 +17,15 @@ const CoinColumn = ({ children }: { children: React.ReactNode }) => (
 const CoinBar = () => {
   const {
     coinSymbol = '',
-    r = '',
-    e = '',
-    v24 = '',
-    u24 = '',
-    h = '',
-    l = '',
-    f = ' ',
+    r = '0',
+    e = '0',
+    v24 = '0',
+    u24 = '0',
+    h = '0',
+    l = '0',
+    f = '0',
   } = useRecoilValue(atomDrawCoinInfo);
+
   return (
     <motion.div
       className={classNames(`flex  justify-around items-center my-4`)}
@@ -35,8 +36,7 @@ const CoinBar = () => {
       <CoinColumn>
         <h1 className="font-bmjua">거래량(24H)</h1>
         <span>
-          {convertStringToVolume24(v24)}
-          {coinSymbol}
+          {convertStringToVolume24(v24)} {coinSymbol}
         </span>
       </CoinColumn>
       <CoinColumn>
@@ -60,4 +60,4 @@ const CoinBar = () => {
   );
 };
 
-export default CoinBar;
+export default React.memo(CoinBar);

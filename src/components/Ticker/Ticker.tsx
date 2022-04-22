@@ -1,12 +1,18 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
-import { Column, Table } from 'react-virtualized';
+import {
+  Column,
+  IndexRange,
+  OverscanIndexRange,
+  Table,
+} from 'react-virtualized';
 import {
   Autocomplete,
   Button,
   InputAdornment,
+  Pagination,
   Paper,
   TextField,
 } from '@mui/material';
@@ -32,13 +38,42 @@ const Ticker = () => {
     Array<'isFavorit' | 'coinName' | 'e' | 'r' | 'u24'>
   >([]);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(6);
+  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(
+    undefined
+  );
 
+  const handleRowsScroll = useCallback(
+    (info: IndexRange & OverscanIndexRange) => {
+      setPage((prev) => {
+        return Math.ceil(info.stopIndex / perPage);
+      });
+      setScrollToIndex(undefined);
+    },
+    []
+  );
+
+  const handlePageChange = useCallback(
+    (event: React.ChangeEvent<unknown>, page: number) => {
+      setPage(page);
+      setScrollToIndex((prev) => {
+        const scrollToIndex = (page - 1) * perPage;
+        return scrollToIndex;
+      });
+    },
+    []
+  );
   const [sortFn, sortList, keywordRef] = useGetSortTicker(
     viewMode,
     orderMode,
     sortBy,
     sortDirection
   );
+  const rowHieght = 50;
+  const headerHeight = 50;
+  const rowCount = sortList.length;
+  const pageCount = Math.ceil(rowCount / perPage);
 
   const [isExist, setIsExist] = useState(false);
   useEffect(() => {
@@ -119,10 +154,11 @@ const Ticker = () => {
           />
         </div>
       </div>
+
       <div>
         <Paper
           sx={{
-            height: 400,
+            height: 350,
             width: '100%',
           }}
         >
@@ -135,9 +171,12 @@ const Ticker = () => {
                   sortDirection={undefined}
                   width={width}
                   height={height}
-                  headerHeight={50}
-                  rowHeight={50}
-                  rowCount={sortList.length}
+                  headerHeight={headerHeight}
+                  rowHeight={rowHieght}
+                  rowCount={rowCount}
+                  scrollToIndex={scrollToIndex}
+                  onRowsRendered={handleRowsScroll}
+                  scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={({ index }) => {
                     return sortList[index];
@@ -218,6 +257,14 @@ const Ticker = () => {
             }
           </AutoSizer>
         </Paper>
+      </div>
+      <div className="flex items-center w-full ">
+        <Pagination
+          count={pageCount}
+          page={page}
+          onChange={handlePageChange}
+          className="mx-auto mt-2"
+        />
       </div>
     </div>
   );

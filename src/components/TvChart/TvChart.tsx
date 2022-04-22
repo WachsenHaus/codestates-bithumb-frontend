@@ -13,6 +13,7 @@ import {
   TypeChartData,
 } from '../../atom/tvChart.atom';
 import { useGetChartDatas } from '../../hooks/useChart';
+import { convertStringPriceToKRW } from '../../utils/utils';
 
 const CONST_KR_UTC = 9 * 60 * 60 * 1000;
 
@@ -59,6 +60,12 @@ const TvChart = () => {
       });
       candleChart.current = chart.addCandlestickSeries();
       candleChart.current.applyOptions({
+        priceFormat: {
+          type: 'custom',
+          formatter: (f: any) => {
+            return convertStringPriceToKRW(f);
+          },
+        },
         upColor: `#ff0000`,
         borderUpColor: `#ff0000`,
         downColor: `#2f00ff`,

@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import _ from 'lodash';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import produce from 'immer';
-import { SocketNamesType } from '../atom/user.atom';
+
 import {
   atomSubscribeWebSocektMessage,
   atomSubscribeWebSocket,
@@ -13,6 +13,7 @@ import {
 import {
   TypeWebSocketSubscribeReturnType,
   TypeWebSocketTickerReturnType,
+  TypeWebSocketTypes,
 } from '../atom/ws.type';
 import {
   atomDrawCoinInfo,
@@ -23,16 +24,18 @@ import {
 import { atomGetStChartData } from '../atom/tvChart.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 import { TypeCoinKind } from '../atom/coinList.type';
+import { atomCommonConfig } from '../atom/commonConfig.atom';
 
 /**
  *
  * @returns 빗썸 웹소켓과 연결하고 웹소켓 객체를 반환합니다.
  */
-export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
+export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
   const [wsSubscribe, setWsSubscribe] = useRecoilState(atomSubscribeWebSocket);
   const [wsMessage, setWsMessage] = useRecoilState(
     atomSubscribeWebSocektMessage
   );
+  const commonConfig = useRecoilValue(atomCommonConfig);
 
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
   const [drawCoin, setDrawCoin] = useRecoilState(atomDrawCoinInfo);
@@ -54,18 +57,18 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   }>();
 
   const generateOnError: any | null =
-    (type: SocketNamesType) => (ev: Event) => {
+    (type: TypeWebSocketTypes) => (ev: Event) => {
       console.error(`Error WebSocket ${type} ${ev}`);
       console.error(ev);
     };
   const generateOnCloser: any | null =
-    (type: SocketNamesType) => (ev: CloseEvent) => {
+    (type: TypeWebSocketTypes) => (ev: CloseEvent) => {
       console.info(`Close WebSocket ${type} ${ev}`);
       console.info(ev);
     };
 
   const generateOnMessage: any | null =
-    (nameType: SocketNamesType) =>
+    (nameType: TypeWebSocketTypes) =>
     (ev: MessageEvent<TypeWebSocketSubscribeReturnType>) => {
       if (ev) {
         const { subtype, type, content }: TypeWebSocketSubscribeReturnType =
@@ -89,7 +92,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     };
 
   const generateOnOpen: any | null =
-    (type: SocketNamesType, ws: WebSocket) => (ev: Event) => {
+    (type: TypeWebSocketTypes, ws: WebSocket) => (ev: Event) => {
       if (ev) {
         console.log(`Connected WebSocket ${type}`);
         switch (type) {
@@ -133,7 +136,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
    * 함수 자리를 이동해야함.
    */
   useEffect(() => {
-    if (tickerObj && drawTicker) {
+    if (commonConfig.isInit && tickerObj && drawTicker) {
       const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
         const next = produce(drawTicker, (draft) => {
           const isExist = draft.findIndex((item) => {
@@ -144,7 +147,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
             setDrawCoin((prevData) => {
               return {
                 ...prevData,
-                e: tickerObj.e,
+                // e: tickerObj.e,
                 u24: tickerObj.u24,
                 v24: tickerObj.v24,
                 r: tickerObj.r,
@@ -154,8 +157,7 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
               };
             });
           }
-          if (isExist === -1) {
-            console.log('not coin');
+          if (isExist === -1 || tickerObj.m === 'C0101') {
           } else {
             // 트랜잭션의 색상을 구함.
             let isUp;
@@ -187,12 +189,14 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
           console.error(e);
         });
     }
-  }, [tickerObj]);
+  }, [tickerObj, commonConfig.isInit]);
 
   useEffect(() => {
     (async () => {
       const result = await produce(drawTransaction, (draft) => {
-        if (transactionObj === undefined) return;
+        if (transactionObj === undefined) {
+          return;
+        }
         const { m, c, l } = transactionObj;
         for (let i = 0; i < l.length; i++) {
           const { o, n, p, q, t } = transactionObj.l[i];
@@ -210,18 +214,27 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
             }
           }
 
-          draft.push({
-            coinType: c,
-            contAmt: n,
-            crncCd: m,
-            buySellGb: color,
-            contPrice: p,
-            contQty: q,
-            contDtm: t,
+          //코인바에 나타날 가격을 갱신함
+          setDrawCoin((prevData) => {
+            return {
+              ...prevData,
+              e: p,
+              // q:lastItem.
+            };
           });
 
-          // 트랜잭션은 10개의 데이터만 보관함.
-          if (draft.length > 10) {
+          draft.push({
+            coinType: c, //
+            contAmt: n, //
+            crncCd: m, //
+            buySellGb: color,
+            contPrice: p, //현재가
+            contQty: q, // 수량
+            contDtm: t, //
+          });
+
+          // 트랜잭션은 20개의 데이터만 보관함.
+          if (draft.length > 20) {
             draft.shift();
           }
         }
