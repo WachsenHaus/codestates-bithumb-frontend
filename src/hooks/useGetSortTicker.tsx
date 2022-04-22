@@ -13,6 +13,23 @@ const useGetSortTicker = (
   const [sortList, setSortList] = useState<Array<TypeDrawTicker>>([]);
   const keywordRef = useRef('');
 
+  const order = useCallback(
+    (
+      orderMode: 'e' | 'r' | 'u24',
+      datas: TypeDrawTicker[],
+      sortDirection: 'asc' | 'desc'
+    ) => {
+      if (orderMode === 'e') {
+        return _.orderBy(datas, [(e) => Number(e.e)], [sortDirection]);
+      } else if (orderMode === 'r') {
+        return _.orderBy(datas, [(e) => Number(e.r)], [sortDirection]);
+      } else {
+        return _.orderBy(datas, [(e) => Number(e.u24)], [sortDirection]);
+      }
+    },
+    []
+  );
+
   const sort = async ({
     sortBy,
     sortDirection,
@@ -30,13 +47,7 @@ const useGetSortTicker = (
           (i) => i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
         );
       }
-      if (orderMode === 'e') {
-        return _.orderBy(normals, [(e) => Number(e.e)], [sortDirection]);
-      } else if (orderMode === 'r') {
-        return _.orderBy(normals, [(e) => Number(e.r)], [sortDirection]);
-      } else {
-        return _.orderBy(normals, [(e) => Number(e.u24)], [sortDirection]);
-      }
+      return order(orderMode, normals, sortDirection);
     } else {
       let favorites;
       if (keywordRef.current === '') {
@@ -49,13 +60,7 @@ const useGetSortTicker = (
             i.consonant?.toLowerCase().indexOf(keywordRef.current) !== -1
         );
       }
-      if (orderMode === 'e') {
-        return _.orderBy(favorites, [(e) => Number(e.e)], [sortDirection]);
-      } else if (orderMode === 'r') {
-        return _.orderBy(favorites, [(e) => Number(e.r)], [sortDirection]);
-      } else {
-        return _.orderBy(favorites, [(e) => Number(e.u24)], [sortDirection]);
-      }
+      return order(orderMode, favorites, sortDirection);
     }
   };
 

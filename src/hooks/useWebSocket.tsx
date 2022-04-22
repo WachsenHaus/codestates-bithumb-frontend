@@ -5,9 +5,21 @@ import _ from 'lodash';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import produce from 'immer';
 import { SocketNamesType } from '../atom/user.atom';
-import { atomSubscribeWebSocektMessage, atomSubscribeWebSocket, atomTicker } from '../atom/ws.atom';
-import { TypeWebSocketSubscribeReturnType, TypeWebSocketTickerReturnType } from '../atom/ws.type';
-import { atomDrawCoinInfo, atomDrawTicker, atomDrawTransaction, TypeDrawTicker } from '../atom/drawData.atom';
+import {
+  atomSubscribeWebSocektMessage,
+  atomSubscribeWebSocket,
+  atomTicker,
+} from '../atom/ws.atom';
+import {
+  TypeWebSocketSubscribeReturnType,
+  TypeWebSocketTickerReturnType,
+} from '../atom/ws.type';
+import {
+  atomDrawCoinInfo,
+  atomDrawTicker,
+  atomDrawTransaction,
+  TypeDrawTicker,
+} from '../atom/drawData.atom';
 import { atomGetStChartData } from '../atom/tvChart.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 import { TypeCoinKind } from '../atom/coinList.type';
@@ -18,12 +30,15 @@ import { TypeCoinKind } from '../atom/coinList.type';
  */
 export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
   const [wsSubscribe, setWsSubscribe] = useRecoilState(atomSubscribeWebSocket);
-  const [wsMessage, setWsMessage] = useRecoilState(atomSubscribeWebSocektMessage);
+  const [wsMessage, setWsMessage] = useRecoilState(
+    atomSubscribeWebSocektMessage
+  );
 
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
   const [drawCoin, setDrawCoin] = useRecoilState(atomDrawCoinInfo);
   const selectCoin = useRecoilValue(atomSelectCoin);
-  const [drawTransaction, setDrawTransaction] = useRecoilState(atomDrawTransaction);
+  const [drawTransaction, setDrawTransaction] =
+    useRecoilState(atomDrawTransaction);
   const [tickerObj, setTickerObj] = useState<TypeWebSocketTickerReturnType>();
   const [stObj, setStObj] = useRecoilState(atomGetStChartData);
   const [transactionObj, setTransactionObj] = useState<{
@@ -38,55 +53,61 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
     }[];
   }>();
 
-  const generateOnError: any | null = (type: SocketNamesType) => (ev: Event) => {
-    console.error(`Error WebSocket ${type} ${ev}`);
-    console.error(ev);
-  };
-  const generateOnCloser: any | null = (type: SocketNamesType) => (ev: CloseEvent) => {
-    console.info(`Close WebSocket ${type} ${ev}`);
-    console.info(ev);
-  };
+  const generateOnError: any | null =
+    (type: SocketNamesType) => (ev: Event) => {
+      console.error(`Error WebSocket ${type} ${ev}`);
+      console.error(ev);
+    };
+  const generateOnCloser: any | null =
+    (type: SocketNamesType) => (ev: CloseEvent) => {
+      console.info(`Close WebSocket ${type} ${ev}`);
+      console.info(ev);
+    };
 
-  const generateOnMessage: any | null = (nameType: SocketNamesType) => (ev: MessageEvent<TypeWebSocketSubscribeReturnType>) => {
-    if (ev) {
-      const { subtype, type, content }: TypeWebSocketSubscribeReturnType = parse(ev.data).value;
-      switch (nameType) {
-        case 'SUBSCRIBE':
-          if (type === 'data') {
-            if (subtype === 'tk') {
-              setTickerObj(content);
-            } else if (subtype === 'st') {
-              setStObj(content);
-            } else if (subtype === 'tr') {
-              setTransactionObj(content);
+  const generateOnMessage: any | null =
+    (nameType: SocketNamesType) =>
+    (ev: MessageEvent<TypeWebSocketSubscribeReturnType>) => {
+      if (ev) {
+        const { subtype, type, content }: TypeWebSocketSubscribeReturnType =
+          parse(ev.data).value;
+        switch (nameType) {
+          case 'SUBSCRIBE':
+            if (type === 'data') {
+              if (subtype === 'tk') {
+                setTickerObj(content);
+              } else if (subtype === 'st') {
+                setStObj(content);
+              } else if (subtype === 'tr') {
+                setTransactionObj(content);
+              }
             }
-          }
-          break;
-        default:
-          break;
+            break;
+          default:
+            break;
+        }
       }
-    }
-  };
+    };
 
-  const generateOnOpen: any | null = (type: SocketNamesType, ws: WebSocket) => (ev: Event) => {
-    if (ev) {
-      console.log(`Connected WebSocket ${type}`);
-      switch (type) {
-        case 'SUBSCRIBE':
-          if (wsSubscribe) {
-            wsSubscribe.close();
-            console.warn(`Exist ${type} Socket`);
-          }
-          if (wsSubscribe?.CLOSED || wsSubscribe === undefined) {
-            setWsSubscribe(ws);
-            ws.send(stringify(wsMessage));
-          }
-          break;
-        default:
-          break;
+  const generateOnOpen: any | null =
+    (type: SocketNamesType, ws: WebSocket) => (ev: Event) => {
+      if (ev) {
+        console.log(`Connected WebSocket ${type}`);
+        switch (type) {
+          case 'SUBSCRIBE':
+            if (wsSubscribe) {
+              wsSubscribe.close();
+              console.warn(`Exist ${type} Socket`);
+            }
+            if (wsSubscribe?.CLOSED || wsSubscribe === undefined) {
+              setWsSubscribe(ws);
+              ws.send(stringify(wsMessage));
+            }
+            break;
+          default:
+            break;
+        }
       }
-    }
-  };
+    };
 
   /**
    * 웹소켓의 구독 메세지가 변경되면 소켓에 전달합니다.
@@ -129,7 +150,6 @@ export const useGenerateBitThumbSocket = (type: SocketNamesType) => {
                 r: tickerObj.r,
                 h: tickerObj.h,
                 l: tickerObj.l,
-                // m: tickerObj.m,
                 f: tickerObj.f,
               };
             });

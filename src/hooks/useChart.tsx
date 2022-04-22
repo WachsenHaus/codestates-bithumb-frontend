@@ -44,7 +44,6 @@ export const useGetChartDatas = () => {
 
     return () => {
       if (timerId.current) {
-        source.cancel('호출취소2');
         setChartData({
           t: [],
           o: [],

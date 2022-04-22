@@ -72,6 +72,7 @@ export const useGetCoinList = () => {
       /**
        * 코인타입이고 사용중인 코인만 필터링합니다.
        */
+      // console.log(rawData);
       const filteredData = rawData.filter(
         (item) =>
           item.coinClassCode !== 'F' &&
@@ -96,14 +97,13 @@ export const useGetCoinList = () => {
         );
         return {
           isFavorite: cookieCoinSymbol ? true : false,
-          siseCrncCd: item.siseCrncCd === 'C0100' ? 'KRW' : 'BTC',
+          siseCrncCd: item.siseCrncCd,
           coinClassCode: item.coinClassCode,
           coinName: item.coinName,
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
           coinType: item.coinType,
           isLive: item.isLive,
-          m: item.siseCrncCd,
           consonant,
         };
       });
@@ -192,13 +192,14 @@ export const useGetTradeData = () => {
             }
 
             if (isExist === -1) {
+              console.log(tickerData[tickerKeys[i]]);
               console.log('not coin');
             } else {
               draft[isExist] = {
                 ...draft[isExist],
                 u24: value24H,
                 r: chgRate,
-                e: openPrice,
+                e: openPrice === '0' ? closePrice : openPrice,
                 a: chgAmt,
               };
             }

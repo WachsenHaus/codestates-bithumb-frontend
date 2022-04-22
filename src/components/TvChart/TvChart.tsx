@@ -7,7 +7,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { atomDrawChart } from '../../atom/drawData.atom';
 import { atomSelectCoin } from '../../atom/selectCoin.atom';
-import { atomChartData, atomGetStChartData, TypeChartData } from '../../atom/tvChart.atom';
+import {
+  atomChartData,
+  atomGetStChartData,
+  TypeChartData,
+} from '../../atom/tvChart.atom';
 import { useGetChartDatas } from '../../hooks/useChart';
 
 const CONST_KR_UTC = 9 * 60 * 60 * 1000;
@@ -78,8 +82,11 @@ const TvChart = () => {
     (async () => {
       if (stObj) {
         const { o, t, e } = stObj;
-        const currentTime = moment(t, 'YYYYMMDDHHmmss').utc().valueOf() as UTCTimestamp;
-        const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) * 60) as UTCTimestamp;
+        const currentTime = moment(t, 'YYYYMMDDHHmmss')
+          .utc()
+          .valueOf() as UTCTimestamp;
+        const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) *
+          60) as UTCTimestamp;
 
         const nextTime = int;
         if (currentBar === undefined) {
@@ -143,9 +150,10 @@ const TvChart = () => {
    * 그리는 차트 값이 변경되면 그래프에 적용함.
    */
   useEffect(() => {
-    if (drawChart.length > 0) {
-      candleChart.current?.setData(drawChart);
-    }
+    // if(drawChart.length ==)
+    // if (drawChart.length > 0) {
+    candleChart.current?.setData(drawChart);
+    // }
   }, [drawChart]);
 
   return <div className={classNames(`w-full h-full`)} ref={wrapperRef} />;

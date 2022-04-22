@@ -18,17 +18,11 @@ export const useGetOrderBookInterval = () => {
   const CancelToken = axios.CancelToken;
   const source = CancelToken.source();
   const isFetching = useRef(false);
-  // const setChartData = useSetRecoilState(atomChartData);
 
-  //   const getD = async () => {
-  //     const result = await axios.get(
-  //       `https://pub1.bithumb.com/trade-info/v1/getTradeData?type=custom&crncCd=C0100&coin=C0101&lists=%7Bticker%3A%20%7B%20coinType%3A%20%27ALL%27%2C%20tickType%3A%20%27MID%27%20%7D%2Ctransaction%3A%20%7B%20limit%3A%2031%20%7D%7D`
-  //     );
-  //     console.log(result);
-  //   };
   const getData = async () => {
     const { coinSymbol, marketSymbol } = selectCoin;
-    const url = `${coinSymbol}_${marketSymbol}/1`;
+    const time = 1; // 분 단위로 설정할 수 있어야함
+    const url = `${coinSymbol}_${marketSymbol}/${time}`;
     try {
       isFetching.current = true;
       const result = await axios.get<ResponseVO<IOrderBookData>>(

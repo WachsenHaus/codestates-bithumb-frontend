@@ -1,4 +1,4 @@
-import { Box, Typography } from '@mui/material';
+import { Box, Skeleton, Typography } from '@mui/material';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
@@ -25,6 +25,7 @@ const Orderbook = () => {
   const { marketSymbol } = useRecoilValue(atomSelectCoin);
   const { f, coinSymbol } = useRecoilValue(atomDrawCoinInfo);
   const [maxQuantity, setMaxQuantity] = useState('0');
+  const [isLoading, setIsLoading] = useState(false);
 
   const getMaxValueOrderBook = async (
     baseValue: string,
@@ -49,6 +50,11 @@ const Orderbook = () => {
 
   useEffect(() => {
     calcQuantity(orderBook.ask, orderBook.bid);
+    if (orderBook.ask.length > 0) {
+      setIsLoading(true);
+    } else {
+      setIsLoading(false);
+    }
   }, [orderBook]);
 
   const getEventType = useCallback(
@@ -149,6 +155,7 @@ const Orderbook = () => {
             />
           );
         })}
+        {isLoading === false && <Skeleton height={'100%'} animation="wave" />}
       </Box>
     </Box>
   );

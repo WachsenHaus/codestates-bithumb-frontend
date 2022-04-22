@@ -101,7 +101,7 @@ export const RenderNameColumn = (e: TableCellProps) => {
     >
       {e.cellData}
       <div className="text-xs font-bmjua">
-        {e.rowData.coinSymbol}/{e.rowData.m === 'C0100' ? 'KRW' : ''}
+        {e.rowData.coinSymbol}/{e.rowData.siseCrncCd === 'C0100' ? 'KRW' : ''}
       </div>
     </motion.div>
   );
