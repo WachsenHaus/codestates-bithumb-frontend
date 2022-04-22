@@ -85,11 +85,6 @@ export const useGetCoinList = () => {
       );
       const cookieFavorites = getCookie('marketFavoritesCoin');
       const unPackCookie = unpackCookie(cookieFavorites);
-      // const parseCookies = cookieFavorites
-      //   .replace('[', '')
-      //   .replace(']', '')
-      //   .replace(/\"/g, '')
-      //   .split(',');
 
       const drawDummy = filteredData.map((item) => {
         const consonant = GetConsonant({

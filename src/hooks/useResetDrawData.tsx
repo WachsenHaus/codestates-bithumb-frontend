@@ -5,6 +5,7 @@ import {
   atomDrawCoinInfo,
   atomDrawTransaction,
 } from '../atom/drawData.atom';
+import { atomOrderBook } from '../atom/orderBook.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 import { atomChartData } from '../atom/tvChart.atom';
 
@@ -16,11 +17,16 @@ const useResetObserverDrawData = () => {
   const drawTranSaction = useSetRecoilState(atomDrawTransaction);
   const drawChartData = useSetRecoilState(atomDrawChart);
   const drawCoinInfo = useSetRecoilState(atomDrawCoinInfo);
+  const drawOrderBook = useSetRecoilState(atomOrderBook);
 
   useEffect(() => {
     drawTranSaction([]);
     drawChartData([]);
     drawCoinInfo({});
+    drawOrderBook({
+      ask: [],
+      bid: [],
+    });
   }, [selectCoin]);
 };
 

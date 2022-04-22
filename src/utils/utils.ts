@@ -32,10 +32,10 @@ export const convertStringPriceWON = (value?: string) => {
     let price;
     if (value.length < CONST_DIVIDE_WON_MILLION) {
       price = (numberValue / 1000) | 0;
-      price = `${price.toLocaleString('ko-kr')}천원`;
+      price = `${price.toLocaleString('ko-kr')}천`;
     } else {
       price = (numberValue / 1000 / 1000) | 0;
-      price = `${price.toLocaleString('ko-kr')}백만원`;
+      price = `${price.toLocaleString('ko-kr')}백만`;
     }
     return price;
   } else {

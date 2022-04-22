@@ -60,8 +60,6 @@ export const atomTradeData = selector({
   get: async ({ get }) => {
     try {
       get(forceReloadTradeData);
-      console.log('get');
-      console.log(`${get(atomSelectCoin).coinType}`);
       const url = {
         type: 'custom',
         crncCd: get(atomSelectCoin).siseCrncCd,
