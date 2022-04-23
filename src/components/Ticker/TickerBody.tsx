@@ -20,9 +20,15 @@ import {
 } from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
+import {
+  atomFilteredCoins,
+  atomFilterUseCoins,
+  atomPriceInfoUseCoins,
+  atomUseCoins,
+} from '../../atom/total.atom';
 
 export const RenderFavoriteColumn = (e: TableCellProps) => {
-  const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
+  const [drawTicker, setDrawTicker] = useRecoilState(atomPriceInfoUseCoins);
 
   const onToggleCoin = async (
     drawTicker: Array<TypeDrawTicker>,

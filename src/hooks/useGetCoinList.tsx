@@ -20,8 +20,17 @@ import { atomTradeData, TypeTradeTransaction } from '../atom/tradeData.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 import { getCookie, unpackCookie } from '../utils/utils';
 import { atomCommonConfig } from '../atom/commonConfig.atom';
+import {
+  atomFilteredCoins,
+  atomFilterUseCoins,
+  atomFinalCoins,
+  atomMergeTickerAndCoins,
+  atomPriceFilterdCoins,
+  atomPriceInfoUseCoins,
+  atomUseCoins,
+} from '../atom/total.atom';
 
-const GetConsonant = ({
+export const GetConsonant = ({
   coinName,
   coinNameEn,
   coinSymbol,
@@ -49,9 +58,16 @@ const GetConsonant = ({
  * @returns 코인 리스트들을 받아옵니다.
  */
 export const useGetCoinList = () => {
-  const [coinState, setCoinState] = useRecoilState(atomCoinList);
-  const setDrawTicker = useSetRecoilState(atomDrawTicker);
   const queryResults = useRecoilValueLoadable(atomGetCoinList);
+  const filterdUseCoins = useRecoilValueLoadable(atomFilterUseCoins);
+  const pricefilterCoins = useRecoilValueLoadable(atomPriceFilterdCoins);
+  const mergeTickerAndCoins = useRecoilValueLoadable(atomMergeTickerAndCoins);
+
+  // const setDrawTicker = useSetRecoilState(atomDrawTicker);
+  const setCoinState = useSetRecoilState(atomCoinList);
+  const setUseCoins = useSetRecoilState(atomUseCoins);
+  const setFilteredCoins = useSetRecoilState(atomFilteredCoins);
+  const setFinalCoins = useSetRecoilState(atomFinalCoins);
 
   /**
    * 최초 코인리스트를 받아오면 동작하는 기능.
@@ -65,60 +81,28 @@ export const useGetCoinList = () => {
     }
   }, [queryResults.state]);
 
-  /**
-   * coinState라는 임시 상태값에 코인이 들어왔다면 drawTicker아톰에 값을 할당함.
-   */
   useEffect(() => {
-    // 받아온 코인리스트에서 그리기위한 정보만 집어넣음.
-    const result = new Promise((resolve, reject) => {
-      if (coinState?.coinList === undefined) return;
-      const rawData = _.cloneDeep(coinState?.coinList);
-      /**
-       * 코인타입이고 사용중인 코인만 필터링합니다.
-       */
-      // console.log(rawData);
-      const filteredData = rawData.filter(
-        (item) =>
-          item.coinClassCode !== 'F' &&
-          item.siseCrncCd !== 'C0101' &&
-          item.isLive === true
-      );
-      const cookieFavorites = getCookie('marketFavoritesCoin');
-      const unPackCookie = unpackCookie(cookieFavorites);
+    if (filterdUseCoins.state === 'hasValue') {
+      // 임시로 설정함 기존 코드 유지용
+      // setDrawTicker(filterdUseCoins.contents);
+      setUseCoins(filterdUseCoins.contents);
+    }
+  }, [filterdUseCoins.contents, filterdUseCoins.state, setUseCoins]);
 
-      const drawDummy = filteredData.map((item) => {
-        const consonant = GetConsonant({
-          coinName: item.coinName,
-          coinNameEn: item.coinNameEn,
-          coinSymbol: item.coinSymbol,
-        });
-        const cookieCoinSymbol = unPackCookie.find(
-          (i) => i.split('_')[0] === item.coinType
-        );
-        return {
-          isFavorite: cookieCoinSymbol ? true : false,
-          siseCrncCd: item.siseCrncCd,
-          coinClassCode: item.coinClassCode,
-          coinName: item.coinName,
-          coinNameEn: item.coinNameEn,
-          coinSymbol: item.coinSymbol,
-          coinType: item.coinType,
-          isLive: item.isLive,
-          consonant,
-        };
-      });
-      if (drawDummy) {
-        resolve(drawDummy);
-      } else {
-        reject('err');
-      }
-    });
-    result
-      .then((data) => {
-        setDrawTicker(data as TypeDrawTicker[]);
-      })
-      .catch((err) => console.error(err));
-  }, [coinState]);
+  useEffect(() => {
+    if (pricefilterCoins.state === 'hasValue') {
+      console.log('왜느리지');
+      console.log(new Date());
+      console.log(pricefilterCoins.contents);
+      setFilteredCoins(pricefilterCoins.contents);
+    }
+  }, [pricefilterCoins.contents, pricefilterCoins.state, setFilteredCoins]);
+
+  useEffect(() => {
+    if (mergeTickerAndCoins.state === 'hasValue') {
+      mergeTickerAndCoins && setFinalCoins(mergeTickerAndCoins.contents);
+    }
+  }, [mergeTickerAndCoins, setFinalCoins]);
 };
 
 /**
@@ -128,16 +112,19 @@ export const useGetTradeData = () => {
   const tradeData = useRecoilValueLoadable(atomTradeData);
   const selectCoin = useRecoilValue(atomSelectCoin);
   const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
+
+  const [useCoins, setUseCoins] = useRecoilState(atomUseCoins);
+  const setPriceInfoUseCoins = useSetRecoilState(atomPriceInfoUseCoins);
   const setDrawCoinInfo = useSetRecoilState(atomDrawCoinInfo);
   const setCommonConfig = useSetRecoilState(atomCommonConfig);
   const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
   const [flag, setFlag] = useState(false);
 
   useEffect(() => {
-    if (drawTicker.length > 1) {
+    if (useCoins.length > 1) {
       setFlag(true);
     }
-  }, [drawTicker]);
+  }, [useCoins]);
 
   useEffect(() => {
     if (
@@ -151,7 +138,7 @@ export const useGetTradeData = () => {
       let defaultObj: TypeDrawTicker = {};
 
       const tickerPromise = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-        const next = produce(drawTicker, (draft) => {
+        const next = produce(useCoins, (draft) => {
           for (let i = 0; i < tickerKeys.length; i++) {
             const {
               coinType,
@@ -241,7 +228,11 @@ export const useGetTradeData = () => {
 
       Promise.all([tickerPromise, transactionPromise]).then((values) => {
         const [ticker, transaction] = values;
-        setDrawTicker(ticker);
+        // setDrawTicker(ticker);
+        console.log('여기');
+        console.log(ticker);
+        setPriceInfoUseCoins(ticker);
+        // setFinalUseCoins(ticker);
         setDrawCoinInfo(defaultObj);
         setDrawTransaction(transaction);
         setCommonConfig({

@@ -8,14 +8,7 @@ import {
   OverscanIndexRange,
   Table,
 } from 'react-virtualized';
-import {
-  Autocomplete,
-  Button,
-  InputAdornment,
-  Pagination,
-  Paper,
-  TextField,
-} from '@mui/material';
+import { InputAdornment, Pagination, Paper, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import _ from 'lodash';
 import {
@@ -29,25 +22,31 @@ import {
   RenderRateOfChange,
   RenderU24,
 } from './../Ticker/TickerBody';
-import useGetSortTicker from '../../hooks/useGetSortTicker';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import {
+  atomFilterDirection,
+  atomFilteredCoins,
+  atomFilterKeyword,
+  atomFilterMode,
+  atomFilterOrderBy,
+  atomFinalCoins,
+} from '../../atom/total.atom';
 
 const Ticker = () => {
-  const [viewMode, setViewMode] = useState<'normal' | 'favorite'>('normal');
-  const [orderMode, setOrderMode] = useState<'e' | 'r' | 'u24'>('u24');
-  const [sortBy, setSortBy] = useState<
-    Array<'isFavorit' | 'coinName' | 'e' | 'r' | 'u24'>
-  >([]);
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [sortFn, sortList, keywordRef] = useGetSortTicker(
-    viewMode,
-    orderMode,
-    sortBy,
-    sortDirection
-  );
+  const [orderMode, setOrderMode] = useRecoilState(atomFilterOrderBy);
+  const [sortDirection, setSortDirection] = useRecoilState(atomFilterDirection);
+
+  // 초ㅣ적화
+  const [filterMode, setFilterMode] = useRecoilState(atomFilterMode);
+  const setFilterKeyword = useSetRecoilState(atomFilterKeyword);
+  const filterKeyword = useRecoilValue(atomFilterKeyword);
+  const filterdCoins = useRecoilValue(atomFilteredCoins);
+  const finalCoins = useRecoilValue(atomFinalCoins);
 
   const rowHeight = 50;
   const headerHeight = 50;
-  const rowCount = sortList.length;
+  const rowCount = finalCoins?.length;
+
   const [height, setHeight] = useState(350);
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(height / rowHeight);
@@ -77,14 +76,23 @@ const Ticker = () => {
     []
   );
 
+  const onChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+      const keyword = e.target.value as string;
+      // keywordRef.current = e.target.value;
+      setFilterKeyword(keyword);
+    },
+    []
+  );
+
   const [isExist, setIsExist] = useState(false);
   useEffect(() => {
-    if (sortList?.length > 0) {
+    if (filterdCoins?.length > 0) {
       setIsExist(true);
     } else {
       setIsExist(false);
     }
-  }, [sortList]);
+  }, [filterdCoins]);
 
   const onClick = (type: 'e' | 'r' | 'u24') => () => {
     let direction: 'desc' | 'asc' = 'desc';
@@ -93,9 +101,7 @@ const Ticker = () => {
     } else {
       direction = 'desc';
     }
-
     setOrderMode(type);
-    setSortBy([type]);
     setSortDirection(direction);
   };
 
@@ -115,26 +121,25 @@ const Ticker = () => {
             )}
           >
             <button
-              // variant={viewMode === 'normal' ? 'outlined' : undefined}
               className={classNames(
-                viewMode === 'normal' && `border-b-4 font-bold`,
+                filterMode === 'normal' && `border-b-4 font-bold`,
                 `border-b-black`,
                 `h-full`
               )}
               onClick={(e) => {
-                setViewMode('normal');
+                setFilterMode('normal');
               }}
             >
               원화마켓
             </button>
             <button
               className={classNames(
-                viewMode === 'favorite' && `border-b-4 font-bold `,
+                filterMode === 'isFavorite' && `border-b-4 font-bold `,
                 `border-b-black`,
                 `h-full`
               )}
               onClick={(e) => {
-                setViewMode('favorite');
+                setFilterMode('isFavorite');
               }}
             >
               즐겨찾기
@@ -150,9 +155,7 @@ const Ticker = () => {
                 </InputAdornment>
               ),
             }}
-            onChange={(e) => {
-              keywordRef.current = e.target.value;
-            }}
+            onChange={onChange}
           />
         </div>
       </div>
@@ -169,9 +172,6 @@ const Ticker = () => {
             {({ width, height }) =>
               isExist ? (
                 <Table
-                  sort={sortFn}
-                  sortBy={undefined}
-                  sortDirection={undefined}
                   width={width}
                   height={height}
                   headerHeight={headerHeight}
@@ -182,7 +182,7 @@ const Ticker = () => {
                   scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={({ index }) => {
-                    return sortList[index];
+                    return finalCoins[index];
                   }}
                 >
                   <Column
@@ -254,7 +254,7 @@ const Ticker = () => {
                   }}
                   className={'flex justify-center items-center font-bmjua'}
                 >
-                  '{keywordRef.current}'로 검색된 가상자산이 없습니다.
+                  '{filterKeyword}'로 검색된 가상자산이 없습니다.
                 </div>
               )
             }

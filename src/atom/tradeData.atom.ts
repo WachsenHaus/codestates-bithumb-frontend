@@ -7,8 +7,8 @@ import { Log } from '../utils/log';
 import { API_BITHUMB } from './../api/bt.api';
 
 export type TypeTradeTikcer = {
-  crncCd: TypeCoinKind;
-  coinType: string;
+  crncCd: TypeCoinKind; // 'C0100"
+  coinType: string; //"C0102"
   tickType: string; //변동 기준시간 - 30M, 1H,12H,24H,MID
   date: string; //일자
   time: string; //시간
@@ -24,8 +24,8 @@ export type TypeTradeTikcer = {
   chgRate: string; //변동률
   chgAmt: string; //변동금액
   volumePower: string; //체결강도
-  volume24H: string; //24시간 거래금액
-  value24H: string;
+  volume24H: string; //24시간 거래량
+  value24H: string; // 24시간 거래금액
   volumePower24H: string; //24시간 체결강도
 };
 

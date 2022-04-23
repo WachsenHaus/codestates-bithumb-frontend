@@ -25,6 +25,7 @@ import { atomGetStChartData } from '../atom/tvChart.atom';
 import { atomSelectCoin } from '../atom/selectCoin.atom';
 import { TypeCoinKind } from '../atom/coinList.type';
 import { atomCommonConfig } from '../atom/commonConfig.atom';
+import { atomTickers } from '../atom/total.atom';
 
 /**
  *
@@ -35,14 +36,11 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
   const [wsMessage, setWsMessage] = useRecoilState(
     atomSubscribeWebSocektMessage
   );
-  const commonConfig = useRecoilValue(atomCommonConfig);
 
-  const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
-  const [drawCoin, setDrawCoin] = useRecoilState(atomDrawCoinInfo);
   const selectCoin = useRecoilValue(atomSelectCoin);
   const [drawTransaction, setDrawTransaction] =
     useRecoilState(atomDrawTransaction);
-  const [tickerObj, setTickerObj] = useState<TypeWebSocketTickerReturnType>();
+  const [tickers, setTickers] = useRecoilState(atomTickers);
   const [stObj, setStObj] = useRecoilState(atomGetStChartData);
   const [transactionObj, setTransactionObj] = useState<{
     m: TypeCoinKind;
@@ -77,7 +75,8 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
           case 'SUBSCRIBE':
             if (type === 'data') {
               if (subtype === 'tk') {
-                setTickerObj(content);
+                setTickers(content);
+                // setTickerObj(content);
               } else if (subtype === 'st') {
                 setStObj(content);
               } else if (subtype === 'tr') {
@@ -131,66 +130,6 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
     }
   }, [selectCoin]);
 
-  /**
-   * 웹소켓으로 들어오는 티커 정보를 drawTicker에 갱신합니다.
-   * 함수 자리를 이동해야함.
-   */
-  useEffect(() => {
-    if (commonConfig.isInit && tickerObj && drawTicker) {
-      const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-        const next = produce(drawTicker, (draft) => {
-          const isExist = draft.findIndex((item) => {
-            return item.coinType === tickerObj.c;
-          });
-          // 현재 코인(ticker)과 선택된 코인(drawCoin)의 정보가 같다면 티커에서 들어오는 정보를 drawcoin에도 넣어줌.
-          if (tickerObj.c === drawCoin.coinType) {
-            setDrawCoin((prevData) => {
-              return {
-                ...prevData,
-                // e: tickerObj.e,
-                u24: tickerObj.u24,
-                v24: tickerObj.v24,
-                r: tickerObj.r,
-                h: tickerObj.h,
-                l: tickerObj.l,
-                f: tickerObj.f,
-              };
-            });
-          }
-          if (isExist === -1 || tickerObj.m === 'C0101') {
-          } else {
-            // 트랜잭션의 색상을 구함.
-            let isUp;
-            const currentPrice = Number(tickerObj.e);
-            const prevPrice = Number(draft[isExist].e);
-            if (currentPrice > prevPrice) {
-              isUp = true;
-            } else if (currentPrice === prevPrice) {
-              isUp = undefined;
-            } else {
-              isUp = false;
-            }
-
-            draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
-          }
-        });
-        if (next) {
-          resolve(next);
-        } else {
-          reject('err');
-        }
-      });
-
-      result
-        .then((d) => {
-          setDrawTicker(d);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    }
-  }, [tickerObj, commonConfig.isInit]);
-
   useEffect(() => {
     (async () => {
       const result = await produce(drawTransaction, (draft) => {
@@ -215,13 +154,13 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
           }
 
           //코인바에 나타날 가격을 갱신함
-          setDrawCoin((prevData) => {
-            return {
-              ...prevData,
-              e: p,
-              // q:lastItem.
-            };
-          });
+          // setDrawCoin((prevData) => {
+          //   return {
+          //     ...prevData,
+          //     e: p,
+          //     // q:lastItem.
+          //   };
+          // });
 
           draft.push({
             coinType: c, //
