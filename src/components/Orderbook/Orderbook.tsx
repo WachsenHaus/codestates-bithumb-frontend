@@ -11,19 +11,18 @@ import { atomFinalTransaction } from '../../atom/total.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import OrderbookRow from './OrderbookRow';
 
-const CONST_DISPALY_COUNT = 30;
-const CONST_LOADING_CNT = 16;
-
 /**
  *
  * @returns 호가창 컴포넌트
  */
 const Orderbook = () => {
   useGetOrderBookInterval();
+
   const orderBook = useRecoilValue(atomOrderBook);
   const transaction = useRecoilValue(atomFinalTransaction);
   const { marketSymbol, coinSymbol } = useRecoilValue(atomSelectCoinDefault);
   const { f } = useRecoilValue(atomSelectCoinDetail);
+
   const [maxQuantity, setMaxQuantity] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
 

@@ -65,11 +65,11 @@ export const useGetCoinList = () => {
   const selectWebSocketTransaction = useRecoilValueLoadable(
     selectorWebSocketTransaction
   );
+  const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
+  const setFinalDrawTransaction = useSetRecoilState(atomFinalTransaction);
 
   const setSelectDetailCoin = useSetRecoilState(atomSelectCoinDetail);
   const setPriceInfoUseCoins = useSetRecoilState(atomPriceInfoUseCoins);
-  const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
-  const setFinalDrawTransaction = useSetRecoilState(atomFinalTransaction);
 
   /**
    * 최초 코인리스트를 받아오면 동작하는 기능.

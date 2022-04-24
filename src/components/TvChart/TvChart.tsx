@@ -28,11 +28,13 @@ const TvChart = () => {
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const candleChart = useRef<ISeriesApi<'Candlestick'> | null>();
 
+  // websocket stbar
   const wsStBar = useRecoilValue(atomWsStBar);
+  const [currentBar, setCurrentBar] = useState<iStBar | undefined>(undefined);
+
+  // atom
   const [drawStBars, setDrawStBars] = useRecoilState(atomDrawStBars);
   const selectorDrawStbars = useRecoilValueLoadable(selectorDrawStBars);
-
-  const [currentBar, setCurrentBar] = useState<iStBar | undefined>(undefined);
 
   useEffect(() => {
     if (wrapperRef.current) {
@@ -101,6 +103,9 @@ const TvChart = () => {
 
   const CONST_KR_UTC = 9 * 60 * 60 * 1000;
 
+  /**
+   * websocket에서 들어온 데이터를 curretBar로 파싱해서 가져옴.
+   */
   useEffect(() => {
     const result = new Promise<iStBar>((resolve, reject) => {
       if (wsStBar) {
@@ -137,7 +142,6 @@ const TvChart = () => {
         }
       }
     });
-
     result.then((result) => {
       setCurrentBar(result);
     });

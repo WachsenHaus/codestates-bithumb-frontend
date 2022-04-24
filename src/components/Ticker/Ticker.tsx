@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
 import {
@@ -42,7 +42,15 @@ const Ticker = () => {
   const filterdCoins = useRecoilValue(atomFilteredCoins);
   const finalCoins = useRecoilValue(atomFinalCoins);
 
+  const delayKeyword = useRef(
+    _.debounce((word) => debounceKeyword(word), 300)
+  ).current;
+
   // 초ㅣ적화
+
+  const debounceKeyword = (word: any) => {
+    setFilterKeyword(word);
+  };
 
   const rowHeight = 50;
   const headerHeight = 50;
@@ -80,8 +88,7 @@ const Ticker = () => {
   const onChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
       const keyword = e.target.value as string;
-      // keywordRef.current = e.target.value;
-      setFilterKeyword(keyword);
+      delayKeyword(keyword);
     },
     []
   );

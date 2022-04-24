@@ -14,7 +14,7 @@ import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
  */
 export const useGetOrderBookInterval = () => {
   const timerId = useRef<NodeJS.Timer | null>(null);
-  const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
+  // const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
   const setOrderBookData = useSetRecoilState(atomOrderBook);
   const isFetching = useRef(false);
 
@@ -46,5 +46,5 @@ export const useGetOrderBookInterval = () => {
         timerId.current = null;
       }
     };
-  }, [reload, selectCoinDefault, setOrderBookData]);
+  }, [reload, setOrderBookData]);
 };
