@@ -32,6 +32,9 @@ export const atomGetOrderBook = selector({
     try {
       get(atomForceGetOrderBook);
       const { coinSymbol, marketSymbol } = get(atomSelectCoinDefault);
+      if (coinSymbol === '') {
+        return;
+      }
 
       const time = 1;
       const url = `${coinSymbol}_${marketSymbol}/${time}`;

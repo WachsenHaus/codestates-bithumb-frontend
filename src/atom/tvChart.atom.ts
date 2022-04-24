@@ -114,6 +114,9 @@ export const selectorGetChartData = selector({
     try {
       get(atomForceGetChartData);
       const { coinType, siseCrncCd } = get(atomSelectCoinDefault);
+      if (coinType === '') {
+        return;
+      }
       const { chartTime } = get(atomSelectChartSetup);
       const coinDataUrl = `${coinType}_${siseCrncCd}/${chartTime}`;
 

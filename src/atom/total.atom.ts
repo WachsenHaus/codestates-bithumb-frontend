@@ -319,7 +319,7 @@ export const selectorWebSocketTransaction = selector({
       });
 
       // 트랜잭션은 20개의 데이터만 보관함.
-      if (deepCopyDrawTransaction.length > 30) {
+      if (deepCopyDrawTransaction.length > 20) {
         deepCopyDrawTransaction.shift();
       }
     }

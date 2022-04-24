@@ -15,9 +15,8 @@ import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 import useGetTradeParam from '../hooks/useGetTradeParam';
 
 const MainPage = () => {
-  useGetCoinList();
-
   useGetTradeParam();
+  useGetCoinList();
 
   // 2.처음 디스플레이되는 거래 데이터들을 받아옴.
 

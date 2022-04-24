@@ -68,10 +68,14 @@ export const atomTradeData = selector({
   get: async ({ get }) => {
     try {
       get(forceReloadTradeData);
+      const { siseCrncCd, coinType } = get(atomSelectCoinDefault);
+      if (coinType === '') {
+        return;
+      }
       const url = {
         type: 'custom',
-        crncCd: get(atomSelectCoinDefault).siseCrncCd,
-        coin: get(atomSelectCoinDefault).coinType,
+        crncCd: siseCrncCd,
+        coin: coinType,
         lists: {
           ticker: { coinType: 'ALL', tickType: 'MID' },
           transaction: { limit: 31 },

@@ -17,7 +17,7 @@ const useGetTradeParam = () => {
   const params = useParams();
   const coins = useRecoilValue(atomCoinList);
   const setSelectCoin = useSetRecoilState(atomSelectCoinDefault);
-  // console.log(params);
+
   useEffect(() => {
     if (params?.coinName) {
       const result = params?.coinName?.split('_');
@@ -53,7 +53,7 @@ const useGetTradeParam = () => {
         siseCrncCd: 'C0100',
       });
     }
-  }, [params]);
+  }, [params, coins]);
 };
 
 export default useGetTradeParam;
