@@ -1,7 +1,6 @@
-import { useEffect } from 'react';
-/* eslint-disable no-extend-native */
-import React from 'react';
+import _ from 'lodash';
 import { TypeDrawTicker } from '../atom/drawData.atom';
+import hangul from 'hangul-js';
 
 /**
  *
@@ -112,4 +111,53 @@ export const packCookie = (cookieStr: string[]) => {
 
 export const applyCookie = (cookie: any, day: number = 1) => {
   setCookie('marketFavoritesCoin', cookie, day);
+};
+
+/**
+ *
+ * @param orderMode
+ * @param datas
+ * @param sortDirection
+ * @returns 정렬 함수
+ */
+export const order = (
+  orderMode: 'e' | 'r' | 'u24',
+  datas: TypeDrawTicker[],
+  sortDirection: 'asc' | 'desc'
+) => {
+  if (orderMode === 'e') {
+    return _.orderBy(datas, [(e) => Number(e.e)], [sortDirection]);
+  } else if (orderMode === 'r') {
+    return _.orderBy(datas, [(e) => Number(e.r)], [sortDirection]);
+  } else {
+    return _.orderBy(datas, [(e) => Number(e.u24)], [sortDirection]);
+  }
+};
+
+/**
+ *
+ * @param param0
+ * @returns 한글자음,한글이름,영어이름을 반환합니다.
+ */
+export const getConsonant = ({
+  coinName,
+  coinNameEn,
+  coinSymbol,
+}: {
+  coinName: string;
+  coinNameEn: string;
+  coinSymbol: string;
+}) => {
+  const result = hangul.d(coinName, true);
+  if (result) {
+    let data = '';
+    for (let i = 0; i < result.length; i++) {
+      data = data + result[i][0];
+    }
+    data.replace(' ', '');
+    data += coinNameEn;
+    data += coinSymbol;
+    data += coinName;
+    return data;
+  }
 };

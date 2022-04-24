@@ -1,30 +1,20 @@
 import classNames from 'classnames';
-import { AnimatePresence, motion } from 'framer-motion';
-import React, { useState } from 'react';
-import { useRecoilValue } from 'recoil';
-import { atomDrawCoinInfo } from '../../atom/drawData.atom';
+import { motion } from 'framer-motion';
+import React from 'react';
 import {
   convertStringPriceToKRW,
   convertStringPriceWON,
   convertStringToVolume24,
 } from '../../utils/utils';
 import CoinRate from './CoinRate';
+import useGetCoinBar from '../../hooks/useGetCoinBar';
 
 const CoinColumn = ({ children }: { children: React.ReactNode }) => (
   <div className={`flex flex-col justify-center items-center`}>{children}</div>
 );
 
 const CoinBar = () => {
-  const {
-    coinSymbol = '',
-    r = '0',
-    e = '0',
-    v24 = '0',
-    u24 = '0',
-    h = '0',
-    l = '0',
-    f = '0',
-  } = useRecoilValue(atomDrawCoinInfo);
+  const { e, v24, u24, h, l, f, r, coinSymbol } = useGetCoinBar();
 
   return (
     <motion.div

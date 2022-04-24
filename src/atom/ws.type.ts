@@ -1,3 +1,5 @@
+import { TypeCoinKind } from './coinList.type';
+
 export type TypeWebSocketTypes = 'SUBSCRIBE';
 
 /**
@@ -41,4 +43,14 @@ export type TypeWebSocketTickerReturnType = {
   w?: string; // 모르겠음
 };
 
-// export interface IWebSocketTickerRetrun extends TypeWebSocketTickerReturnType {}
+export type TypeWebSocketTransactionReturnType = {
+  m: TypeCoinKind;
+  c: string;
+  l: Array<{
+    o: string;
+    n: string;
+    p: string;
+    q: string;
+    t: string;
+  }>;
+};

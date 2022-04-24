@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { TableCellProps, TableHeaderProps } from 'react-virtualized';
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import { AnimatePresence, motion } from 'framer-motion';
-import produce from 'immer';
+import { useNavigate } from 'react-router-dom';
+
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarRateIcon from '@mui/icons-material/StarRate';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { atomDrawTicker, TypeDrawTicker } from '../../atom/drawData.atom';
-import { atomSelectCoin } from '../../atom/selectCoin.atom';
+import { TypeDrawTicker } from '../../atom/drawData.atom';
 import {
   applyCookie,
   convertStringPriceToKRW,
@@ -20,12 +20,12 @@ import {
 } from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
+import { atomPriceInfoUseCoins } from '../../atom/total.atom';
 import {
-  atomFilteredCoins,
-  atomFilterUseCoins,
-  atomPriceInfoUseCoins,
-  atomUseCoins,
-} from '../../atom/total.atom';
+  atomSelectCoinDefault,
+  ISelectCoinDefault,
+} from '../../atom/selectCoinDefault.atom';
+import _, { find } from 'lodash';
 
 export const RenderFavoriteColumn = (e: TableCellProps) => {
   const [drawTicker, setDrawTicker] = useRecoilState(atomPriceInfoUseCoins);
@@ -36,13 +36,14 @@ export const RenderFavoriteColumn = (e: TableCellProps) => {
       rowData: TypeDrawTicker;
     }
   ) => {
-    const next = produce(drawTicker, (item) => {
-      const a = item.find((item) => item.coinSymbol === e.rowData.coinSymbol);
-      if (a) {
-        a.isFavorite = !a.isFavorite;
-      }
-    });
-    return next;
+    const cloneDrawTicker = _.cloneDeep(drawTicker);
+    const findItem = cloneDrawTicker.find(
+      (item) => item.coinSymbol === e.rowData.coinSymbol
+    );
+    if (findItem) {
+      findItem.isFavorite = !findItem.isFavorite;
+    }
+    return cloneDrawTicker;
   };
 
   const onClick = async () => {
@@ -69,29 +70,20 @@ export const RenderFavoriteColumn = (e: TableCellProps) => {
 };
 
 export const RenderNameColumn = (e: TableCellProps) => {
-  const [selectCoin, setSelectCoin] = useRecoilState(atomSelectCoin);
+  const navigate = useNavigate();
+  const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
+
   const onSelectClick = async (e: any) => {
-    const clickedCoinInfo = e.rowData;
+    const clickedCoinInfo = e.rowData as ISelectCoinDefault;
     if (clickedCoinInfo === undefined) {
       return;
     }
-    if (clickedCoinInfo.coinSymbol === selectCoin.coinSymbol) {
+    if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
       return;
     }
-
-    await setSelectCoin((prevData) => {
-      return {
-        ...prevData,
-        coinType: clickedCoinInfo.coinType,
-        coinSymbol: clickedCoinInfo.coinSymbol,
-        e: clickedCoinInfo.e,
-        v24: clickedCoinInfo.v24,
-        u24: clickedCoinInfo.u24,
-        h: clickedCoinInfo.h,
-        l: clickedCoinInfo.l,
-        f: clickedCoinInfo.f,
-      };
-    });
+    const symbol = clickedCoinInfo.coinSymbol;
+    const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
+    navigate(`/${symbol}_${mSymbol}`);
   };
 
   return (
@@ -115,9 +107,6 @@ export const RenderNameColumn = (e: TableCellProps) => {
 };
 
 export const RenderCurrentPriceColumn = (e: TableCellProps) => {
-  // if (e.cellData === undefined || e.cellData === '0') {
-  //   console.log(e);
-  // }
   return (
     <motion.div className="flex items-center">
       <div>
@@ -161,7 +150,6 @@ export const RenderRateOfChange = (e: TableCellProps) => {
       setIsUp(true);
     }
   }, [e]);
-  // console.log(e.rowData.a);
   let price = Number(e.rowData.a).toLocaleString('ko-kr');
   if (isUp) {
     price = `+${price}`;

@@ -6,7 +6,7 @@
 //   ITransactionReceiverTypes,
 //   ITransactionSenderTypes,
 // } from '../atom/user.atom';
-import { CoinSymbolBTCTypes, CoinSymbolKRWTypes } from '../type/coinTypes';
+
 // import {
 //   DEFAULT_ORDERBOOK_DEPTH_RECEIV_DATA,
 //   DEFAULT_ORDERBOOK_DEPTH_SENDER,
@@ -17,8 +17,8 @@ import { CoinSymbolBTCTypes, CoinSymbolKRWTypes } from '../type/coinTypes';
 // } from './defaultData';
 
 interface ConstTypes {
-  ENABLE_KRW_SYMBOL: CoinSymbolKRWTypes[];
-  ENABLE_BTC_SYMBOL: CoinSymbolBTCTypes[];
+  // ENABLE_KRW_SYMBOL: CoinSymbolKRWTypes[];
+  // ENABLE_BTC_SYMBOL: CoinSymbolBTCTypes[];
   // DEFAULT_TICKER_SENDER: ITickerSenderTypes;
   // DEFAULT_TICKER_RECEIV_DATA: ITickerReceiverTypes;
   // DEFAULT_ORDERBOOK_DEPTH_SENDER: IOrderBookDepthSenderTypes;

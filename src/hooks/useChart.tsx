@@ -1,45 +1,41 @@
-import axios from 'axios';
 import React, { useEffect, useRef } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { API_BITHUMB } from '../api/bt.api';
-import { atomSelectCoin } from '../atom/selectCoin.atom';
-import { atomChartData, ICoinChart } from '../atom/tvChart.atom';
-import { ResponseVO } from '../type/api';
-import { Log } from '../utils/log';
+import {
+  useRecoilStateLoadable,
+  useRecoilValue,
+  useSetRecoilState,
+} from 'recoil';
+
+import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
+import { atomChartData, selectorGetChartData } from '../atom/tvChart.atom';
 
 export const useGetChartDatas = () => {
   const timerId = useRef<NodeJS.Timer | null>(null);
-  const selectCoin = useRecoilValue(atomSelectCoin);
+  const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
+
+  const [getChartData, reload] = useRecoilStateLoadable(selectorGetChartData);
   const setChartData = useSetRecoilState(atomChartData);
-  const CancelToken = axios.CancelToken;
-  const source = CancelToken.source();
   const isFetching = useRef(false);
 
-  const getData = async () => {
-    const { coinType, chartTime, siseCrncCd } = selectCoin;
-    const coinDataUrl = `${coinType}_${siseCrncCd}/${chartTime}`;
-    try {
-      isFetching.current = true;
-      const result = await axios.get<ResponseVO<ICoinChart>>(
-        `${API_BITHUMB.GET_CANDLESTICKNEW_TRVIEW}/${coinDataUrl}`,
-        {
-          cancelToken: source.token,
-        }
-      );
-      setChartData(result.data.data);
-      isFetching.current = false;
-    } catch (err) {
-      Log(err);
-      return undefined;
-    }
-  };
+  /**
+   * 차트데이터를 성공적으로 받아오면 atomchartdata에 할당합니다.
+   */
   useEffect(() => {
-    getData();
+    if (getChartData.state === 'hasValue') {
+      getChartData.contents && setChartData(getChartData.contents);
+      isFetching.current = false;
+    }
+  }, [getChartData]);
+
+  /**
+   * 1분 주기로 차트데이터를 받아옵니다.
+   */
+  useEffect(() => {
     timerId.current = setInterval(async () => {
       if (isFetching.current) {
         return;
       }
-      getData();
+      isFetching.current = true;
+      reload(undefined);
     }, 60 * 1000);
 
     return () => {
@@ -56,5 +52,5 @@ export const useGetChartDatas = () => {
         timerId.current = null;
       }
     };
-  }, [selectCoin]);
+  }, [selectCoinDefault]);
 };

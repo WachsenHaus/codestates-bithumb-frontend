@@ -1,10 +1,11 @@
-import { atomSelectCoin } from './selectCoin.atom';
 import axios from 'axios';
-import { atom, selector } from 'recoil';
+import { atom, DefaultValue, selector } from 'recoil';
 import { API_BITHUMB } from '../api/bt.api';
 import { ResponseVO } from '../type/api';
-import { Log } from '../utils/log';
 import { UTCTimestamp } from 'lightweight-charts';
+import { atomSelectCoinDefault } from './selectCoinDefault.atom';
+import { atomSelectChartSetup } from './selectChart.atom';
+import _ from 'lodash';
 
 export interface ICoinChart {
   t: Array<UTCTimestamp>;
@@ -60,7 +61,70 @@ export type TypeChartData = {
   close: string;
 };
 
-export const atomGetStChartData = atom<iStChartData | undefined>({
-  key: 'AtomGetStChartData',
+export const atomWsStBar = atom<iStChartData | undefined>({
+  key: 'atomWsStBar',
   default: undefined,
+});
+
+export const atomForceGetChartData = atom<undefined | number>({
+  key: 'atomForceGetChartData',
+  default: undefined,
+});
+
+const CONST_KR_UTC = 9 * 60 * 60 * 1000;
+
+export interface iStBar {
+  close: string;
+  high: string;
+  low: string;
+  open: string;
+  time: UTCTimestamp;
+}
+
+export const atomDrawStBars = atom<Array<iStBar>>({
+  key: 'atomDrawStBars',
+  default: [],
+});
+export const selectorDrawStBars = selector({
+  key: 'selectorDrawStBars',
+  get: async ({ get }) => {
+    const stbars = get(atomChartData);
+    const { c, h, l, o, t, v } = stbars;
+    const result = new Promise<iStBar[]>((resolve, reject) => {
+      let obj = [];
+      for (let i = 0; i < t.length; i++) {
+        const time = ((t[i] + CONST_KR_UTC) / 1000) as UTCTimestamp;
+        obj.push({
+          time: time,
+          open: o[i],
+          high: h[i],
+          low: l[i],
+          close: c[i],
+        });
+      }
+      resolve(obj);
+    });
+    return await result;
+  },
+});
+
+export const selectorGetChartData = selector({
+  key: 'selectorGetChartData',
+  get: async ({ get }) => {
+    try {
+      get(atomForceGetChartData);
+      const { coinType, siseCrncCd } = get(atomSelectCoinDefault);
+      const { chartTime } = get(atomSelectChartSetup);
+      const coinDataUrl = `${coinType}_${siseCrncCd}/${chartTime}`;
+
+      const result = await axios.get<ResponseVO<ICoinChart>>(
+        `${API_BITHUMB.GET_CANDLESTICKNEW_TRVIEW}/${coinDataUrl}`
+      );
+      return result.data.data;
+    } catch (err) {}
+  },
+  set: ({ set }) => set(atomForceGetChartData, Math.random()),
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
 });

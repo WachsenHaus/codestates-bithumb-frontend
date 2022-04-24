@@ -1,14 +1,14 @@
 import { TypeCoinKind, TypeCoinClassCode } from './coinList.type';
 import { atom, selector } from 'recoil';
-import { GetConsonant } from '../hooks/useGetCoinList';
-import { order } from '../hooks/useGetSortTicker';
-import { getCookie, unpackCookie } from '../utils/utils';
+import { getConsonant, getCookie, order, unpackCookie } from '../utils/utils';
 import { atomCoinList } from './coinList.atom';
 import { TypeDrawTicker } from './drawData.atom';
-import { TypeWebSocketTickerReturnType } from './ws.type';
-import { atomCommonConfig } from './commonConfig.atom';
-import produce from 'immer';
+import {
+  TypeWebSocketTickerReturnType,
+  TypeWebSocketTransactionReturnType,
+} from './ws.type';
 import _ from 'lodash';
+import { TypeTradeTransaction } from './tradeData.atom';
 
 // 1. draw atom은 ticker, coinBar, chart, orderbook,transaction 총 다섯개이다.
 // 각 요소들에서 그리기위한 정보는 다음과 같다.
@@ -56,10 +56,6 @@ export const atomDrawTicker = atom({
 // h //고가(당일) highPrice
 // l //저가(당일) lowPrice
 // f //전일종가 closePrice
-export const atomDrawCoinBar = atom({
-  key: 'atomDrawCoinBar',
-  default: undefined,
-});
 
 export const atomDrawChart = atom({
   key: 'atomDrawChart',
@@ -71,11 +67,15 @@ export const atomDrawOrderBook = atom({
   default: undefined,
 });
 
-export const atomDrawTransaction = atom({
+export const atomDrawTransaction = atom<Array<TypeTradeTransaction>>({
   key: 'atomDrawTransaction',
-  default: undefined,
+  default: [],
 });
 
+export const atomFinalTransaction = atom<Array<TypeTradeTransaction>>({
+  key: 'atomFinalTransaction',
+  default: [],
+});
 export interface IDisplayCoinsFilter {
   isLive: boolean;
   coinClassCode: TypeCoinClassCode;
@@ -124,6 +124,15 @@ export const atomTickers = atom<TypeWebSocketTickerReturnType>({
   default: {},
 });
 
+export const atomTransactions = atom<TypeWebSocketTransactionReturnType>({
+  key: 'atomTransactions',
+  default: {
+    m: 'C0100',
+    c: '',
+    l: [],
+  },
+});
+
 export const atomFilteredCoins = atom<TypeDrawTicker[]>({
   key: 'atomFilteredCoins',
   default: [],
@@ -135,38 +144,32 @@ export const atomFinalCoins = atom<TypeDrawTicker[]>({
 });
 
 // 해당 티커가 갱신될때,
-export const atomMergeTickerAndCoins = selector({
-  key: 'atomMergeTickerAndCoins',
+export const selectorMergeTickerAndCoins = selector({
+  key: 'selectorMergeTickerAndCoins',
   get: async ({ get }) => {
     const tickerObj = get(atomTickers);
     const coins = get(atomFilteredCoins);
-    const commonConfig = get(atomCommonConfig);
-
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-      if (commonConfig.isInit === true) {
-        const isExist = coins.findIndex(
-          (item) => item.coinType === tickerObj.c
-        );
-        if (isExist === -1) {
-          resolve(coins);
-          return;
-        } else if (tickerObj.m === 'C0101') {
-          resolve(coins);
+      const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
+      if (isExist === -1) {
+        resolve(coins);
+        return;
+      } else if (tickerObj.m === 'C0101') {
+        resolve(coins);
+      } else {
+        const draft = _.cloneDeep(coins);
+        let isUp;
+        const currentPrice = Number(tickerObj.e);
+        const prevPrice = Number(draft[isExist].e);
+        if (currentPrice > prevPrice) {
+          isUp = true;
+        } else if (currentPrice === prevPrice) {
+          isUp = undefined;
         } else {
-          const draft = _.cloneDeep(coins);
-          let isUp;
-          const currentPrice = Number(tickerObj.e);
-          const prevPrice = Number(draft[isExist].e);
-          if (currentPrice > prevPrice) {
-            isUp = true;
-          } else if (currentPrice === prevPrice) {
-            isUp = undefined;
-          } else {
-            isUp = false;
-          }
-          draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
-          resolve(draft);
+          isUp = false;
         }
+        draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
+        resolve(draft);
       }
     });
     return result;
@@ -179,19 +182,16 @@ export const atomMergeTickerAndCoins = selector({
 /**
  * 가격정보가 포함되고 사용중인 코인목록을 의존하면서, keyword와 mode, orderby로 필터링을 하는 함수
  */
-export const atomPriceFilterdCoins = selector({
-  key: 'atomPriceFilterdCoins',
+export const selectorPriceFilterdCoins = selector({
+  key: 'selectorPriceFilterdCoins',
   get: async ({ get }) => {
     const filterMode = get(atomFilterMode);
     const filterKeyword = get(atomFilterKeyword);
     const orderBy = get(atomFilterOrderBy);
     const direction = get(atomFilterDirection);
-    // 이부분이 문제야, mode가 변경되면 최초의 사용 코인만을 가지고 필터링을 돌잖아.
     const prevUseCoins = get(atomPriceInfoUseCoins);
 
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-      // console.log(filterKeyword, filterMode);
-
       let resultUseCoins;
 
       if (filterMode === 'normal') {
@@ -228,8 +228,8 @@ export const atomPriceFilterdCoins = selector({
 /**
  * 표시하려는 코인만 추리는 셀렉터
  */
-export const atomFilterUseCoins = selector({
-  key: 'atomFilterUseCoins',
+export const selectorFilterUseCoins = selector({
+  key: 'selectorFilterUseCoins',
   get: async ({ get }) => {
     const defaultInfoCoins = get(atomCoinList);
     const displayFilter = get(atomDisplayCoinsFilter);
@@ -245,7 +245,7 @@ export const atomFilterUseCoins = selector({
       const unPackCookie = unpackCookie(cookieFavorites);
 
       const resultCoins = useFilterCoins?.map((item) => {
-        const consonant = GetConsonant({
+        const consonant = getConsonant({
           coinName: item.coinName,
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
@@ -271,11 +271,62 @@ export const atomFilterUseCoins = selector({
     });
     return result;
   },
+
   cachePolicy_UNSTABLE: {
     eviction: 'most-recent',
   },
 });
 
-/**
- * 1차 필터링된 목록에서 웹소켓 티커정보가 들어올때 갱신한다.
- */
+export const selectorWebSocketTransaction = selector({
+  key: 'selectorWebSocketTransaction',
+  get: async ({ get }) => {
+    const transaction = get(atomTransactions);
+    const drawTransaction = get(atomDrawTransaction);
+    if (transaction === undefined && drawTransaction === undefined) {
+      return;
+    }
+    const deepCopyDrawTransaction = _.cloneDeep(drawTransaction);
+    if (transaction === undefined) {
+      return;
+    }
+    const { m, c, l } = transaction;
+    let coinbarPrice;
+    for (let i = 0; i < l.length; i++) {
+      const { o, n, p, q, t } = transaction.l[i];
+      let color = '1';
+      let prevPrice;
+      const lastItem =
+        deepCopyDrawTransaction[deepCopyDrawTransaction.length - 1];
+      if (lastItem) {
+        prevPrice = lastItem.contPrice;
+        if (p === prevPrice) {
+          color = lastItem.buySellGb;
+        } else if (p > prevPrice) {
+          color = '2';
+        } else {
+          color = '1';
+        }
+      }
+
+      deepCopyDrawTransaction.push({
+        coinType: c, //
+        contAmt: n, //
+        crncCd: m, //
+        buySellGb: color,
+        contPrice: p, //현재가
+        contQty: q, // 수량
+        contDtm: t, //
+      });
+
+      // 트랜잭션은 20개의 데이터만 보관함.
+      if (deepCopyDrawTransaction.length > 30) {
+        deepCopyDrawTransaction.shift();
+      }
+    }
+
+    return await { deepCopyDrawTransaction, coinbarPrice };
+  },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
+});

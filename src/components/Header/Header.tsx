@@ -1,16 +1,6 @@
-import {
-  AppBar,
-  Badge,
-  Box,
-  IconButton,
-  InputBase,
-  Toolbar,
-} from '@mui/material';
-import { styled, alpha } from '@mui/material/styles';
-import SearchIcon from '@mui/icons-material/Search';
+import { AppBar, Box, Toolbar } from '@mui/material';
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
-import { Clock } from 'grommet';
 import React from 'react';
 import CI from '../../asset/img/sp_main_new.png';
 import bg_main from '../../asset/img/bg_main.png';

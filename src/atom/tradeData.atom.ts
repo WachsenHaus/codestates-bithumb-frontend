@@ -1,10 +1,18 @@
 import { TypeCoinKind } from './coinList.type';
-import { atomSelectCoin } from './selectCoin.atom';
+
 import axios from 'axios';
 import { atom, selector } from 'recoil';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
-import { API_BITHUMB } from './../api/bt.api';
+import { API_BITHUMB, API_BITHUMB_STATUS_CODE } from './../api/bt.api';
+import { atomSelectCoinDefault } from './selectCoinDefault.atom';
+import {
+  atomSelectCoinDetail,
+  ISelectCoinDetail,
+} from './selectCoinDetail.atom';
+import { TypeDrawTicker } from './drawData.atom';
+import { atomPriceInfoUseCoins, atomUseCoins } from './total.atom';
+import _ from 'lodash';
 
 export type TypeTradeTikcer = {
   crncCd: TypeCoinKind; // 'C0100"
@@ -62,8 +70,8 @@ export const atomTradeData = selector({
       get(forceReloadTradeData);
       const url = {
         type: 'custom',
-        crncCd: get(atomSelectCoin).siseCrncCd,
-        coin: get(atomSelectCoin).coinType,
+        crncCd: get(atomSelectCoinDefault).siseCrncCd,
+        coin: get(atomSelectCoinDefault).coinType,
         lists: {
           ticker: { coinType: 'ALL', tickType: 'MID' },
           transaction: { limit: 31 },
@@ -79,11 +87,116 @@ export const atomTradeData = selector({
     } catch (err) {
       Log(err);
       return undefined;
-      // return
     }
   },
   set: ({ set }) => {
-    console.log('set');
     set(forceReloadTradeData, Math.random());
+  },
+});
+
+export const selectPriceInfoToCoins = selector({
+  key: 'selectorDetailCoinInfo',
+  get: async ({ get }) => {
+    const tradeData = get(atomTradeData);
+    const selectDefaultCoin = get(atomSelectCoinDefault);
+    const useCoins = get(atomUseCoins);
+    if (tradeData?.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
+      const tickerData = tradeData.data[selectDefaultCoin.siseCrncCd]['ticker'];
+      const tickerKeys = Object.keys(tickerData);
+      let defaultObj: ISelectCoinDetail = {};
+      const tickerPromise = new Promise<TypeDrawTicker[]>((resolve, reject) => {
+        const cloneUseCoin = _.cloneDeep(useCoins);
+        for (let i = 0; i < tickerKeys.length; i++) {
+          const {
+            coinType,
+            buyVolume,
+            chgAmt,
+            chgRate,
+            openPrice,
+            volume24H,
+            value24H,
+            prevClosePrice,
+            highPrice,
+            lowPrice,
+            closePrice,
+          } = tickerData[tickerKeys[i]];
+          const isExist = cloneUseCoin.findIndex(
+            (item) => item.coinType === coinType
+          );
+          if (coinType === selectDefaultCoin.coinType) {
+            defaultObj = {
+              e: closePrice,
+              u24: value24H,
+              v24: volume24H,
+              h: highPrice,
+              r: chgRate,
+              l: lowPrice,
+              f: prevClosePrice,
+            };
+          }
+          if (isExist === -1) {
+          } else {
+            cloneUseCoin[isExist] = {
+              ...cloneUseCoin[isExist],
+              u24: value24H,
+              r: chgRate,
+              e: closePrice,
+              a: chgAmt,
+            };
+          }
+        }
+
+        if (cloneUseCoin) {
+          resolve(cloneUseCoin);
+        } else {
+          reject('err');
+        }
+      });
+      const result = await tickerPromise;
+
+      return { result, defaultObj };
+    }
+  },
+});
+
+export const selectTransactionInfoToCoins = selector({
+  key: 'selectTransactionInfoToCoins',
+  get: async ({ get }) => {
+    const tradeData = get(atomTradeData);
+    const selectDefaultCoin = get(atomSelectCoinDefault);
+
+    if (tradeData?.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
+      const transactionData =
+        tradeData.data[selectDefaultCoin.siseCrncCd]['transaction'];
+      const transactionKeys = Object.keys(transactionData);
+      const data = transactionData[transactionKeys[0]];
+
+      const transactionPromise = new Promise<TypeTradeTransaction[]>(
+        (resolve, reject) => {
+          const cloneData = _.cloneDeep(data);
+          let color;
+          for (let i = 0; i < cloneData.length; i++) {
+            if (i !== 0) {
+              const prevPrice = cloneData[i - 1].contPrice;
+              const curPrice = cloneData[i].contPrice;
+              if (curPrice === prevPrice) {
+                color = cloneData[i - 1].buySellGb;
+              } else if (curPrice > prevPrice) {
+                color = '2';
+              } else {
+                color = '1';
+              }
+              cloneData[i].buySellGb = color;
+            }
+          }
+          if (cloneData) {
+            resolve(cloneData);
+          } else {
+            reject(undefined);
+          }
+        }
+      );
+      return await transactionPromise;
+    }
   },
 });

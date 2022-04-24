@@ -15,7 +15,7 @@ export type TypeDrawTicker = {
   isFavorite?: boolean;
 
   isUp?: boolean | undefined; //custom
-  siseCrncCd?: TypeCoinKind;
+  siseCrncCd: TypeCoinKind;
 } & TypeWebSocketTickerReturnType;
 
 export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
@@ -23,10 +23,10 @@ export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
   default: [],
 });
 
-export const atomDrawTransaction = atom<Array<TypeTradeTransaction>>({
-  key: 'AtomDrawTransaction',
-  default: [],
-});
+// export const atomDrawTransaction = atom<Array<TypeTradeTransaction>>({
+//   key: 'AtomDrawTransaction',
+//   default: [],
+// });
 
 export const atomDrawChart = atom<Array<TypeChartData>>({
   key: 'AtomDrawChart',
@@ -36,6 +36,7 @@ export const atomDrawChart = atom<Array<TypeChartData>>({
 export const atomDrawCoinInfo = atom<TypeDrawTicker>({
   key: 'AtomDrawCoinInfo',
   default: {
+    siseCrncCd: 'C0100',
     a: '', //변화금액
     c: '', //코인번호
     e: '', //현재가

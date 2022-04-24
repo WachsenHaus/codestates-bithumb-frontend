@@ -1,4 +1,3 @@
-import produce from 'immer';
 import React, { useEffect, useState } from 'react';
 import hangul from 'hangul-js';
 import {
@@ -9,65 +8,68 @@ import {
 } from 'recoil';
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
 import { atomCoinList, atomGetCoinList } from '../atom/coinList.atom';
+
+import _ from 'lodash';
 import {
-  atomDrawCoinInfo,
-  atomDrawTicker,
+  selectPriceInfoToCoins,
+  selectTransactionInfoToCoins,
+} from '../atom/tradeData.atom';
+import {
   atomDrawTransaction,
-  TypeDrawTicker,
-} from '../atom/drawData.atom';
-import _, { iteratee } from 'lodash';
-import { atomTradeData, TypeTradeTransaction } from '../atom/tradeData.atom';
-import { atomSelectCoin } from '../atom/selectCoin.atom';
-import { getCookie, unpackCookie } from '../utils/utils';
-import { atomCommonConfig } from '../atom/commonConfig.atom';
-import {
   atomFilteredCoins,
-  atomFilterUseCoins,
+  selectorFilterUseCoins,
   atomFinalCoins,
-  atomMergeTickerAndCoins,
-  atomPriceFilterdCoins,
+  atomFinalTransaction,
+  selectorMergeTickerAndCoins,
+  selectorPriceFilterdCoins,
   atomPriceInfoUseCoins,
   atomUseCoins,
+  selectorWebSocketTransaction,
 } from '../atom/total.atom';
-
-export const GetConsonant = ({
-  coinName,
-  coinNameEn,
-  coinSymbol,
-}: {
-  coinName: string;
-  coinNameEn: string;
-  coinSymbol: string;
-}) => {
-  const result = hangul.d(coinName, true);
-  if (result) {
-    let data = '';
-    for (let i = 0; i < result.length; i++) {
-      data = data + result[i][0];
-    }
-    data.replace(' ', '');
-    data += coinNameEn;
-    data += coinSymbol;
-    data += coinName;
-    return data;
-  }
-};
+import { atomSelectCoinDetail } from '../atom/selectCoinDetail.atom';
 
 /**
  *
  * @returns 코인 리스트들을 받아옵니다.
  */
 export const useGetCoinList = () => {
+  // 코인에 대한 정보를 받아 옵니다 .
   const queryResults = useRecoilValueLoadable(atomGetCoinList);
-  const filterdUseCoins = useRecoilValueLoadable(atomFilterUseCoins);
-  const pricefilterCoins = useRecoilValueLoadable(atomPriceFilterdCoins);
-  const mergeTickerAndCoins = useRecoilValueLoadable(atomMergeTickerAndCoins);
-
-  // const setDrawTicker = useSetRecoilState(atomDrawTicker);
   const setCoinState = useSetRecoilState(atomCoinList);
+
+  // 사용할 코인리스트만을 필터링합니다.
+  const filterdUseCoins = useRecoilValueLoadable(selectorFilterUseCoins);
   const setUseCoins = useSetRecoilState(atomUseCoins);
+
+  // 가격 정보를 사용할 코인리스트에 넣고
+  const pricefilterCoins = useRecoilValueLoadable(selectorPriceFilterdCoins);
   const setFilteredCoins = useSetRecoilState(atomFilteredCoins);
+
+  // 티커정보와 코인정보를 합칩니다.
+  const mergeTickerAndCoins = useRecoilValueLoadable(
+    selectorMergeTickerAndCoins
+  );
   const setFinalCoins = useSetRecoilState(atomFinalCoins);
+
+  // 초기 useCoin리스트에 현재가,변동률,거래금액을 덮어씌기 하는 데이터
+  const selectTicker = useRecoilValueLoadable(selectPriceInfoToCoins);
+
+  // 초기 트랜잭션 데이터를 가져와 갱신함.
+  const selectTransaction = useRecoilValueLoadable(
+    selectTransactionInfoToCoins
+  );
+
+  /**
+   * 웹소켓으로 트랜직션이 들어오는 데이터.
+   */
+  const selectWebSocketTransaction = useRecoilValueLoadable(
+    selectorWebSocketTransaction
+  );
+
+  const setSelectDetailCoin = useSetRecoilState(atomSelectCoinDetail);
+  const setPriceInfoUseCoins = useSetRecoilState(atomPriceInfoUseCoins);
+  const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
+  const setFinalDrawTransaction = useSetRecoilState(atomFinalTransaction);
 
   /**
    * 최초 코인리스트를 받아오면 동작하는 기능.
@@ -78,167 +80,92 @@ export const useGetCoinList = () => {
       if (contents?.status === API_BITHUMB_STATUS_CODE.SUCCESS) {
         setCoinState(contents?.data);
       }
+    } else if (state === 'hasError') {
+      console.log('erro');
     }
-  }, [queryResults.state]);
+  }, [queryResults, setCoinState]);
 
+  /**
+   * 원본 코인리스트에서 필터링하고 사용할 코인리스트를 정합니다.
+   */
   useEffect(() => {
-    if (filterdUseCoins.state === 'hasValue') {
-      // 임시로 설정함 기존 코드 유지용
-      // setDrawTicker(filterdUseCoins.contents);
-      setUseCoins(filterdUseCoins.contents);
+    const { state, contents } = filterdUseCoins;
+    if (state === 'hasValue') {
+      setUseCoins(contents);
+    } else if (state === 'hasError') {
+      console.log(filterdUseCoins);
+      console.log('erro');
     }
-  }, [filterdUseCoins.contents, filterdUseCoins.state, setUseCoins]);
+  }, [filterdUseCoins, setUseCoins]);
 
+  /**
+   *
+   */
   useEffect(() => {
-    if (pricefilterCoins.state === 'hasValue') {
-      console.log('왜느리지');
-      console.log(new Date());
-      console.log(pricefilterCoins.contents);
-      setFilteredCoins(pricefilterCoins.contents);
+    const { state, contents } = pricefilterCoins;
+    if (state === 'hasValue') {
+      setFilteredCoins(contents);
+    } else if (state === 'hasError') {
+      console.log('erro');
     }
-  }, [pricefilterCoins.contents, pricefilterCoins.state, setFilteredCoins]);
+  }, [pricefilterCoins, setFilteredCoins]);
 
+  /**
+   * 가격정보와 사용할 코인리스트에서 티커정보를 합치고, finalCoins에 집어넣습니다.
+   */
   useEffect(() => {
-    if (mergeTickerAndCoins.state === 'hasValue') {
-      mergeTickerAndCoins && setFinalCoins(mergeTickerAndCoins.contents);
+    const { state, contents } = mergeTickerAndCoins;
+    if (state === 'hasValue') {
+      setFinalCoins(contents);
+    } else if (state === 'hasError') {
+      console.log('erro');
     }
   }, [mergeTickerAndCoins, setFinalCoins]);
-};
 
-/**
- * 선택된 코인이 변화되면 해당 거래정보를 한번에 다 받아옵니다.
- */
-export const useGetTradeData = () => {
-  const tradeData = useRecoilValueLoadable(atomTradeData);
-  const selectCoin = useRecoilValue(atomSelectCoin);
-  const [drawTicker, setDrawTicker] = useRecoilState(atomDrawTicker);
-
-  const [useCoins, setUseCoins] = useRecoilState(atomUseCoins);
-  const setPriceInfoUseCoins = useSetRecoilState(atomPriceInfoUseCoins);
-  const setDrawCoinInfo = useSetRecoilState(atomDrawCoinInfo);
-  const setCommonConfig = useSetRecoilState(atomCommonConfig);
-  const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
-  const [flag, setFlag] = useState(false);
-
+  /**
+   * 선택된 코인이 변경되
+   */
   useEffect(() => {
-    if (useCoins.length > 1) {
-      setFlag(true);
+    const { state, contents } = selectTicker;
+    if (state === 'hasValue') {
+      if (contents) {
+        setSelectDetailCoin(contents?.defaultObj);
+        setPriceInfoUseCoins(contents?.result);
+      }
+    } else if (state === 'hasError') {
+      console.log('error');
     }
-  }, [useCoins]);
+  }, [selectTicker]);
 
+  /**
+   * 초기 트랜직션 데이터를 넣는 기능.
+   */
   useEffect(() => {
-    if (
-      flag === true &&
-      tradeData.state === 'hasValue' &&
-      tradeData?.contents?.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR
-    ) {
-      const tickerData =
-        tradeData.contents.data[selectCoin.siseCrncCd]['ticker'];
-      const tickerKeys = Object.keys(tickerData);
-      let defaultObj: TypeDrawTicker = {};
-
-      const tickerPromise = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-        const next = produce(useCoins, (draft) => {
-          for (let i = 0; i < tickerKeys.length; i++) {
-            const {
-              coinType,
-              buyVolume,
-              chgAmt,
-              chgRate,
-              openPrice,
-              volume24H,
-              value24H,
-              prevClosePrice,
-              highPrice,
-              lowPrice,
-              closePrice,
-            } = tickerData[tickerKeys[i]];
-            const isExist = draft.findIndex(
-              (item) => item.coinType === coinType
-            );
-
-            const selectIdx = draft.findIndex(
-              (item) => item.coinSymbol === selectCoin.coinSymbol
-            );
-            if (coinType === selectCoin.coinType) {
-              defaultObj = {
-                coinType: draft[selectIdx].coinType,
-                coinSymbol: draft[selectIdx].coinSymbol,
-                e: closePrice,
-                u24: value24H,
-                v24: volume24H,
-                h: highPrice,
-                r: chgRate,
-                l: lowPrice,
-                f: prevClosePrice,
-                siseCrncCd: draft[selectIdx].siseCrncCd,
-              };
-            }
-
-            if (isExist === -1) {
-            } else {
-              draft[isExist] = {
-                ...draft[isExist],
-                u24: value24H,
-                r: chgRate,
-                e: closePrice,
-                a: chgAmt,
-              };
-            }
-          }
-        });
-        if (next) {
-          resolve(next);
-        } else {
-          reject('err');
-        }
-      });
-
-      const transactionData =
-        tradeData.contents.data[selectCoin.siseCrncCd]['transaction'];
-      const transactionKeys = Object.keys(transactionData);
-      const data = transactionData[transactionKeys[0]];
-
-      const transactionPromise = new Promise<TypeTradeTransaction[]>(
-        (resolve, reject) => {
-          const next = produce(data, (draft) => {
-            let color;
-            for (let i = 0; i < draft.length; i++) {
-              if (i !== 0) {
-                const prevPrice = draft[i - 1].contPrice;
-                const curPrice = draft[i].contPrice;
-                if (curPrice === prevPrice) {
-                  color = draft[i - 1].buySellGb;
-                } else if (curPrice > prevPrice) {
-                  color = '2';
-                } else {
-                  color = '1';
-                }
-                draft[i].buySellGb = color;
-              }
-            }
-          });
-          if (next) {
-            resolve(next);
-          } else {
-            reject(undefined);
-          }
-        }
-      );
-
-      Promise.all([tickerPromise, transactionPromise]).then((values) => {
-        const [ticker, transaction] = values;
-        // setDrawTicker(ticker);
-        console.log('여기');
-        console.log(ticker);
-        setPriceInfoUseCoins(ticker);
-        // setFinalUseCoins(ticker);
-        setDrawCoinInfo(defaultObj);
-        setDrawTransaction(transaction);
-        setCommonConfig({
-          isInit: true,
-        });
-      });
+    const { state, contents } = selectTransaction;
+    if (state === 'hasValue') {
+      contents && setDrawTransaction(contents);
+    } else if (state === 'hasError') {
+      console.log('error');
     }
-  }, [flag, tradeData, selectCoin]);
+  }, [selectTransaction]);
+
+  /**
+   * 웹소켓으로 트랜잭션 데이터가 들어오면, detail을 갱신하고, 트랜잭션 리스트를 수정함.
+   */
+  useEffect(() => {
+    const { state, contents } = selectWebSocketTransaction;
+    if (state === 'hasValue') {
+      // contents && console.log(contents.deepCopyDrawTransaction);
+      contents && setFinalDrawTransaction(contents.deepCopyDrawTransaction);
+      contents &&
+        setSelectDetailCoin((prevData) => {
+          return {
+            ...prevData,
+            e: contents.coinbarPrice,
+          };
+        });
+    } else if (state === 'hasError') {
+      console.log('error');
+    }
+  }, [selectWebSocketTransaction]);
 };

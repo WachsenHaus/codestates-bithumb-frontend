@@ -2,12 +2,12 @@ import { Box, Skeleton, Typography } from '@mui/material';
 import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
-import {
-  atomDrawCoinInfo,
-  atomDrawTransaction,
-} from '../../atom/drawData.atom';
+import { atomDrawCoinInfo } from '../../atom/drawData.atom';
 import { atomOrderBook, TypeOrderObj } from '../../atom/orderBook.atom';
-import { atomSelectCoin } from '../../atom/selectCoin.atom';
+
+import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
+import { atomSelectCoinDetail } from '../../atom/selectCoinDetail.atom';
+import { atomFinalTransaction } from '../../atom/total.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import OrderbookRow from './OrderbookRow';
 
@@ -21,9 +21,9 @@ const CONST_LOADING_CNT = 16;
 const Orderbook = () => {
   useGetOrderBookInterval();
   const orderBook = useRecoilValue(atomOrderBook);
-  const transaction = useRecoilValue(atomDrawTransaction);
-  const { marketSymbol } = useRecoilValue(atomSelectCoin);
-  const { f, coinSymbol } = useRecoilValue(atomDrawCoinInfo);
+  const transaction = useRecoilValue(atomFinalTransaction);
+  const { marketSymbol, coinSymbol } = useRecoilValue(atomSelectCoinDefault);
+  const { f } = useRecoilValue(atomSelectCoinDetail);
   const [maxQuantity, setMaxQuantity] = useState('0');
   const [isLoading, setIsLoading] = useState(false);
 

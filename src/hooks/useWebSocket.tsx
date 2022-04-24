@@ -1,31 +1,18 @@
 import stringify from 'fast-json-stable-stringify';
 import parse from 'fast-json-parse';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect } from 'react';
 import _ from 'lodash';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import produce from 'immer';
-
 import {
   atomSubscribeWebSocektMessage,
   atomSubscribeWebSocket,
-  atomTicker,
 } from '../atom/ws.atom';
 import {
   TypeWebSocketSubscribeReturnType,
-  TypeWebSocketTickerReturnType,
   TypeWebSocketTypes,
 } from '../atom/ws.type';
-import {
-  atomDrawCoinInfo,
-  atomDrawTicker,
-  atomDrawTransaction,
-  TypeDrawTicker,
-} from '../atom/drawData.atom';
-import { atomGetStChartData } from '../atom/tvChart.atom';
-import { atomSelectCoin } from '../atom/selectCoin.atom';
-import { TypeCoinKind } from '../atom/coinList.type';
-import { atomCommonConfig } from '../atom/commonConfig.atom';
-import { atomTickers } from '../atom/total.atom';
+import { atomWsStBar } from '../atom/tvChart.atom';
+import { atomTickers, atomTransactions } from '../atom/total.atom';
 
 /**
  *
@@ -33,26 +20,11 @@ import { atomTickers } from '../atom/total.atom';
  */
 export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
   const [wsSubscribe, setWsSubscribe] = useRecoilState(atomSubscribeWebSocket);
-  const [wsMessage, setWsMessage] = useRecoilState(
-    atomSubscribeWebSocektMessage
-  );
+  const wsMessage = useRecoilValue(atomSubscribeWebSocektMessage);
 
-  const selectCoin = useRecoilValue(atomSelectCoin);
-  const [drawTransaction, setDrawTransaction] =
-    useRecoilState(atomDrawTransaction);
-  const [tickers, setTickers] = useRecoilState(atomTickers);
-  const [stObj, setStObj] = useRecoilState(atomGetStChartData);
-  const [transactionObj, setTransactionObj] = useState<{
-    m: TypeCoinKind;
-    c: string;
-    l: {
-      o: string;
-      n: string;
-      p: string;
-      q: string;
-      t: string;
-    }[];
-  }>();
+  const setTickers = useSetRecoilState(atomTickers);
+  const setTransactions = useSetRecoilState(atomTransactions);
+  const setSt = useSetRecoilState(atomWsStBar);
 
   const generateOnError: any | null =
     (type: TypeWebSocketTypes) => (ev: Event) => {
@@ -76,11 +48,10 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
             if (type === 'data') {
               if (subtype === 'tk') {
                 setTickers(content);
-                // setTickerObj(content);
               } else if (subtype === 'st') {
-                setStObj(content);
+                setSt(content);
               } else if (subtype === 'tr') {
-                setTransactionObj(content);
+                setTransactions(content);
               }
             }
             break;
@@ -116,71 +87,10 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
    */
   useEffect(() => {
     if (wsSubscribe && wsMessage?.events) {
-      const message = _.cloneDeep(wsMessage);
-      const filter = [selectCoin.siseCrncCd, selectCoin.coinType];
-      message?.events.forEach((item) => {
-        if (item.type === 'tr') {
-          item.filters = filter;
-        } else if (item.type === 'st') {
-          item.filters = filter;
-        }
-      });
-      const data = stringify(message);
+      const data = stringify(wsMessage);
       wsSubscribe.send(data);
     }
-  }, [selectCoin]);
-
-  useEffect(() => {
-    (async () => {
-      const result = await produce(drawTransaction, (draft) => {
-        if (transactionObj === undefined) {
-          return;
-        }
-        const { m, c, l } = transactionObj;
-        for (let i = 0; i < l.length; i++) {
-          const { o, n, p, q, t } = transactionObj.l[i];
-          let color = '1';
-          let prevPrice;
-          const lastItem = draft[draft.length - 1];
-          if (lastItem) {
-            prevPrice = lastItem.contPrice;
-            if (p === prevPrice) {
-              color = lastItem.buySellGb;
-            } else if (p > prevPrice) {
-              color = '2';
-            } else {
-              color = '1';
-            }
-          }
-
-          //코인바에 나타날 가격을 갱신함
-          // setDrawCoin((prevData) => {
-          //   return {
-          //     ...prevData,
-          //     e: p,
-          //     // q:lastItem.
-          //   };
-          // });
-
-          draft.push({
-            coinType: c, //
-            contAmt: n, //
-            crncCd: m, //
-            buySellGb: color,
-            contPrice: p, //현재가
-            contQty: q, // 수량
-            contDtm: t, //
-          });
-
-          // 트랜잭션은 20개의 데이터만 보관함.
-          if (draft.length > 20) {
-            draft.shift();
-          }
-        }
-      });
-      setDrawTransaction(result);
-    })();
-  }, [transactionObj]);
+  }, [wsMessage]);
 
   /**
    * 웹소켓을 생성합니다.

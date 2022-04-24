@@ -1,9 +1,9 @@
 import { Box, Typography } from '@mui/material';
 import classNames from 'classnames';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useRecoilValue } from 'recoil';
-import { atomDrawTransaction } from '../../atom/drawData.atom';
-import { atomSelectCoin } from '../../atom/selectCoin.atom';
+import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
+import { atomFinalTransaction } from '../../atom/total.atom';
 
 import TransactionRow from './TransactionRow';
 
@@ -12,8 +12,8 @@ import TransactionRow from './TransactionRow';
  * @returns 실시간 체결내역 컴포넌트
  */
 const Transaction = () => {
-  const drawTransaction = useRecoilValue(atomDrawTransaction);
-  const { coinSymbol, marketSymbol } = useRecoilValue(atomSelectCoin);
+  const drawTransaction = useRecoilValue(atomFinalTransaction);
+  const { coinSymbol, marketSymbol } = useRecoilValue(atomSelectCoinDefault);
 
   return (
     <Box className={classNames(`w-full`)}>

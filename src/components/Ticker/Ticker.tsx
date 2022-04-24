@@ -36,12 +36,13 @@ const Ticker = () => {
   const [orderMode, setOrderMode] = useRecoilState(atomFilterOrderBy);
   const [sortDirection, setSortDirection] = useRecoilState(atomFilterDirection);
 
-  // 초ㅣ적화
   const [filterMode, setFilterMode] = useRecoilState(atomFilterMode);
-  const setFilterKeyword = useSetRecoilState(atomFilterKeyword);
   const filterKeyword = useRecoilValue(atomFilterKeyword);
+  const setFilterKeyword = useSetRecoilState(atomFilterKeyword);
   const filterdCoins = useRecoilValue(atomFilteredCoins);
   const finalCoins = useRecoilValue(atomFinalCoins);
+
+  // 초ㅣ적화
 
   const rowHeight = 50;
   const headerHeight = 50;
