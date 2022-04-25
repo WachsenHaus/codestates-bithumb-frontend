@@ -36,7 +36,7 @@ export const RenderFavoriteColumn = (e: TableCellProps) => {
       rowData: TypeDrawTicker;
     }
   ) => {
-    const cloneDrawTicker = _.cloneDeep(drawTicker);
+    const cloneDrawTicker = _.clone(drawTicker);
     const findItem = cloneDrawTicker.find(
       (item) => item.coinSymbol === e.rowData.coinSymbol
     );

@@ -35,4 +35,7 @@ export const atomSubscribeWebSocektMessage = selector({
       return undefined;
     }
   },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
 });

@@ -45,7 +45,7 @@ const Transaction = () => {
             return (
               <TransactionRow
                 coinSymbol={coinSymbol}
-                key={index}
+                key={item.contDtm + index}
                 time={item.contDtm}
                 price={item.contPrice}
                 contQty={item.contQty}

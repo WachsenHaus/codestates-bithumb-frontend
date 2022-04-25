@@ -56,6 +56,7 @@ const TvChart = () => {
       });
 
       window.addEventListener('resize', () => {
+        console.log('사이징');
         if (wrapperRef.current) {
           chart.resize(wrapperRef?.current?.offsetWidth, 340);
         }
@@ -86,6 +87,7 @@ const TvChart = () => {
   useEffect(() => {
     const { state, contents } = selectorDrawStbars;
     if (state === 'hasValue') {
+      candleChart.current?.setData([]);
       contents && setDrawStBars(contents);
       setCurrentBar(undefined);
     } else if (state === 'hasError') {
@@ -125,7 +127,7 @@ const TvChart = () => {
             time: nextTime,
           });
         } else if (currentBar?.open !== null) {
-          const cloneStBar = _.cloneDeep(currentBar);
+          const cloneStBar = _.clone(currentBar);
           if (currentBar) {
             cloneStBar.close = e;
             cloneStBar.high = Math.max(
@@ -139,12 +141,17 @@ const TvChart = () => {
             cloneStBar.open = o;
           }
           resolve(cloneStBar);
+          // if (cloneStBar === undefined) {
+          //   reject('err');
+          // }
         }
       }
     });
-    result.then((result) => {
-      setCurrentBar(result);
-    });
+    result
+      .then((result) => {
+        setCurrentBar(result);
+      })
+      .catch((err) => console.error(err));
   }, [wsStBar]);
 
   return <div className={classNames(`w-full h-full`)} ref={wrapperRef} />;

@@ -164,7 +164,7 @@ export const selectorMergeTickerAndCoins = selector({
         resolve(coins);
       } else {
         // console.log({ ...tickerObj });
-        const draft = _.cloneDeep(coins);
+        const draft = _.clone(coins);
         let isUp;
         const currentPrice = Number(tickerObj.e);
         const prevPrice = Number(draft[isExist].e);
@@ -293,7 +293,7 @@ export const selectorWebSocketTransaction = selector({
     if (webSocketTransaction === undefined && initTransactions === undefined) {
       return;
     }
-    const deepCopyInitTransaction = _.cloneDeep(initTransactions);
+    const deepCopyInitTransaction = _.clone(initTransactions);
     if (webSocketTransaction === undefined) {
       return;
     }

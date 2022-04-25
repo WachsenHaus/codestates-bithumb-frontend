@@ -164,7 +164,9 @@ const Orderbook = () => {
         sx={{
           height: { sm: 200, md: 440 },
         }}
-        className={classNames(`scrollbar-hide overflow-y-auto`)}
+        className={classNames(
+          `scrollbar-hide overflow-y-auto will-change-scroll`
+        )}
       >
         {orderBook?.ask
           ?.slice(0)

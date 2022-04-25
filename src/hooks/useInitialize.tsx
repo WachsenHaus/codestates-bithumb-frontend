@@ -124,9 +124,10 @@ const useMergeTickersWebsocketAndFilteredData = () => {
   );
 
   const merge = async () => {
+    const tickerObj = getAtomTicker;
+    const coins = priceInfoUseCoin;
+    let draft;
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-      const tickerObj = getAtomTicker;
-      const coins = priceInfoUseCoin;
       const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
       if (isExist === -1) {
         resolve(coins);
@@ -134,7 +135,7 @@ const useMergeTickersWebsocketAndFilteredData = () => {
         resolve(coins);
       } else {
         // console.log({ ...tickerObj });
-        const draft = _.cloneDeep(coins);
+        draft = _.clone(coins);
         let isUp;
         const currentPrice = Number(tickerObj.e);
         const prevPrice = Number(draft[isExist].e);
@@ -150,7 +151,10 @@ const useMergeTickersWebsocketAndFilteredData = () => {
         resolve(draft);
       }
     });
-    result.then((i) => setPriceInfoUseCoins(i));
+    result.then((i) => {
+      setPriceInfoUseCoins(i);
+      draft = undefined;
+    });
   };
 
   useEffect(() => {
@@ -175,6 +179,8 @@ const useGetInitTransactionData = () => {
     if (state === 'hasValue') {
       contents && setDrawTransaction(contents);
     } else if (state === 'hasError') {
+      console.log(selectTransaction);
+      console.log(state);
       console.log('error');
     }
   }, [selectTransaction]);
@@ -191,7 +197,7 @@ const useMergeTransactionWebsocketAndInitData = () => {
 
   const merge = async () => {
     const result = new Promise<TypeTradeTransaction[]>((resolve, reject) => {
-      const deepCopyInitTransaction = _.cloneDeep(drawTransaction);
+      const deepCopyInitTransaction = _.clone(drawTransaction);
       if (drawTransaction === undefined) {
         return;
       }

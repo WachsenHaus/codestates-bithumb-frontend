@@ -96,6 +96,9 @@ export const atomTradeData = selector({
   set: ({ set }) => {
     set(forceReloadTradeData, Math.random());
   },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
 });
 
 export const selectPriceInfoToCoins = selector({
@@ -114,7 +117,7 @@ export const selectPriceInfoToCoins = selector({
       const tickerKeys = Object.keys(tickerData);
       let detailObj: ISelectCoinDetail = {};
       const tickerPromise = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-        const cloneUseCoin = _.cloneDeep(useCoins);
+        const cloneUseCoin = _.clone(useCoins);
         for (let i = 0; i < tickerKeys.length; i++) {
           const {
             coinType,
@@ -165,6 +168,9 @@ export const selectPriceInfoToCoins = selector({
       return { result, detailObj };
     }
   },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
 });
 
 export const selectTransactionInfoToCoins = selector({
@@ -210,5 +216,8 @@ export const selectTransactionInfoToCoins = selector({
       );
       return await transactionPromise;
     }
+  },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
   },
 });

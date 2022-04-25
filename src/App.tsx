@@ -22,7 +22,7 @@ import DebugObserver from './RecoilDebug';
 const App = () => {
   return (
     <RecoilRoot>
-      <DebugObserver />
+      {/* <DebugObserver /> */}
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <StyledEngineProvider>
           <CssBaseline />

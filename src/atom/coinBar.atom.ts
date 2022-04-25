@@ -44,4 +44,7 @@ export const selectorCoinBar = selector({
     };
     return result;
   },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
 });

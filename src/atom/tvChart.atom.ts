@@ -106,6 +106,9 @@ export const selectorDrawStBars = selector({
     });
     return await result;
   },
+  cachePolicy_UNSTABLE: {
+    eviction: 'most-recent',
+  },
 });
 
 export const selectorGetChartData = selector({
