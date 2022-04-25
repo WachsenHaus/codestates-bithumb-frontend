@@ -154,17 +154,17 @@ export const selectorMergeTickerAndCoins = selector({
   get: async ({ get }) => {
     const tickerObj = get(atomTickers);
     // console.log(tickerObj);
-    const coins = get(atomFilteredCoins);
+    const coins = get(atomPriceInfoUseCoins);
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
       const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
+      // console.log(isExist);
       if (isExist === -1) {
         resolve(coins);
       } else if (tickerObj.m === 'C0101') {
         resolve(coins);
       } else {
+        // console.log({ ...tickerObj });
         const draft = _.cloneDeep(coins);
-        console.log(draft);
-        console.log(tickerObj);
         let isUp;
         const currentPrice = Number(tickerObj.e);
         const prevPrice = Number(draft[isExist].e);
@@ -176,6 +176,7 @@ export const selectorMergeTickerAndCoins = selector({
           isUp = false;
         }
         draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
+        // console.log(draft[isExist]);
         resolve(draft);
       }
     });

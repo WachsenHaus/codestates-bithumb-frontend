@@ -30,6 +30,7 @@ import {
   atomFilterMode,
   atomFilterOrderBy,
   atomFinalCoins,
+  atomPriceInfoUseCoins,
 } from '../../atom/total.atom';
 
 const Ticker = () => {
@@ -40,7 +41,7 @@ const Ticker = () => {
   const filterKeyword = useRecoilValue(atomFilterKeyword);
   const setFilterKeyword = useSetRecoilState(atomFilterKeyword);
   const filterdCoins = useRecoilValue(atomFilteredCoins);
-  const finalCoins = useRecoilValue(atomFinalCoins);
+  const priceInfoUseCoins = useRecoilValue(atomPriceInfoUseCoins);
 
   const delayKeyword = useRef(
     _.debounce((word) => debounceKeyword(word), 300)
@@ -54,7 +55,7 @@ const Ticker = () => {
 
   const rowHeight = 50;
   const headerHeight = 50;
-  const rowCount = finalCoins?.length;
+  const rowCount = filterdCoins?.length;
 
   const [height, setHeight] = useState(350);
   const [page, setPage] = useState(0);
@@ -190,7 +191,7 @@ const Ticker = () => {
                   scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={({ index }) => {
-                    return finalCoins[index];
+                    return filterdCoins[index];
                   }}
                 >
                   <Column

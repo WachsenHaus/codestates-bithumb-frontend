@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
-import { atomFinalTransaction } from '../../atom/total.atom';
+import { atomDrawTransaction } from '../../atom/total.atom';
 
 import TransactionRow from './TransactionRow';
 
@@ -12,7 +12,7 @@ import TransactionRow from './TransactionRow';
  * @returns 실시간 체결내역 컴포넌트
  */
 const Transaction = () => {
-  const drawTransaction = useRecoilValue(atomFinalTransaction);
+  const drawTransaction = useRecoilValue(atomDrawTransaction);
   const { coinSymbol, marketSymbol } = useRecoilValue(atomSelectCoinDefault);
 
   return (
