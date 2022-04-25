@@ -1,12 +1,9 @@
 import { TypeCoinKind, TypeCoinClassCode } from './coinList.type';
 import { atom, selector } from 'recoil';
-import { getConsonant, getCookie, order, unpackCookie } from '../utils/utils';
+import { generateKeywordForSearch, getCookie, order, unpackCookie } from '../utils/utils';
 import { atomCoinList } from './coinList.atom';
 import { TypeDrawTicker } from './drawData.atom';
-import {
-  TypeWebSocketTickerReturnType,
-  TypeWebSocketTransactionReturnType,
-} from './ws.type';
+import { TypeWebSocketTickerReturnType, TypeWebSocketTransactionReturnType } from './ws.type';
 import _ from 'lodash';
 import { TypeTradeTransaction } from './tradeData.atom';
 
@@ -198,21 +195,13 @@ export const selectorPriceFilterdCoins = selector({
         if (filterKeyword === '') {
           resultUseCoins = prevUseCoins;
         } else {
-          resultUseCoins = _.filter(
-            prevUseCoins,
-            (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
-          );
+          resultUseCoins = _.filter(prevUseCoins, (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1);
         }
       } else {
         if (filterKeyword === '') {
           resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true);
         } else {
-          resultUseCoins = _.filter(
-            prevUseCoins,
-            (i) =>
-              i.isFavorite === true &&
-              i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
-          );
+          resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true && i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1);
         }
       }
       const result = order(orderBy, resultUseCoins, direction);
@@ -236,23 +225,18 @@ export const selectorFilterUseCoins = selector({
 
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
       const useFilterCoins = defaultInfoCoins?.coinList.filter(
-        (item) =>
-          item.coinClassCode === displayFilter.coinClassCode &&
-          item.siseCrncCd === displayFilter.siseCrncCd &&
-          item.isLive === displayFilter.isLive
+        (item) => item.coinClassCode === displayFilter.coinClassCode && item.siseCrncCd === displayFilter.siseCrncCd && item.isLive === displayFilter.isLive
       );
       const cookieFavorites = getCookie('marketFavoritesCoin');
       const unPackCookie = unpackCookie(cookieFavorites);
 
       const resultCoins = useFilterCoins?.map((item) => {
-        const consonant = getConsonant({
+        const consonant = generateKeywordForSearch({
           coinName: item.coinName,
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
         });
-        const cookieCoinSymbol = unPackCookie.find(
-          (i) => i.split('_')[0] === item.coinType
-        );
+        const cookieCoinSymbol = unPackCookie.find((i) => i.split('_')[0] === item.coinType);
         return {
           isFavorite: cookieCoinSymbol ? true : false,
           siseCrncCd: item.siseCrncCd,
@@ -295,8 +279,7 @@ export const selectorWebSocketTransaction = selector({
       const { o, n, p, q, t } = transaction.l[i];
       let color = '1';
       let prevPrice;
-      const lastItem =
-        deepCopyDrawTransaction[deepCopyDrawTransaction.length - 1];
+      const lastItem = deepCopyDrawTransaction[deepCopyDrawTransaction.length - 1];
       if (lastItem) {
         prevPrice = lastItem.contPrice;
         if (p === prevPrice) {

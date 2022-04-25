@@ -47,22 +47,16 @@ export const convertStringPriceWON = (value?: string) => {
  * @param value 24시간 볼륨을 인자로받음
  * @returns 소숫점 4자리까지 반올림하여 반환함.
  */
-export const convertStringToVolume24 = (value?: string) =>
-  value ? Number(value).toFixed(4) : '';
+export const convertStringToVolume24 = (value?: string) => (value ? Number(value).toFixed(4) : '');
 
 export type TypeMarketFavoritesCoin = 'marketFavoritesCoin';
 
-export const setCookie = (
-  name: TypeMarketFavoritesCoin,
-  value: string,
-  exp: number
-) => {
+export const setCookie = (name: TypeMarketFavoritesCoin, value: string, exp: number) => {
   let date = new Date();
   date.setTime(date.getTime() + exp * 24 * 60 * 60 * 1000);
   // console.log()
   const eValue = encodeURI(value);
-  document.cookie =
-    name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
+  document.cookie = name + '=' + eValue + ';expires=' + date.toUTCString() + ';path=/';
 };
 
 export const getCookie = (name: TypeMarketFavoritesCoin) => {
@@ -90,9 +84,7 @@ export const pushCookie = (
   if (cookies?.length === 1 && cookies[0] === '') {
     cookies = [selectCoinName];
   } else {
-    const isExist = cookies.findIndex(
-      (cookieName) => cookieName === selectCoinName
-    );
+    const isExist = cookies.findIndex((cookieName) => cookieName === selectCoinName);
     if (isExist !== -1) {
       cookies.splice(isExist, 1);
     } else {
@@ -120,11 +112,7 @@ export const applyCookie = (cookie: any, day: number = 1) => {
  * @param sortDirection
  * @returns 정렬 함수
  */
-export const order = (
-  orderMode: 'e' | 'r' | 'u24',
-  datas: TypeDrawTicker[],
-  sortDirection: 'asc' | 'desc'
-) => {
+export const order = (orderMode: 'e' | 'r' | 'u24', datas: TypeDrawTicker[], sortDirection: 'asc' | 'desc') => {
   if (orderMode === 'e') {
     return _.orderBy(datas, [(e) => Number(e.e)], [sortDirection]);
   } else if (orderMode === 'r') {
@@ -139,15 +127,7 @@ export const order = (
  * @param param0
  * @returns 한글자음,한글이름,영어이름을 반환합니다.
  */
-export const getConsonant = ({
-  coinName,
-  coinNameEn,
-  coinSymbol,
-}: {
-  coinName: string;
-  coinNameEn: string;
-  coinSymbol: string;
-}) => {
+export const generateKeywordForSearch = ({ coinName, coinNameEn, coinSymbol }: { coinName: string; coinNameEn: string; coinSymbol: string }) => {
   const result = hangul.d(coinName, true);
   if (result) {
     let data = '';
