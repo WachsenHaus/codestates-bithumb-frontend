@@ -1,17 +1,16 @@
 import { useEffect } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { atomCoinBar, atomDrawCoinBar } from '../atom/coinBar.atom';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { selectorCoinBar, atomDrawCoinBar } from '../atom/coinBar.atom';
 
 export const useGetCoinBar = () => {
-  const result = useRecoilValue(atomDrawCoinBar);
-  const setDrawCoinBar = useSetRecoilState(atomDrawCoinBar);
-  const coinBar = useRecoilValue(atomCoinBar);
+  const coinBar = useRecoilValue(selectorCoinBar);
+  const [drawCoinBar, setDrawCoinBar] = useRecoilState(atomDrawCoinBar);
 
   useEffect(() => {
     setDrawCoinBar(coinBar);
   }, [coinBar]);
 
-  return { ...result };
+  return { ...drawCoinBar };
 };
 
 export default useGetCoinBar;

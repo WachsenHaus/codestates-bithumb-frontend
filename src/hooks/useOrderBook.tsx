@@ -1,25 +1,16 @@
-import axios from 'axios';
 import { useRef, useEffect } from 'react';
-import {
-  useRecoilStateLoadable,
-  useRecoilValue,
-  useSetRecoilState,
-} from 'recoil';
-
-import { atomGetOrderBook, atomOrderBook } from '../atom/orderBook.atom';
-import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
+import { useRecoilStateLoadable, useSetRecoilState } from 'recoil';
+import { selectorGetOrderBook, atomOrderBook } from '../atom/orderBook.atom';
 
 /**
  * 1초에 한번씩 호가창의 데이터를 받아옵니다.
  */
 export const useGetOrderBookInterval = () => {
   const timerId = useRef<NodeJS.Timer | null>(null);
-  const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
-  const setOrderBookData = useSetRecoilState(atomOrderBook);
   const isFetching = useRef(false);
 
-  const [getOrderBook, reload] = useRecoilStateLoadable(atomGetOrderBook);
-
+  const [getOrderBook, reload] = useRecoilStateLoadable(selectorGetOrderBook);
+  const setOrderBookData = useSetRecoilState(atomOrderBook);
   useEffect(() => {
     if (getOrderBook.state === 'hasValue') {
       getOrderBook.contents && setOrderBookData(getOrderBook.contents);
@@ -46,5 +37,5 @@ export const useGetOrderBookInterval = () => {
         timerId.current = null;
       }
     };
-  }, [reload, selectCoinDefault, setOrderBookData]);
+  }, [reload, setOrderBookData]);
 };

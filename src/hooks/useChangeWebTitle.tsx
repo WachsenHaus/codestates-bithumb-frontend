@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useRecoilValue } from 'recoil';
-import { atomCoinBar } from '../atom/coinBar.atom';
+import { selectorCoinBar } from '../atom/coinBar.atom';
 import { convertStringPriceToKRW } from '../utils/utils';
 
 /**
@@ -8,7 +8,7 @@ import { convertStringPriceToKRW } from '../utils/utils';
  */
 const useChangeWebTitle = () => {
   const { e, coinSymbol, siseCrncCd, marketSymbol } =
-    useRecoilValue(atomCoinBar);
+    useRecoilValue(selectorCoinBar);
 
   useEffect(() => {
     const htmlTitle = document.querySelector('title');

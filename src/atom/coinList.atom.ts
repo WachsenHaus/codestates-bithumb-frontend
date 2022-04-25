@@ -19,8 +19,8 @@ export const atomCoinList = atom<ICoinList | undefined>({
 /**
  * 코인의 종류들을 받아옴.
  */
-export const atomGetCoinList = selector({
-  key: 'AtomGetCoinList',
+export const selectorGetCoinList = selector({
+  key: 'selectorGetCoinList',
   get: async ({ get }) => {
     try {
       const result = await axios.get<ResponseVO<ICoinList>>(

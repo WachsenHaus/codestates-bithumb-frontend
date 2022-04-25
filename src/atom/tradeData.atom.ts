@@ -99,15 +99,20 @@ export const atomTradeData = selector({
 });
 
 export const selectPriceInfoToCoins = selector({
-  key: 'selectorDetailCoinInfo',
+  key: 'selectPriceInfoToCoins',
   get: async ({ get }) => {
     const tradeData = get(atomTradeData);
     const selectDefaultCoin = get(atomSelectCoinDefault);
     const useCoins = get(atomUseCoins);
-    if (tradeData?.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
-      const tickerData = tradeData.data[selectDefaultCoin.siseCrncCd]['ticker'];
+    if (tradeData?.data === undefined) {
+      return;
+    }
+    const { message, data } = tradeData;
+
+    if (message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
+      const tickerData = data[selectDefaultCoin.siseCrncCd]['ticker'];
       const tickerKeys = Object.keys(tickerData);
-      let defaultObj: ISelectCoinDetail = {};
+      let detailObj: ISelectCoinDetail = {};
       const tickerPromise = new Promise<TypeDrawTicker[]>((resolve, reject) => {
         const cloneUseCoin = _.cloneDeep(useCoins);
         for (let i = 0; i < tickerKeys.length; i++) {
@@ -128,7 +133,7 @@ export const selectPriceInfoToCoins = selector({
             (item) => item.coinType === coinType
           );
           if (coinType === selectDefaultCoin.coinType) {
-            defaultObj = {
+            detailObj = {
               e: closePrice,
               u24: value24H,
               v24: volume24H,
@@ -157,8 +162,7 @@ export const selectPriceInfoToCoins = selector({
         }
       });
       const result = await tickerPromise;
-
-      return { result, defaultObj };
+      return { result, detailObj };
     }
   },
 });
@@ -168,16 +172,20 @@ export const selectTransactionInfoToCoins = selector({
   get: async ({ get }) => {
     const tradeData = get(atomTradeData);
     const selectDefaultCoin = get(atomSelectCoinDefault);
+    if (tradeData?.data === undefined) {
+      return;
+    }
+    const { message, data } = tradeData;
 
-    if (tradeData?.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
-      const transactionData =
-        tradeData.data[selectDefaultCoin.siseCrncCd]['transaction'];
+    if (message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
+      const transactionData = data[selectDefaultCoin.siseCrncCd]['transaction'];
       const transactionKeys = Object.keys(transactionData);
-      const data = transactionData[transactionKeys[0]];
+
+      const keys = transactionData[transactionKeys[0]];
 
       const transactionPromise = new Promise<TypeTradeTransaction[]>(
         (resolve, reject) => {
-          const cloneData = _.cloneDeep(data);
+          const cloneData = _.cloneDeep(keys);
           let color;
           for (let i = 0; i < cloneData.length; i++) {
             if (i !== 0) {

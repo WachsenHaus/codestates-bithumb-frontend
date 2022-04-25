@@ -32,8 +32,8 @@ export const atomDrawCoinBar = atom<IDrawCoinBar>({
   default: DEFAULT_DRAW_COINBAR,
 });
 
-export const atomCoinBar = selector({
-  key: 'atomCoinBar',
+export const selectorCoinBar = selector({
+  key: 'selectorCoinBar',
   get: ({ get }) => {
     const selectDefaultInfo = get(atomSelectCoinDefault);
     const selectDetailInfo = get(atomSelectCoinDetail);

@@ -170,7 +170,7 @@ const Ticker = () => {
 
       <div>
         <Paper
-          className="will-change-contents"
+          // className="will-change-contents"
           sx={{
             height: height,
             width: '100%',

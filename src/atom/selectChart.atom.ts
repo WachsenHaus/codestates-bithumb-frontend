@@ -5,7 +5,7 @@ export interface ISelectChartSetup {
 }
 
 export const atomSelectChartSetup = atom<ISelectChartSetup>({
-  key: 'atomSelectChartSetting',
+  key: 'atomSelectChartSetup',
   default: {
     chartTime: '1M',
   },

@@ -18,10 +18,10 @@ export type TypeDrawTicker = {
   siseCrncCd: TypeCoinKind;
 } & TypeWebSocketTickerReturnType;
 
-export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
-  key: 'AtomDrawTicker',
-  default: [],
-});
+// export const atomDrawTicker = atom<Array<TypeDrawTicker>>({
+//   key: 'AtomDrawTicker',
+//   default: [],
+// });
 
 // export const atomDrawTransaction = atom<Array<TypeTradeTransaction>>({
 //   key: 'AtomDrawTransaction',

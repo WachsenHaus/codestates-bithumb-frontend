@@ -8,17 +8,12 @@ import Orderbook from '../components/Orderbook/Orderbook';
 import Ticker from '../components/Ticker/Ticker';
 import Transaction from '../components/Transaction/Transaction';
 import useChangeWebTitle from '../hooks/useChangeWebTitle';
-import { useGetCoinList } from '../hooks/useGetCoinList';
 import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
-
-import useGetTradeParam from '../hooks/useGetTradeParam';
+import useInitialize from '../hooks/useInitialize';
 
 const MainPage = () => {
-  useGetTradeParam();
-  useGetCoinList();
-
-  // 2.처음 디스플레이되는 거래 데이터들을 받아옴.
+  useInitialize();
 
   // 3.웹소켓을 실행시킴 웹소켓은 트랜잭션,티커,차트봉에 대한 정보를 받아온다.
   useGenerateBitThumbSocket('SUBSCRIBE');

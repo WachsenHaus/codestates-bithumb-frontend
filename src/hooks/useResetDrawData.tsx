@@ -5,7 +5,7 @@ import {
   useResetRecoilState,
   useSetRecoilState,
 } from 'recoil';
-import { atomCoinBar, atomDrawCoinBar } from '../atom/coinBar.atom';
+import { atomDrawCoinBar } from '../atom/coinBar.atom';
 import { atomDrawChart, atomDrawCoinInfo } from '../atom/drawData.atom';
 import { atomOrderBook } from '../atom/orderBook.atom';
 import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';

@@ -1,9 +1,17 @@
 import { TypeCoinKind, TypeCoinClassCode } from './coinList.type';
 import { atom, selector } from 'recoil';
-import { generateKeywordForSearch, getCookie, order, unpackCookie } from '../utils/utils';
+import {
+  generateKeywordForSearch,
+  getCookie,
+  order,
+  unpackCookie,
+} from '../utils/utils';
 import { atomCoinList } from './coinList.atom';
 import { TypeDrawTicker } from './drawData.atom';
-import { TypeWebSocketTickerReturnType, TypeWebSocketTransactionReturnType } from './ws.type';
+import {
+  TypeWebSocketTickerReturnType,
+  TypeWebSocketTransactionReturnType,
+} from './ws.type';
 import _ from 'lodash';
 import { TypeTradeTransaction } from './tradeData.atom';
 
@@ -37,10 +45,10 @@ import { TypeTradeTransaction } from './tradeData.atom';
 // siseCrncCd: TypeCoinKind; // '-','C0100'
 // isLive: boolean;
 
-export const atomDrawTicker = atom({
-  key: 'atomDrawTicker',
-  default: undefined,
-});
+// export const atomDrawTicker = atom({
+//   key: 'atomDrawTicker',
+//   default: undefined,
+// });
 
 // coinType
 // coinSymbol
@@ -145,16 +153,18 @@ export const selectorMergeTickerAndCoins = selector({
   key: 'selectorMergeTickerAndCoins',
   get: async ({ get }) => {
     const tickerObj = get(atomTickers);
+    // console.log(tickerObj);
     const coins = get(atomFilteredCoins);
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
       const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
       if (isExist === -1) {
         resolve(coins);
-        return;
       } else if (tickerObj.m === 'C0101') {
         resolve(coins);
       } else {
         const draft = _.cloneDeep(coins);
+        console.log(draft);
+        console.log(tickerObj);
         let isUp;
         const currentPrice = Number(tickerObj.e);
         const prevPrice = Number(draft[isExist].e);
@@ -195,13 +205,21 @@ export const selectorPriceFilterdCoins = selector({
         if (filterKeyword === '') {
           resultUseCoins = prevUseCoins;
         } else {
-          resultUseCoins = _.filter(prevUseCoins, (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1);
+          resultUseCoins = _.filter(
+            prevUseCoins,
+            (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
+          );
         }
       } else {
         if (filterKeyword === '') {
           resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true);
         } else {
-          resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true && i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1);
+          resultUseCoins = _.filter(
+            prevUseCoins,
+            (i) =>
+              i.isFavorite === true &&
+              i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
+          );
         }
       }
       const result = order(orderBy, resultUseCoins, direction);
@@ -225,7 +243,10 @@ export const selectorFilterUseCoins = selector({
 
     const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
       const useFilterCoins = defaultInfoCoins?.coinList.filter(
-        (item) => item.coinClassCode === displayFilter.coinClassCode && item.siseCrncCd === displayFilter.siseCrncCd && item.isLive === displayFilter.isLive
+        (item) =>
+          item.coinClassCode === displayFilter.coinClassCode &&
+          item.siseCrncCd === displayFilter.siseCrncCd &&
+          item.isLive === displayFilter.isLive
       );
       const cookieFavorites = getCookie('marketFavoritesCoin');
       const unPackCookie = unpackCookie(cookieFavorites);
@@ -236,7 +257,9 @@ export const selectorFilterUseCoins = selector({
           coinNameEn: item.coinNameEn,
           coinSymbol: item.coinSymbol,
         });
-        const cookieCoinSymbol = unPackCookie.find((i) => i.split('_')[0] === item.coinType);
+        const cookieCoinSymbol = unPackCookie.find(
+          (i) => i.split('_')[0] === item.coinType
+        );
         return {
           isFavorite: cookieCoinSymbol ? true : false,
           siseCrncCd: item.siseCrncCd,
@@ -264,22 +287,23 @@ export const selectorFilterUseCoins = selector({
 export const selectorWebSocketTransaction = selector({
   key: 'selectorWebSocketTransaction',
   get: async ({ get }) => {
-    const transaction = get(atomTransactions);
-    const drawTransaction = get(atomDrawTransaction);
-    if (transaction === undefined && drawTransaction === undefined) {
+    const webSocketTransaction = get(atomTransactions);
+    const initTransactions = get(atomDrawTransaction);
+    if (webSocketTransaction === undefined && initTransactions === undefined) {
       return;
     }
-    const deepCopyDrawTransaction = _.cloneDeep(drawTransaction);
-    if (transaction === undefined) {
+    const deepCopyInitTransaction = _.cloneDeep(initTransactions);
+    if (webSocketTransaction === undefined) {
       return;
     }
-    const { m, c, l } = transaction;
+    const { m, c, l } = webSocketTransaction;
     let coinbarPrice;
     for (let i = 0; i < l.length; i++) {
-      const { o, n, p, q, t } = transaction.l[i];
+      const { o, n, p, q, t } = l[i];
       let color = '1';
       let prevPrice;
-      const lastItem = deepCopyDrawTransaction[deepCopyDrawTransaction.length - 1];
+      const lastItem =
+        deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
       if (lastItem) {
         prevPrice = lastItem.contPrice;
         if (p === prevPrice) {
@@ -290,8 +314,8 @@ export const selectorWebSocketTransaction = selector({
           color = '1';
         }
       }
-
-      deepCopyDrawTransaction.push({
+      coinbarPrice = p;
+      deepCopyInitTransaction.push({
         coinType: c, //
         contAmt: n, //
         crncCd: m, //
@@ -302,12 +326,12 @@ export const selectorWebSocketTransaction = selector({
       });
 
       // 트랜잭션은 20개의 데이터만 보관함.
-      if (deepCopyDrawTransaction.length > 20) {
-        deepCopyDrawTransaction.shift();
+      if (deepCopyInitTransaction.length > 20) {
+        deepCopyInitTransaction.shift();
       }
     }
 
-    return await { deepCopyDrawTransaction, coinbarPrice };
+    return await { deepCopyInitTransaction, coinbarPrice };
   },
   cachePolicy_UNSTABLE: {
     eviction: 'most-recent',

@@ -26,13 +26,13 @@ export const atomForceGetOrderBook = atom<undefined | number>({
   default: undefined,
 });
 
-export const atomGetOrderBook = selector({
-  key: 'atomGetOrderBook',
+export const selectorGetOrderBook = selector({
+  key: 'selectorGetOrderBook',
   get: async ({ get }) => {
     try {
       get(atomForceGetOrderBook);
       const { coinSymbol, marketSymbol } = get(atomSelectCoinDefault);
-      if (coinSymbol === '') {
+      if (coinSymbol === '' || marketSymbol === '') {
         return;
       }
 
