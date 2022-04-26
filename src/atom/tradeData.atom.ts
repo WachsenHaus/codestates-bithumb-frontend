@@ -5,7 +5,10 @@ import { atom, selector } from 'recoil';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
 import { API_BITHUMB, API_BITHUMB_STATUS_CODE } from './../api/bt.api';
-import { atomSelectCoinDetail, ISelectCoinDetail } from './selectCoinDetail.atom';
+import {
+  atomSelectCoinDetail,
+  ISelectCoinDetail,
+} from './selectCoinDetail.atom';
 import _ from 'lodash';
 import produce from 'immer';
 import { atomSelectCoinDefault } from './selectCoinDefault.atom';
@@ -54,15 +57,20 @@ export type ITradeData = {
     };
   };
 };
-
-export const atomTradeData = selector({
+export const atomTradeData = atom<ITradeData | undefined>({
   key: 'atomTradeData',
+  default: undefined,
+});
+
+export const selectorTradeData = selector({
+  key: 'selectorTradeData',
   get: async ({ get }) => {
     try {
       const { siseCrncCd, coinType } = get(atomSelectCoinDefault);
       if (coinType === '') {
         return;
       }
+      console.log('무한반복?');
       console.log(coinType);
       const url = {
         type: 'custom',
@@ -73,11 +81,13 @@ export const atomTradeData = selector({
           transaction: { limit: 31 },
         },
       };
-      const result = await axios.get<ResponseVO<ITradeData>>(`${API_BITHUMB.GET_TRADE_DATA}`, {
-        params: url,
-      });
-      return { data: result.data, siseCrncCd, coinType };
-      // return result.data;
+      const result = await axios.get<ResponseVO<ITradeData>>(
+        `${API_BITHUMB.GET_TRADE_DATA}`,
+        {
+          params: url,
+        }
+      );
+      return result.data;
     } catch (err) {
       Log(err);
       return undefined;
@@ -93,49 +103,59 @@ export const selectPriceInfoToCoins = selector({
   key: 'selectPriceInfoToCoins',
   get: ({ get }) => {
     const tradeData = get(atomTradeData);
-    // const selectDefaultCoin = get(atomSelectCoinDefault);
+    const selectDefaultCoin = get(atomSelectCoinDefault);
     const useCoins = get(atomUseCoins);
-    if (tradeData?.data === undefined) {
+    if (tradeData === undefined) {
       return;
     }
-    const { data, coinType, siseCrncCd } = tradeData;
 
-    if (data.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
-      const tickerData = data.data[siseCrncCd]['ticker'];
-      const tickerKeys = Object.keys(tickerData);
-      let detailObj: ISelectCoinDetail = {};
+    const tickerData = tradeData[selectDefaultCoin.siseCrncCd]['ticker'];
+    const tickerKeys = Object.keys(tickerData);
+    let detailObj: ISelectCoinDetail = {};
 
-      const cloneUseCoin = _.clone(useCoins);
-      for (let i = 0; i < tickerKeys.length; i++) {
-        const { coinType, buyVolume, chgAmt, chgRate, openPrice, volume24H, value24H, prevClosePrice, highPrice, lowPrice, closePrice } =
-          tickerData[tickerKeys[i]];
-        const isExist = cloneUseCoin.findIndex((item) => item.coinType === coinType);
-        if (coinType === tradeData.coinType) {
-          detailObj = {
-            e: closePrice,
-            u24: value24H,
-            v24: volume24H,
-            h: highPrice,
-            r: chgRate,
-            l: lowPrice,
-            f: prevClosePrice,
-          };
-        }
-        if (isExist === -1) {
-        } else {
-          cloneUseCoin[isExist] = {
-            ...cloneUseCoin[isExist],
-            u24: value24H,
-            r: chgRate,
-            e: closePrice,
-            a: chgAmt,
-          };
-        }
+    const cloneUseCoin = _.clone(useCoins);
+    for (let i = 0; i < tickerKeys.length; i++) {
+      const {
+        coinType,
+        buyVolume,
+        chgAmt,
+        chgRate,
+        openPrice,
+        volume24H,
+        value24H,
+        prevClosePrice,
+        highPrice,
+        lowPrice,
+        closePrice,
+      } = tickerData[tickerKeys[i]];
+      const isExist = cloneUseCoin.findIndex(
+        (item) => item.coinType === coinType
+      );
+      if (coinType === selectDefaultCoin.coinType) {
+        detailObj = {
+          e: closePrice,
+          u24: value24H,
+          v24: volume24H,
+          h: highPrice,
+          r: chgRate,
+          l: lowPrice,
+          f: prevClosePrice,
+        };
       }
-
-      const result = cloneUseCoin;
-      return { result, detailObj };
+      if (isExist === -1) {
+      } else {
+        cloneUseCoin[isExist] = {
+          ...cloneUseCoin[isExist],
+          u24: value24H,
+          r: chgRate,
+          e: closePrice,
+          a: chgAmt,
+        };
+      }
     }
+
+    const result = cloneUseCoin;
+    return { result, detailObj };
   },
   cachePolicy_UNSTABLE: {
     eviction: 'most-recent',
@@ -146,36 +166,34 @@ export const selectTransactionInfoToCoins = selector({
   key: 'selectTransactionInfoToCoins',
   get: ({ get }) => {
     const tradeData = get(atomTradeData);
-    // const selectDefaultCoin = get(atomSelectCoinDefault);
-    if (tradeData?.data === undefined) {
+    const selectDefaultCoin = get(atomSelectCoinDefault);
+    if (tradeData === undefined) {
       return;
     }
-    const { data, coinType, siseCrncCd } = tradeData;
 
-    if (data.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
-      const transactionData = data.data[siseCrncCd]['transaction'];
-      const transactionKeys = Object.keys(transactionData);
+    const transactionData =
+      tradeData[selectDefaultCoin.siseCrncCd]['transaction'];
+    const transactionKeys = Object.keys(transactionData);
 
-      const keys = transactionData[transactionKeys[0]];
-      const next = produce(keys, (draft) => {
-        let color;
-        for (let i = 0; i < draft.length; i++) {
-          if (i !== 0) {
-            const prevPrice = draft[i - 1].contPrice;
-            const curPrice = draft[i].contPrice;
-            if (curPrice === prevPrice) {
-              color = draft[i - 1].buySellGb;
-            } else if (curPrice > prevPrice) {
-              color = '2';
-            } else {
-              color = '1';
-            }
-            draft[i].buySellGb = color;
+    const keys = transactionData[transactionKeys[0]];
+    const next = produce(keys, (draft) => {
+      let color;
+      for (let i = 0; i < draft.length; i++) {
+        if (i !== 0) {
+          const prevPrice = draft[i - 1].contPrice;
+          const curPrice = draft[i].contPrice;
+          if (curPrice === prevPrice) {
+            color = draft[i - 1].buySellGb;
+          } else if (curPrice > prevPrice) {
+            color = '2';
+          } else {
+            color = '1';
           }
+          draft[i].buySellGb = color;
         }
-      });
-      return next;
-    }
+      }
+    });
+    return next;
   },
   cachePolicy_UNSTABLE: {
     eviction: 'most-recent',

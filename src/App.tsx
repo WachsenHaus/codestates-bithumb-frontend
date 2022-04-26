@@ -16,15 +16,15 @@ import Home from './page/Home';
 const App = () => {
   return (
     <RecoilRoot>
-      {/* <DebugObserver /> */}
+      <DebugObserver />
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <StyledEngineProvider>
           <CssBaseline />
           <Grommet plain>
             <BrowserRouter>
               <Routes>
-                <Route path={`/`} element={<TradePage />} />
                 <Route path={`/:coinName`} element={<TradePage />} />
+                <Route path={`/`} element={<TradePage />} />
               </Routes>
             </BrowserRouter>
           </Grommet>

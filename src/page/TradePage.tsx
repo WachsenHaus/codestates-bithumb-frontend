@@ -11,11 +11,13 @@ import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 import useInitialize from '../hooks/useInitialize';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { atomCoinList } from '../atom/coinList.atom';
+import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
 
 const TradePage = () => {
   useInitialize();
-
   // 3.웹소켓을 실행시킴 웹소켓은 트랜잭션,티커,차트봉에 대한 정보를 받아온다.
   useGenerateBitThumbSocket('SUBSCRIBE');
   // 4.선택된 코인에 대한 정보가 바뀌면 그리는 데이터들을 초기화하는 옵저버.
@@ -48,4 +50,4 @@ const TradePage = () => {
   );
 };
 
-export default React.memo(TradePage);
+export default TradePage;
