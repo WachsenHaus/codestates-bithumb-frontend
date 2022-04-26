@@ -172,6 +172,7 @@ const Orderbook = () => {
             return (
               <OrderbookRow
                 // key={`${item.p}_${item.q}`}
+                key={index}
                 price={item.p}
                 quantity={item.q}
                 orderType={'ask'}
@@ -187,6 +188,7 @@ const Orderbook = () => {
               // key={uuidv4()}
               // key={orderBook.timestamp}
               // key={`${item.p}_${item.q}`}
+              key={index}
               index={index}
               price={item.p}
               quantity={item.q}

@@ -1,7 +1,7 @@
 import _, { result } from 'lodash';
 import { resolve } from 'node:path/win32';
 import React, { useCallback, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable, useSetRecoilState } from 'recoil';
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
 import { selectorGetCoinList, atomCoinList } from '../atom/coinList.atom';
@@ -79,6 +79,7 @@ const useGetPriceInfoList = () => {
     if (state === 'hasValue') {
       if (contents) {
         //
+        console.log(getPriceInfoList);
         setSelectDetailCoin(contents?.detailObj);
         setPriceInfoUseCoins(contents?.result);
       }
@@ -170,6 +171,52 @@ const useGetInitTransactionData = () => {
 };
 
 /**
+ * URL주소를 분석하고 해당 값으로 defaultCoin을 설정합니다.
+ */
+const useGetTradeParam = () => {
+  const params = useParams();
+  const loation = useLocation();
+  const navigate = useNavigate();
+  const coins = useRecoilValue(atomCoinList);
+  const setSelectCoin = useSetRecoilState(atomSelectCoinDefault);
+
+  useEffect(() => {
+    // console.log(params);
+    // console.log(loation);
+    if (params?.coinName) {
+      const result = params?.coinName?.split('_');
+      if (coins && result) {
+        const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
+        const type = item?.coinType;
+        const siseCrncCd = item?.siseCrncCd;
+        const coinSymbol = item?.coinSymbol;
+        const marketSymbol = result[1];
+
+        if (type && siseCrncCd && coinSymbol && marketSymbol) {
+          console.log('뭐하냐');
+          setSelectCoin((prevData) => {
+            return {
+              coinType: type,
+              coinSymbol: coinSymbol,
+              marketSymbol: marketSymbol,
+              siseCrncCd: siseCrncCd,
+            };
+          });
+        }
+      }
+    } else {
+      // console.log('초기설정함');
+      // setSelectCoin({
+      //   coinType: 'C0101',
+      //   coinSymbol: 'BTC',
+      //   marketSymbol: 'KRW',
+      //   siseCrncCd: 'C0100',
+      // });
+      // navigate('/BTC_KRW');
+    }
+  }, [params, loation]);
+};
+/**
  *
  */
 const useMergeTransactionWebsocketAndInitData = () => {
@@ -235,61 +282,23 @@ const useMergeTransactionWebsocketAndInitData = () => {
   }, [websocketTransaction]);
 };
 
-/**
- * URL주소를 분석하고 해당 값으로 defaultCoin을 설정합니다.
- */
-const useGetTradeParam = () => {
-  const params = useParams();
-  const coins = useRecoilValue(atomCoinList);
-  const setSelectCoin = useSetRecoilState(atomSelectCoinDefault);
-
-  useEffect(() => {
-    if (params?.coinName) {
-      const result = params?.coinName?.split('_');
-      if (coins && result) {
-        const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
-        const type = item?.coinType;
-        const siseCrncCd = item?.siseCrncCd;
-        const coinSymbol = item?.coinSymbol;
-        const marketSymbol = result[1];
-
-        if (type && siseCrncCd && coinSymbol && marketSymbol) {
-          setSelectCoin((prevData) => {
-            return {
-              coinType: type,
-              coinSymbol: coinSymbol,
-              marketSymbol: marketSymbol,
-              siseCrncCd: siseCrncCd,
-            };
-          });
-        }
-      }
-    } else {
-      setSelectCoin({
-        coinType: 'C0101',
-        coinSymbol: 'BTC',
-        marketSymbol: 'KRW',
-        siseCrncCd: 'C0100',
-      });
-    }
-  }, [coins, params?.coinName, setSelectCoin]);
-};
-
 const useInitialize = () => {
   /**
    * 티커
    */
   // 코인 정보를 받아온다.
+  // useGetCoinList();
   useGetCoinList();
   // URL을 분석하여 선택된 코인을 변경한다.
   useGetTradeParam();
+
+  // 사용할 코인리스트만 추린다.
+  useGetFiltredUseCoins();
+
   // 추린 코인리스트에 가격정보를 병합한다.
   useGetPriceInfoList();
   // 티커정보를 필터링된 배열과 병합하고, 코인리스트를 atomFinalCoin에 할당한다
   useMergeTickersWebsocketAndFilteredData();
-
-  // 사용할 코인리스트만 추린다.
-  useGetFiltredUseCoins();
 
   // 키워드,방향등의 필터조건을 통과한 결과값을 filteredCoins에 할당한다.
   useGetFilteredCoins();

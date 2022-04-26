@@ -11,8 +11,9 @@ import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 import useInitialize from '../hooks/useInitialize';
+import { useNavigate } from 'react-router-dom';
 
-const MainPage = () => {
+const TradePage = () => {
   useInitialize();
 
   // 3.웹소켓을 실행시킴 웹소켓은 트랜잭션,티커,차트봉에 대한 정보를 받아온다.
@@ -47,4 +48,4 @@ const MainPage = () => {
   );
 };
 
-export default React.memo(MainPage);
+export default React.memo(TradePage);

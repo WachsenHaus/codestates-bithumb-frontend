@@ -12,7 +12,7 @@ import { ICoinList } from './coinList.type';
  * 한글이름, 코인코드, 클래스코드, 거래가능,.isLive, decimalDigits(모름))등의 정보를 가지고있음
  */
 export const atomCoinList = atom<ICoinList | undefined>({
-  key: 'AtomCoinList',
+  key: 'atomCoinList',
   default: undefined,
 });
 
@@ -23,9 +23,7 @@ export const selectorGetCoinList = selector({
   key: 'selectorGetCoinList',
   get: async ({ get }) => {
     try {
-      const result = await axios.get<ResponseVO<ICoinList>>(
-        API_BITHUMB.COIN_LIST
-      );
+      const result = await axios.get<ResponseVO<ICoinList>>(API_BITHUMB.COIN_LIST);
       return result.data;
     } catch (err) {
       Log(err);

@@ -9,9 +9,9 @@ export interface ISelectCoinDefault {
 }
 
 export const DEFAULT_SELECT_COIN_DEFAULT: ISelectCoinDefault = {
-  coinType: '',
-  coinSymbol: '',
-  marketSymbol: '',
+  coinType: 'C0101',
+  coinSymbol: 'BTC',
+  marketSymbol: 'KRW',
   siseCrncCd: 'C0100',
 };
 

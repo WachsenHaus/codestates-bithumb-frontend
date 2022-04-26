@@ -5,12 +5,11 @@ import { atom, selector } from 'recoil';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
 import { API_BITHUMB, API_BITHUMB_STATUS_CODE } from './../api/bt.api';
-import { atomSelectCoinDefault } from './selectCoinDefault.atom';
 import { atomSelectCoinDetail, ISelectCoinDetail } from './selectCoinDetail.atom';
-import { TypeDrawTicker } from './drawData.atom';
-import { atomPriceInfoUseCoins, atomUseCoins } from './total.atom';
 import _ from 'lodash';
 import produce from 'immer';
+import { atomSelectCoinDefault } from './selectCoinDefault.atom';
+import { atomUseCoins } from './total.atom';
 
 export type TypeTradeTikcer = {
   crncCd: TypeCoinKind; // 'C0100"
@@ -64,6 +63,7 @@ export const atomTradeData = selector({
       if (coinType === '') {
         return;
       }
+      console.log(coinType);
       const url = {
         type: 'custom',
         crncCd: siseCrncCd,
@@ -76,7 +76,8 @@ export const atomTradeData = selector({
       const result = await axios.get<ResponseVO<ITradeData>>(`${API_BITHUMB.GET_TRADE_DATA}`, {
         params: url,
       });
-      return result.data;
+      return { data: result.data, siseCrncCd, coinType };
+      // return result.data;
     } catch (err) {
       Log(err);
       return undefined;
@@ -92,15 +93,15 @@ export const selectPriceInfoToCoins = selector({
   key: 'selectPriceInfoToCoins',
   get: ({ get }) => {
     const tradeData = get(atomTradeData);
-    const selectDefaultCoin = get(atomSelectCoinDefault);
+    // const selectDefaultCoin = get(atomSelectCoinDefault);
     const useCoins = get(atomUseCoins);
     if (tradeData?.data === undefined) {
       return;
     }
-    const { message, data } = tradeData;
+    const { data, coinType, siseCrncCd } = tradeData;
 
-    if (message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
-      const tickerData = data[selectDefaultCoin.siseCrncCd]['ticker'];
+    if (data.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
+      const tickerData = data.data[siseCrncCd]['ticker'];
       const tickerKeys = Object.keys(tickerData);
       let detailObj: ISelectCoinDetail = {};
 
@@ -109,7 +110,7 @@ export const selectPriceInfoToCoins = selector({
         const { coinType, buyVolume, chgAmt, chgRate, openPrice, volume24H, value24H, prevClosePrice, highPrice, lowPrice, closePrice } =
           tickerData[tickerKeys[i]];
         const isExist = cloneUseCoin.findIndex((item) => item.coinType === coinType);
-        if (coinType === selectDefaultCoin.coinType) {
+        if (coinType === tradeData.coinType) {
           detailObj = {
             e: closePrice,
             u24: value24H,
@@ -145,14 +146,14 @@ export const selectTransactionInfoToCoins = selector({
   key: 'selectTransactionInfoToCoins',
   get: ({ get }) => {
     const tradeData = get(atomTradeData);
-    const selectDefaultCoin = get(atomSelectCoinDefault);
+    // const selectDefaultCoin = get(atomSelectCoinDefault);
     if (tradeData?.data === undefined) {
       return;
     }
-    const { message, data } = tradeData;
+    const { data, coinType, siseCrncCd } = tradeData;
 
-    if (message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
-      const transactionData = data[selectDefaultCoin.siseCrncCd]['transaction'];
+    if (data.message === API_BITHUMB_STATUS_CODE.SUCCESS_STR) {
+      const transactionData = data.data[siseCrncCd]['transaction'];
       const transactionKeys = Object.keys(transactionData);
 
       const keys = transactionData[transactionKeys[0]];
