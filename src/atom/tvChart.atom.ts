@@ -87,24 +87,26 @@ export const atomDrawStBars = atom<Array<iStBar>>({
 });
 export const selectorDrawStBars = selector({
   key: 'selectorDrawStBars',
-  get: async ({ get }) => {
+  get: ({ get }) => {
     const stbars = get(atomChartData);
     const { c, h, l, o, t, v } = stbars;
-    const result = new Promise<iStBar[]>((resolve, reject) => {
-      let obj = [];
-      for (let i = 0; i < t.length; i++) {
-        const time = ((t[i] + CONST_KR_UTC) / 1000) as UTCTimestamp;
-        obj.push({
-          time: time,
-          open: o[i],
-          high: h[i],
-          low: l[i],
-          close: c[i],
-        });
-      }
-      resolve(obj);
-    });
-    return await result;
+    let obj = [];
+    for (let i = 0; i < t.length; i++) {
+      const time = ((t[i] + CONST_KR_UTC) / 1000) as UTCTimestamp;
+      obj.push({
+        time: time,
+        open: o[i],
+        high: h[i],
+        low: l[i],
+        close: c[i],
+      });
+    }
+    return obj;
+    // const result = new Promise<iStBar[]>((resolve, reject) => {
+
+    //   resolve(obj);
+    // });
+    // return await result;
   },
   cachePolicy_UNSTABLE: {
     eviction: 'most-recent',
@@ -123,9 +125,7 @@ export const selectorGetChartData = selector({
       const { chartTime } = get(atomSelectChartSetup);
       const coinDataUrl = `${coinType}_${siseCrncCd}/${chartTime}`;
 
-      const result = await axios.get<ResponseVO<ICoinChart>>(
-        `${API_BITHUMB.GET_CANDLESTICKNEW_TRVIEW}/${coinDataUrl}`
-      );
+      const result = await axios.get<ResponseVO<ICoinChart>>(`${API_BITHUMB.GET_CANDLESTICKNEW_TRVIEW}/${coinDataUrl}`);
       return result.data.data;
     } catch (err) {}
   },

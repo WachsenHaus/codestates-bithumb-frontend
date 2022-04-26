@@ -1,13 +1,8 @@
 import _, { result } from 'lodash';
 import { resolve } from 'node:path/win32';
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import {
-  useRecoilState,
-  useRecoilValue,
-  useRecoilValueLoadable,
-  useSetRecoilState,
-} from 'recoil';
+import { useRecoilState, useRecoilValue, useRecoilValueLoadable, useSetRecoilState } from 'recoil';
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
 import { selectorGetCoinList, atomCoinList } from '../atom/coinList.atom';
 import { TypeDrawTicker } from '../atom/drawData.atom';
@@ -27,11 +22,8 @@ import {
   atomTickers,
   atomTransactions,
 } from '../atom/total.atom';
-import {
-  selectPriceInfoToCoins,
-  selectTransactionInfoToCoins,
-  TypeTradeTransaction,
-} from '../atom/tradeData.atom';
+import { selectPriceInfoToCoins, selectTransactionInfoToCoins, TypeTradeTransaction } from '../atom/tradeData.atom';
+import { TypeWebSocketTickerReturnType } from '../atom/ws.type';
 
 /**
  * 모든 코인에 대한 기초 정보를 받아 옵니다.
@@ -67,8 +59,8 @@ const useGetFiltredUseCoins = () => {
   useEffect(() => {
     const { state, contents } = filterdUseCoins;
     if (state === 'hasValue') {
-      setUseCoins(contents);
-    } else if (state === 'hasError') {
+      contents && setUseCoins(contents);
+    } else {
       console.log(filterdUseCoins);
       console.log('erro');
     }
@@ -119,46 +111,39 @@ const useGetFilteredCoins = () => {
 const useMergeTickersWebsocketAndFilteredData = () => {
   // 티커정보와 코인정보를 합칩니다.
   const getAtomTicker = useRecoilValue(atomTickers);
-  const [priceInfoUseCoin, setPriceInfoUseCoins] = useRecoilState(
-    atomPriceInfoUseCoins
-  );
+  const [priceInfoUseCoin, setPriceInfoUseCoins] = useRecoilState(atomPriceInfoUseCoins);
 
-  const merge = async () => {
-    const tickerObj = getAtomTicker;
-    const coins = priceInfoUseCoin;
+  const merge = useCallback((ticker: TypeWebSocketTickerReturnType, coinList: TypeDrawTicker[]) => {
     let draft;
-    const result = new Promise<TypeDrawTicker[]>((resolve, reject) => {
-      const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
-      if (isExist === -1) {
-        resolve(coins);
-      } else if (tickerObj.m === 'C0101') {
-        resolve(coins);
+    const isExist = coinList.findIndex((item) => item.coinType === ticker.c);
+    if (isExist === -1) {
+      return;
+    } else if (ticker.m === 'C0101') {
+      return;
+    } else {
+      // console.log({ ...tickerObj });
+      draft = _.clone(coinList);
+      let isUp;
+      const currentPrice = Number(ticker.e);
+      const prevPrice = Number(draft[isExist].e);
+      if (currentPrice > prevPrice) {
+        isUp = true;
+      } else if (currentPrice === prevPrice) {
+        isUp = undefined;
       } else {
-        // console.log({ ...tickerObj });
-        draft = _.clone(coins);
-        let isUp;
-        const currentPrice = Number(tickerObj.e);
-        const prevPrice = Number(draft[isExist].e);
-        if (currentPrice > prevPrice) {
-          isUp = true;
-        } else if (currentPrice === prevPrice) {
-          isUp = undefined;
-        } else {
-          isUp = false;
-        }
-        draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
-        // console.log(draft[isExist]);
-        resolve(draft);
+        isUp = false;
       }
-    });
-    result.then((i) => {
-      setPriceInfoUseCoins(i);
-      draft = undefined;
-    });
-  };
+      draft[isExist] = { ...draft[isExist], ...ticker, isUp };
+      setPriceInfoUseCoins(draft);
+    }
+  }, []);
 
   useEffect(() => {
-    merge();
+    const tickerObj = getAtomTicker;
+    const coins = priceInfoUseCoin;
+    merge(tickerObj, coins);
+
+    // merge();
   }, [getAtomTicker]);
 };
 
@@ -167,9 +152,7 @@ const useMergeTickersWebsocketAndFilteredData = () => {
  */
 const useGetInitTransactionData = () => {
   // 초기 트랜잭션 데이터를 가져와 갱신함.
-  const selectTransaction = useRecoilValueLoadable(
-    selectTransactionInfoToCoins
-  );
+  const selectTransaction = useRecoilValueLoadable(selectTransactionInfoToCoins);
   const setDrawTransaction = useSetRecoilState(atomDrawTransaction);
   /**
    * 초기 트랜직션 데이터를 넣는 기능.
@@ -191,8 +174,7 @@ const useGetInitTransactionData = () => {
  */
 const useMergeTransactionWebsocketAndInitData = () => {
   const websocketTransaction = useRecoilValue(atomTransactions);
-  const [drawTransaction, setDrawTransaction] =
-    useRecoilState(atomDrawTransaction);
+  const [drawTransaction, setDrawTransaction] = useRecoilState(atomDrawTransaction);
   const setSelectDetailCoin = useSetRecoilState(atomSelectCoinDetail);
 
   const merge = async () => {
@@ -206,8 +188,7 @@ const useMergeTransactionWebsocketAndInitData = () => {
         const { o, n, p, q, t } = l[i];
         let color = '1';
         let prevPrice;
-        const lastItem =
-          deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
+        const lastItem = deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
         if (lastItem) {
           prevPrice = lastItem.contPrice;
           if (p === prevPrice) {
@@ -261,9 +242,7 @@ const useGetTradeParam = () => {
     if (params?.coinName) {
       const result = params?.coinName?.split('_');
       if (coins && result) {
-        const item = coins.coinList.find(
-          (item) => item.coinSymbol === result[0]
-        );
+        const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
         const type = item?.coinType;
         const siseCrncCd = item?.siseCrncCd;
         const coinSymbol = item?.coinSymbol;
@@ -299,13 +278,13 @@ const useInitialize = () => {
   useGetCoinList();
   // URL을 분석하여 선택된 코인을 변경한다.
   useGetTradeParam();
-
-  // 사용할 코인리스트만 추린다.
-  useGetFiltredUseCoins();
   // 추린 코인리스트에 가격정보를 병합한다.
   useGetPriceInfoList();
   // 티커정보를 필터링된 배열과 병합하고, 코인리스트를 atomFinalCoin에 할당한다
   useMergeTickersWebsocketAndFilteredData();
+
+  // 사용할 코인리스트만 추린다.
+  useGetFiltredUseCoins();
 
   // 키워드,방향등의 필터조건을 통과한 결과값을 filteredCoins에 할당한다.
   useGetFilteredCoins();

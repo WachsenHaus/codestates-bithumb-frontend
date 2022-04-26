@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { TableCellProps, TableHeaderProps } from 'react-virtualized';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -9,52 +9,58 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { TypeDrawTicker } from '../../atom/drawData.atom';
-import {
-  applyCookie,
-  convertStringPriceToKRW,
-  convertStringPriceWON,
-  getCookie,
-  packCookie,
-  pushCookie,
-  unpackCookie,
-} from '../../utils/utils';
+import { applyCookie, convertStringPriceToKRW, convertStringPriceWON, getCookie, packCookie, pushCookie, unpackCookie } from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
-import { atomPriceInfoUseCoins } from '../../atom/total.atom';
-import {
-  atomSelectCoinDefault,
-  ISelectCoinDefault,
-} from '../../atom/selectCoinDefault.atom';
+import { atomFilteredCoins, atomPriceInfoUseCoins, atomUseCoins } from '../../atom/total.atom';
+import { atomSelectCoinDefault, ISelectCoinDefault } from '../../atom/selectCoinDefault.atom';
 import _, { find } from 'lodash';
+import produce from 'immer';
 
-export const RenderFavoriteColumn = (e: TableCellProps) => {
+export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
   const [drawTicker, setDrawTicker] = useRecoilState(atomPriceInfoUseCoins);
 
-  const onToggleCoin = async (
-    drawTicker: Array<TypeDrawTicker>,
-    e: {
-      rowData: TypeDrawTicker;
-    }
-  ) => {
-    const cloneDrawTicker = _.clone(drawTicker);
-    const findItem = cloneDrawTicker.find(
-      (item) => item.coinSymbol === e.rowData.coinSymbol
-    );
-    if (findItem) {
-      findItem.isFavorite = !findItem.isFavorite;
-    }
-    return cloneDrawTicker;
-  };
+  const onToggleCoin = useCallback(
+    (
+      drawTicker: Array<TypeDrawTicker>,
+      e: {
+        rowData: TypeDrawTicker;
+      }
+    ) => {
+      const next = produce(drawTicker, (draft) => {
+        draft.forEach((item) => {
+          if (item.coinSymbol === e.rowData.coinSymbol) {
+            item.isFavorite = !item.isFavorite;
+          }
+        });
+        // const findItem = drawTicker.find((item) => item.coinSymbol === e.rowData.coinSymbol);
+        // if (findItem) {
+        //   findItem.isFavorite = !findItem.isFavorite;
+        // }
+      });
+      return next;
+      // const cloneDrawTicker = _.cloneDeep(drawTicker);
+      // const cloneDrawTicker = window.structuredClone(drawTicker);
+      // const findItem = cloneDrawTicker.find((item) => item.coinSymbol === e.rowData.coinSymbol);
+      // if (findItem) {
+      //   findItem.isFavorite = !findItem.isFavorite;
+      // }
+      // console.log(findItem);
+      // return cloneDrawTicker;
+    },
+    []
+  );
 
-  const onClick = async () => {
+  const onClick = useCallback(() => {
     const rawCookies = getCookie('marketFavoritesCoin');
     const parsedCookies = unpackCookie(rawCookies);
     const pushedCookies = pushCookie(parsedCookies, e);
     const packedCookies = packCookie(pushedCookies);
     applyCookie(packedCookies);
-    const coins = await onToggleCoin(drawTicker, e);
+    const coins = onToggleCoin(drawTicker, e);
     setDrawTicker(coins);
-  };
+    console.log(coins);
+  }, [drawTicker]);
 
   return (
     <motion.div
@@ -67,13 +73,13 @@ export const RenderFavoriteColumn = (e: TableCellProps) => {
       {e.rowData.isFavorite ? <StarRateIcon /> : <StarBorderIcon />}
     </motion.div>
   );
-};
+});
 
-export const RenderNameColumn = (e: TableCellProps) => {
+export const RenderNameColumn = React.memo((e: TableCellProps) => {
   const navigate = useNavigate();
   const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
 
-  const onSelectClick = async (e: any) => {
+  const onSelectClick = useCallback((e: any) => {
     const clickedCoinInfo = e.rowData as ISelectCoinDefault;
     if (clickedCoinInfo === undefined) {
       return;
@@ -84,7 +90,7 @@ export const RenderNameColumn = (e: TableCellProps) => {
     const symbol = clickedCoinInfo.coinSymbol;
     const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
     navigate(`/${symbol}_${mSymbol}`);
-  };
+  }, []);
 
   return (
     <motion.div
@@ -104,44 +110,24 @@ export const RenderNameColumn = (e: TableCellProps) => {
       </div>
     </motion.div>
   );
-};
+});
 
-export const RenderCurrentPriceColumn = (e: TableCellProps) => {
+export const RenderCurrentPriceColumn = React.memo((e: TableCellProps) => {
   return (
     <motion.div className="flex items-center">
       <div>
         {convertStringPriceToKRW(e.cellData)}
         <AnimatePresence>
-          {e.rowData.isUp && (
-            <motion.div
-              className={classNames(
-                `${styles.upEffect}`,
-                `border-2 border-white`,
-                `h-1`
-              )}
-            />
-          )}
-          {e.rowData.isUp === false && (
-            <motion.div
-              className={classNames(
-                `${styles.downEffect}`,
-                `border-2 border-white`,
-                `h-1`
-              )}
-            />
-          )}
-          {e.rowData.isUp === undefined && (
-            <motion.div
-              className={classNames(`border-2 border-white`, `h-1`)}
-            />
-          )}
+          {e.rowData.isUp && <motion.div className={classNames(`${styles.upEffect}`, `border-2 border-white`, `h-1`)} />}
+          {e.rowData.isUp === false && <motion.div className={classNames(`${styles.downEffect}`, `border-2 border-white`, `h-1`)} />}
+          {e.rowData.isUp === undefined && <motion.div className={classNames(`border-2 border-white`, `h-1`)} />}
         </AnimatePresence>
       </div>
     </motion.div>
   );
-};
+});
 
-export const RenderRateOfChange = (e: TableCellProps) => {
+export const RenderRateOfChange = React.memo((e: TableCellProps) => {
   const [isUp, setIsUp] = useState(true);
   useEffect(() => {
     if (e.rowData.a?.includes('-')) {
@@ -149,7 +135,7 @@ export const RenderRateOfChange = (e: TableCellProps) => {
     } else {
       setIsUp(true);
     }
-  }, [e]);
+  }, [e.rowData.a]);
   let price = Number(e.rowData.a).toLocaleString('ko-kr');
   if (isUp) {
     price = `+${price}`;
@@ -158,110 +144,61 @@ export const RenderRateOfChange = (e: TableCellProps) => {
   }
 
   return (
-    <motion.div
-      className={classNames(
-        `flex flex-col justify-center items-start`,
-        `w-full h-full`,
-        `${isUp ? `text-red-500` : `text-blue-500`}`
-      )}
-    >
+    <motion.div className={classNames(`flex flex-col justify-center items-start`, `w-full h-full`, `${isUp ? `text-red-500` : `text-blue-500`}`)}>
       <motion.div className="">{e.cellData}%</motion.div>
       <motion.div className="ml-4 text-sm">{price}</motion.div>
     </motion.div>
   );
-};
+});
 
-export const RenderU24 = (e: TableCellProps) => {
+export const RenderU24 = React.memo((e: TableCellProps) => {
   return (
-    <motion.div
-      className={classNames(
-        `flex flex-col items-start justify-center`,
-        `w-full h-full`
-      )}
-    >
+    <motion.div className={classNames(`flex flex-col items-start justify-center`, `w-full h-full`)}>
       <motion.div className="">{convertStringPriceWON(e.cellData)}</motion.div>
     </motion.div>
   );
-};
+});
 
-export const HeaderCoinName = (e: TableHeaderProps) => {
+export const HeaderCoinName = React.memo((e: TableHeaderProps) => {
   return <div className="font-bmjua">자산</div>;
-};
+});
 
-export const HeaderPrice = ({
-  e,
-  onClick,
-  direction,
-  arrowActive,
-}: {
-  e: TableHeaderProps;
-  onClick: () => void;
-  direction: 'desc' | 'asc';
-  arrowActive: boolean;
-}) => {
-  return (
-    <div className="flex justify-center items-center font-bmjua  cursor-pointer">
-      <div onClick={onClick}>현재가</div>
-      <SortArrow direction={direction} active={arrowActive} />
-    </div>
-  );
-};
+export const HeaderPrice = React.memo(
+  ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
+    return (
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer">
+        <div onClick={onClick}>현재가</div>
+        <SortArrow direction={direction} active={arrowActive} />
+      </div>
+    );
+  }
+);
 
-export const HeaderRateOfChange = ({
-  e,
-  onClick,
-  direction,
-  arrowActive,
-}: {
-  e: TableHeaderProps;
-  onClick: () => void;
-  direction: 'desc' | 'asc';
-  arrowActive: boolean;
-}) => {
-  return (
-    <div className="flex justify-center items-center font-bmjua  cursor-pointer">
-      <div onClick={onClick}>변동률(당일)</div>
-      <SortArrow direction={direction} active={arrowActive} />
-    </div>
-  );
-};
+export const HeaderRateOfChange = React.memo(
+  ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
+    return (
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer">
+        <div onClick={onClick}>변동률(당일)</div>
+        <SortArrow direction={direction} active={arrowActive} />
+      </div>
+    );
+  }
+);
 
-export const HeaderVolume = ({
-  e,
-  onClick,
-  direction,
-  arrowActive,
-}: {
-  e: TableHeaderProps;
-  onClick: () => void;
-  direction: 'desc' | 'asc';
-  arrowActive: boolean;
-}) => {
-  return (
-    <div className="flex justify-center items-center font-bmjua  cursor-pointer">
-      <div onClick={onClick}>거래금액(24H)</div>
-      <SortArrow direction={direction} active={arrowActive} />
-    </div>
-  );
-};
+export const HeaderVolume = React.memo(
+  ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
+    return (
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer">
+        <div onClick={onClick}>거래금액(24H)</div>
+        <SortArrow direction={direction} active={arrowActive} />
+      </div>
+    );
+  }
+);
 
-const SortArrow = ({
-  direction,
-  active,
-}: {
-  direction: 'desc' | 'asc';
-  active: boolean;
-}) => (
+const SortArrow = ({ direction, active }: { direction: 'desc' | 'asc'; active: boolean }) => (
   <div className="flex flex-col justify-center items-center opacity-50">
-    <ArrowDropUpIcon
-      className={classNames(
-        direction === 'asc' && active ? `opacity-100` : 'opacity-50'
-      )}
-    />
-    <ArrowDropDownIcon
-      className={classNames(
-        direction === 'desc' && active ? `opacity-100` : 'opacity-50'
-      )}
-    />
+    <ArrowDropUpIcon className={classNames(direction === 'asc' && active ? `opacity-100` : 'opacity-50')} />
+    <ArrowDropDownIcon className={classNames(direction === 'desc' && active ? `opacity-100` : 'opacity-50')} />
   </div>
 );

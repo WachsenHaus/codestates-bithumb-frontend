@@ -43,13 +43,7 @@ const OrderbookRow = ({
           `bg-opacity-5`
         )}
       >
-        <span
-          className={classNames(
-            `text-left`,
-            `${eventType === 'ask' ? `${styles.askEffect}` : ''}`,
-            `${eventType === 'bid' ? `${styles.bidEffect}` : ''}`
-          )}
-        >
+        <span className={classNames(`text-left`, `${eventType === 'ask' ? `${styles.askEffect}` : ''}`, `${eventType === 'bid' ? `${styles.bidEffect}` : ''}`)}>
           {convertStringPriceToKRW(price)}
         </span>
         <span>{r}%</span>
@@ -61,9 +55,7 @@ const OrderbookRow = ({
           sx={{
             width: `${quantityRatio}%`,
             height: '100%',
-            backgroundColor: `${
-              orderType === 'ask' ? '#416ac25e;' : '#ff000021;'
-            }`,
+            backgroundColor: `${orderType === 'ask' ? '#416ac25e;' : '#ff000021;'}`,
           }}
         />
       </Box>
@@ -71,4 +63,4 @@ const OrderbookRow = ({
   );
 };
 
-export default OrderbookRow;
+export default React.memo(OrderbookRow);

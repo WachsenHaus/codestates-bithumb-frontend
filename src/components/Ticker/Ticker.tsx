@@ -2,12 +2,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
-import {
-  Column,
-  IndexRange,
-  OverscanIndexRange,
-  Table,
-} from 'react-virtualized';
+import { Column, IndexRange, OverscanIndexRange, Table } from 'react-virtualized';
 import { InputAdornment, Pagination, Paper, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import _ from 'lodash';
@@ -41,11 +36,9 @@ const Ticker = () => {
   const filterKeyword = useRecoilValue(atomFilterKeyword);
   const setFilterKeyword = useSetRecoilState(atomFilterKeyword);
   const filterdCoins = useRecoilValue(atomFilteredCoins);
-  const priceInfoUseCoins = useRecoilValue(atomPriceInfoUseCoins);
+  // const priceInfoUseCoins = useRecoilValue(atomPriceInfoUseCoins);
 
-  const delayKeyword = useRef(
-    _.debounce((word) => debounceKeyword(word), 300)
-  ).current;
+  const delayKeyword = useRef(_.debounce((word) => debounceKeyword(word), 300)).current;
 
   // 초ㅣ적화
 
@@ -61,47 +54,27 @@ const Ticker = () => {
   const [page, setPage] = useState(0);
   const [perPage, setPerPage] = useState(height / rowHeight);
   const pageCount = Math.ceil(rowCount / perPage);
-  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(
-    undefined
-  );
+  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(undefined);
 
-  const handleRowsScroll = useCallback(
-    (info: IndexRange & OverscanIndexRange) => {
-      setPage((prev) => {
-        return Math.ceil(info.stopIndex / perPage);
-      });
-      setScrollToIndex(undefined);
-    },
-    []
-  );
+  const handleRowsScroll = useCallback((info: IndexRange & OverscanIndexRange) => {
+    setPage((prev) => {
+      return Math.ceil(info.stopIndex / perPage);
+    });
+    setScrollToIndex(undefined);
+  }, []);
 
-  const handlePageChange = useCallback(
-    (event: React.ChangeEvent<unknown>, page: number) => {
-      setPage(page);
-      setScrollToIndex((prev) => {
-        const scrollToIndex = (page - 1) * perPage;
-        return scrollToIndex;
-      });
-    },
-    []
-  );
+  const handlePageChange = useCallback((event: React.ChangeEvent<unknown>, page: number) => {
+    setPage(page);
+    setScrollToIndex((prev) => {
+      const scrollToIndex = (page - 1) * perPage;
+      return scrollToIndex;
+    });
+  }, []);
 
-  const onChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-      const keyword = e.target.value as string;
-      delayKeyword(keyword);
-    },
-    []
-  );
-
-  const [isExist, setIsExist] = useState(false);
-  useEffect(() => {
-    if (filterdCoins?.length > 0) {
-      setIsExist(true);
-    } else {
-      setIsExist(false);
-    }
-  }, [filterdCoins]);
+  const onChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const keyword = e.target.value as string;
+    delayKeyword(keyword);
+  }, []);
 
   const onClick = (type: 'e' | 'r' | 'u24') => () => {
     let direction: 'desc' | 'asc' = 'desc';
@@ -123,18 +96,9 @@ const Ticker = () => {
             gridTemplateColumns: '40% auto',
           }}
         >
-          <div
-            className={classNames(
-              `w-full h-full`,
-              `flex items-center justify-around`
-            )}
-          >
+          <div className={classNames(`w-full h-full`, `flex items-center justify-around`)}>
             <button
-              className={classNames(
-                filterMode === 'normal' && `border-b-4 font-bold`,
-                `border-b-black`,
-                `h-full`
-              )}
+              className={classNames(filterMode === 'normal' && `border-b-4 font-bold`, `border-b-black`, `h-full`)}
               onClick={(e) => {
                 setFilterMode('normal');
               }}
@@ -142,11 +106,7 @@ const Ticker = () => {
               원화마켓
             </button>
             <button
-              className={classNames(
-                filterMode === 'isFavorite' && `border-b-4 font-bold `,
-                `border-b-black`,
-                `h-full`
-              )}
+              className={classNames(filterMode === 'isFavorite' && `border-b-4 font-bold `, `border-b-black`, `h-full`)}
               onClick={(e) => {
                 setFilterMode('isFavorite');
               }}
@@ -171,7 +131,6 @@ const Ticker = () => {
 
       <div>
         <Paper
-          // className="will-change-contents"
           sx={{
             height: height,
             width: '100%',
@@ -179,7 +138,7 @@ const Ticker = () => {
         >
           <AutoSizer>
             {({ width, height }) =>
-              isExist ? (
+              filterdCoins?.length > 0 ? (
                 <Table
                   width={width}
                   height={height}
@@ -194,12 +153,7 @@ const Ticker = () => {
                     return filterdCoins[index];
                   }}
                 >
-                  <Column
-                    width={width * 0.05}
-                    label=""
-                    dataKey="isFavorite"
-                    cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
-                  />
+                  <Column width={width * 0.05} label="" dataKey="isFavorite" cellRenderer={(e) => <RenderFavoriteColumn {...e} />} />
                   <Column
                     width={width * 0.2}
                     label="자산"
@@ -214,14 +168,7 @@ const Ticker = () => {
                     dataKey="e"
                     className="flex"
                     cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
-                    headerRenderer={(e) => (
-                      <HeaderPrice
-                        e={e}
-                        direction={sortDirection}
-                        arrowActive={orderMode === 'e'}
-                        onClick={onClick('e')}
-                      />
-                    )}
+                    headerRenderer={(e) => <HeaderPrice e={e} direction={sortDirection} arrowActive={orderMode === 'e'} onClick={onClick('e')} />}
                     headerClassName="flex items-center"
                   />
                   <Column
@@ -229,14 +176,7 @@ const Ticker = () => {
                     label="변동률(당일)"
                     dataKey="r"
                     cellRenderer={(e) => <RenderRateOfChange {...e} />}
-                    headerRenderer={(e) => (
-                      <HeaderRateOfChange
-                        e={e}
-                        direction={sortDirection}
-                        arrowActive={orderMode === 'r'}
-                        onClick={onClick('r')}
-                      />
-                    )}
+                    headerRenderer={(e) => <HeaderRateOfChange e={e} direction={sortDirection} arrowActive={orderMode === 'r'} onClick={onClick('r')} />}
                     headerClassName="flex items-center"
                   />
                   <Column
@@ -244,14 +184,7 @@ const Ticker = () => {
                     label="거래금액(24H)"
                     dataKey="u24"
                     cellRenderer={(e) => <RenderU24 {...e} />}
-                    headerRenderer={(e) => (
-                      <HeaderVolume
-                        e={e}
-                        direction={sortDirection}
-                        arrowActive={orderMode === 'u24'}
-                        onClick={onClick('u24')}
-                      />
-                    )}
+                    headerRenderer={(e) => <HeaderVolume e={e} direction={sortDirection} arrowActive={orderMode === 'u24'} onClick={onClick('u24')} />}
                     headerClassName="flex items-center"
                   />
                 </Table>
@@ -271,12 +204,7 @@ const Ticker = () => {
         </Paper>
       </div>
       <div className="flex items-center w-full ">
-        <Pagination
-          count={pageCount}
-          page={page}
-          onChange={handlePageChange}
-          className="mx-auto mt-2"
-        />
+        <Pagination count={pageCount} page={page} onChange={handlePageChange} className="mx-auto mt-2" />
       </div>
     </div>
   );

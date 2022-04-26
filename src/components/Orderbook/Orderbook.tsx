@@ -12,10 +12,7 @@ import { TypeTradeTransaction } from '../../atom/tradeData.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import OrderbookRow from './OrderbookRow';
 
-const getMaxValueOrderBook = async (
-  baseValue: string,
-  values: TypeOrderObj[]
-) => {
+const getMaxValueOrderBook = async (baseValue: string, values: TypeOrderObj[]) => {
   let base = Number(baseValue);
   for (let i = 0; i < values.length; i++) {
     const { q } = values[i];
@@ -81,10 +78,10 @@ const useGetMaxQuantity = () => {
   const [maxQuantity, setMaxQuantity] = useState('0');
   const orderBook = useRecoilValue(atomOrderBook);
 
-  const calc = async () => {
+  const calc = useCallback(async () => {
     const result = await calcQuantity(orderBook.ask, orderBook.bid);
     setMaxQuantity(result);
-  };
+  }, []);
   useEffect(() => {
     calc();
   }, [orderBook]);
@@ -164,9 +161,7 @@ const Orderbook = () => {
         sx={{
           height: { sm: 200, md: 440 },
         }}
-        className={classNames(
-          `scrollbar-hide overflow-y-auto will-change-scroll`
-        )}
+        className={classNames(`scrollbar-hide overflow-y-auto will-change-scroll`)}
       >
         {orderBook?.ask
           ?.slice(0)
@@ -175,7 +170,7 @@ const Orderbook = () => {
             // 변동량은 전일종가를 비율식으로 계산한것.
             return (
               <OrderbookRow
-                key={index}
+                // key={index}
                 price={item.p}
                 quantity={item.q}
                 orderType={'ask'}
@@ -188,7 +183,7 @@ const Orderbook = () => {
         {orderBook?.bid?.map((item, index) => {
           return (
             <OrderbookRow
-              key={index}
+              // key={index}
               index={index}
               price={item.p}
               quantity={item.q}
