@@ -35,7 +35,7 @@ const MainPage = () => {
         </Box>
         <Box gridColumn={`span 7`}>
           <CoinBar />
-          {/* <MainContent /> */}
+          <MainContent />
           <Ticker />
         </Box>
         <Box gridColumn={`span 5`}>
