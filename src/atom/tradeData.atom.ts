@@ -56,16 +56,10 @@ export type ITradeData = {
   };
 };
 
-export const forceReloadTradeData = atom<number | undefined>({
-  key: 'ForceReloadTradeData',
-  default: 0,
-});
-
 export const atomTradeData = selector({
-  key: 'AtomTradeData',
+  key: 'atomTradeData',
   get: async ({ get }) => {
     try {
-      get(forceReloadTradeData);
       const { siseCrncCd, coinType } = get(atomSelectCoinDefault);
       if (coinType === '') {
         return;
@@ -88,9 +82,7 @@ export const atomTradeData = selector({
       return undefined;
     }
   },
-  set: ({ set }) => {
-    set(forceReloadTradeData, Math.random());
-  },
+
   cachePolicy_UNSTABLE: {
     eviction: 'most-recent',
   },

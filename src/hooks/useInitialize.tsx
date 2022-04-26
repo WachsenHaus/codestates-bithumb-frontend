@@ -272,7 +272,7 @@ const useGetTradeParam = () => {
         siseCrncCd: 'C0100',
       });
     }
-  }, [params, coins]);
+  }, [coins, params?.coinName, setSelectCoin]);
 };
 
 const useInitialize = () => {

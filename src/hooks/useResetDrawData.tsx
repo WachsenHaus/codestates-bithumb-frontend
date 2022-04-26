@@ -11,24 +11,28 @@ import { atomDrawTransaction, atomFinalTransaction, atomTransactions } from '../
  */
 const useResetObserverDrawData = () => {
   const selectCoin = useRecoilValue(atomSelectCoinDefault);
-  const drawTransaction = useSetRecoilState(atomDrawTransaction);
+  // const drawTransaction = useSetRecoilState(atomDrawTransaction);
   // const rowTransaction = useSetRecoilState(atomTransactions);
-  const drawChartData = useSetRecoilState(atomDrawChart);
-  const drawOrderBook = useSetRecoilState(atomOrderBook);
+  // const drawChartData = useSetRecoilState(atomDrawChart);
+  // const drawOrderBook = useSetRecoilState(atomOrderBook);
 
   const resetCoinBar = useResetRecoilState(atomDrawCoinBar);
   const resetRowTransaction = useResetRecoilState(atomTransactions);
+  const resetOrderBook = useResetRecoilState(atomOrderBook);
+  const resetChartData = useResetRecoilState(atomDrawChart);
 
   useEffect(() => {
-    drawTransaction([]);
-    drawChartData([]);
     resetRowTransaction();
     resetCoinBar();
-    drawOrderBook({
-      ask: [],
-      bid: [],
-      timestamp: '',
-    });
+    resetOrderBook();
+    resetChartData();
+    // drawTransaction([]);
+    // drawChartData([]);
+    // drawOrderBook({
+    //   ask: [],
+    //   bid: [],
+    //   timestamp: '',
+    // });
   }, [selectCoin]);
 };
 

@@ -1,15 +1,6 @@
-import React, { ReactNode, useEffect } from 'react';
-import qs from 'qs';
-import bmjua from './font/BMJUA_otf.otf';
-import bmjuaTTF from './font/BMJUA_ttf.ttf';
-import { Grommet, ThemeContext } from 'grommet';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  useLocation,
-} from 'react-router-dom';
+import React from 'react';
+import { Grommet } from 'grommet';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 import { RecoilRoot } from 'recoil';
 import PathRoutes from './Routes';
@@ -27,15 +18,13 @@ const App = () => {
         <StyledEngineProvider>
           <CssBaseline />
           <Grommet plain>
-            <Router>
+            <BrowserRouter>
               <Routes>
-                <Route path={PathRoutes.HOME} element={<MainPage />} />
-                <Route
-                  path={`${PathRoutes.HOME}/:coinName`}
-                  element={<MainPage />}
-                />
+                <Route path={`${PathRoutes.HOME}`} element={<MainPage />}>
+                  <Route path={`:coinName`} element={<MainPage />} />
+                </Route>
               </Routes>
-            </Router>
+            </BrowserRouter>
           </Grommet>
         </StyledEngineProvider>
       </LocalizationProvider>
