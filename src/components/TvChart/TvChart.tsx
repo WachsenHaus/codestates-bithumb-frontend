@@ -4,24 +4,16 @@ import produce from 'immer';
 import { createChart, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 import moment from 'moment';
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  useRecoilState,
-  useRecoilValue,
-  useRecoilValueLoadable,
-  useSetRecoilState,
-} from 'recoil';
+import { useRecoilState, useRecoilValue, useRecoilValueLoadable, useSetRecoilState } from 'recoil';
 import _ from 'lodash';
 
-import {
-  atomDrawStBars,
-  atomWsStBar,
-  iStBar,
-  selectorDrawStBars,
-} from '../../atom/tvChart.atom';
+import { atomDrawStBars, atomWsStBar, iStBar, selectorDrawStBars } from '../../atom/tvChart.atom';
 import { useGetChartDatas } from '../../hooks/useChart';
 import { convertStringPriceToKRW } from '../../utils/utils';
 
 // const CONST_KR_UTC = 9 * 60 * 60 * 1000;
+
+const CONST_KR_UTC = 9 * 60 * 60 * 1000;
 
 const TvChart = () => {
   useGetChartDatas();
@@ -103,55 +95,34 @@ const TvChart = () => {
     candleChart.current?.setData(drawStBars);
   }, [drawStBars]);
 
-  const CONST_KR_UTC = 9 * 60 * 60 * 1000;
-
   /**
    * websocket에서 들어온 데이터를 curretBar로 파싱해서 가져옴.
    */
   useEffect(() => {
-    const result = new Promise<iStBar>((resolve, reject) => {
-      if (wsStBar) {
-        const { o, t, e } = wsStBar;
-        const currentTime = moment(t, 'YYYYMMDDHHmmss')
-          .utc()
-          .valueOf() as UTCTimestamp;
-        const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) *
-          60) as UTCTimestamp;
-        const nextTime = int;
-        if (currentBar === undefined) {
-          setCurrentBar({
-            close: e,
-            high: e,
-            low: e,
-            open: e,
-            time: nextTime,
-          });
-        } else if (currentBar?.open !== null) {
-          const cloneStBar = _.clone(currentBar);
-          if (currentBar) {
-            cloneStBar.close = e;
-            cloneStBar.high = Math.max(
-              Number(cloneStBar?.high),
-              Number(e)
-            ).toString();
-            cloneStBar.low = Math.min(
-              Number(cloneStBar?.low),
-              Number(e)
-            ).toString();
-            cloneStBar.open = o;
-          }
-          resolve(cloneStBar);
-          // if (cloneStBar === undefined) {
-          //   reject('err');
-          // }
+    if (wsStBar) {
+      const { o, t, e } = wsStBar;
+      const currentTime = moment(t, 'YYYYMMDDHHmmss').utc().valueOf() as UTCTimestamp;
+      const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) * 60) as UTCTimestamp;
+      const nextTime = int;
+      if (currentBar === undefined) {
+        setCurrentBar({
+          close: e,
+          high: e,
+          low: e,
+          open: e,
+          time: nextTime,
+        });
+      } else if (currentBar?.open !== null) {
+        const cloneStBar = _.clone(currentBar);
+        if (currentBar) {
+          cloneStBar.close = e;
+          cloneStBar.high = Math.max(Number(cloneStBar?.high), Number(e)).toString();
+          cloneStBar.low = Math.min(Number(cloneStBar?.low), Number(e)).toString();
+          cloneStBar.open = o;
         }
+        setCurrentBar(cloneStBar);
       }
-    });
-    result
-      .then((result) => {
-        setCurrentBar(result);
-      })
-      .catch((err) => console.error(err));
+    }
   }, [wsStBar]);
 
   return <div className={classNames(`w-full h-full`)} ref={wrapperRef} />;

@@ -32,6 +32,7 @@ export const useGetOrderBookInterval = () => {
         setOrderBookData({
           ask: [],
           bid: [],
+          timestamp: '',
         });
         clearInterval(timerId.current);
         timerId.current = null;

@@ -11,6 +11,7 @@ export type TypeOrderObj = {
 export interface IOrderBookData {
   ask: Array<TypeOrderObj>;
   bid: Array<TypeOrderObj>;
+  timestamp: string;
 }
 
 export const atomOrderBook = atom<IOrderBookData>({
@@ -18,6 +19,7 @@ export const atomOrderBook = atom<IOrderBookData>({
   default: {
     ask: [],
     bid: [],
+    timestamp: '',
   },
 });
 
@@ -38,9 +40,7 @@ export const selectorGetOrderBook = selector({
 
       const time = 1;
       const url = `${coinSymbol}_${marketSymbol}/${time}`;
-      const result = await axios.get<ResponseVO<IOrderBookData>>(
-        `${API_BITHUMB.GET_ORDERBOOK}/${url}`
-      );
+      const result = await axios.get<ResponseVO<IOrderBookData>>(`${API_BITHUMB.GET_ORDERBOOK}/${url}`);
       return result.data.data;
     } catch (err) {}
   },

@@ -76,16 +76,19 @@ const Ticker = () => {
     delayKeyword(keyword);
   }, []);
 
-  const onClick = (type: 'e' | 'r' | 'u24') => () => {
-    let direction: 'desc' | 'asc' = 'desc';
-    if (orderMode === type) {
-      direction = sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      direction = 'desc';
-    }
-    setOrderMode(type);
-    setSortDirection(direction);
-  };
+  const onClick = useCallback(
+    (type: 'e' | 'r' | 'u24') => () => {
+      let direction: 'desc' | 'asc' = 'desc';
+      if (orderMode === type) {
+        direction = sortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        direction = 'desc';
+      }
+      setOrderMode(type);
+      setSortDirection(direction);
+    },
+    [orderMode, sortDirection, setOrderMode, setSortDirection]
+  );
 
   return (
     <div>

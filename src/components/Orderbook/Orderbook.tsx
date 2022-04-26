@@ -7,12 +7,14 @@ import { atomOrderBook, TypeOrderObj } from '../../atom/orderBook.atom';
 
 import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
 import { atomSelectCoinDetail } from '../../atom/selectCoinDetail.atom';
-import { atomFinalTransaction } from '../../atom/total.atom';
+import { atomDrawTransaction, atomFinalTransaction } from '../../atom/total.atom';
 import { TypeTradeTransaction } from '../../atom/tradeData.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import OrderbookRow from './OrderbookRow';
+import { v4 as uuidv4 } from 'uuid';
+import _ from 'lodash';
 
-const getMaxValueOrderBook = async (baseValue: string, values: TypeOrderObj[]) => {
+const getMaxValueOrderBook = (baseValue: string, values: TypeOrderObj[]) => {
   let base = Number(baseValue);
   for (let i = 0; i < values.length; i++) {
     const { q } = values[i];
@@ -23,10 +25,10 @@ const getMaxValueOrderBook = async (baseValue: string, values: TypeOrderObj[]) =
   return base.toString();
 };
 
-const calcQuantity = async (ask: TypeOrderObj[], bid: TypeOrderObj[]) => {
+const calcQuantity = (ask: TypeOrderObj[], bid: TypeOrderObj[]) => {
   let baseQuantity = '0';
-  const firstMaxValue = await getMaxValueOrderBook(baseQuantity, ask);
-  const lastMaxValue = await getMaxValueOrderBook(firstMaxValue, bid);
+  const firstMaxValue = getMaxValueOrderBook(baseQuantity, ask);
+  const lastMaxValue = getMaxValueOrderBook(firstMaxValue, bid);
 
   return lastMaxValue.toString();
 };
@@ -78,10 +80,10 @@ const useGetMaxQuantity = () => {
   const [maxQuantity, setMaxQuantity] = useState('0');
   const orderBook = useRecoilValue(atomOrderBook);
 
-  const calc = useCallback(async () => {
-    const result = await calcQuantity(orderBook.ask, orderBook.bid);
+  const calc = useCallback(() => {
+    const result = calcQuantity(orderBook.ask, orderBook.bid);
     setMaxQuantity(result);
-  }, []);
+  }, [orderBook]);
   useEffect(() => {
     calc();
   }, [orderBook]);
@@ -111,7 +113,7 @@ const useGetLoadingState = () => {
  * @returns 트랜잭션중에 마지막으로 들어온값을 반환합니다.
  */
 const useGetLastTransaction = () => {
-  const transaction = useRecoilValue(atomFinalTransaction);
+  const transaction = useRecoilValue(atomDrawTransaction);
   const [lastTransaction, setLastTransaction] = useState<TypeTradeTransaction>({
     crncCd: 'C0100',
     coinType: '',
@@ -163,14 +165,13 @@ const Orderbook = () => {
         }}
         className={classNames(`scrollbar-hide overflow-y-auto will-change-scroll`)}
       >
-        {orderBook?.ask
-          ?.slice(0)
+        {_.clone(orderBook?.ask)
           .reverse()
           .map((item, index) => {
             // 변동량은 전일종가를 비율식으로 계산한것.
             return (
               <OrderbookRow
-                // key={index}
+                // key={`${item.p}_${item.q}`}
                 price={item.p}
                 quantity={item.q}
                 orderType={'ask'}
@@ -183,7 +184,9 @@ const Orderbook = () => {
         {orderBook?.bid?.map((item, index) => {
           return (
             <OrderbookRow
-              // key={index}
+              // key={uuidv4()}
+              // key={orderBook.timestamp}
+              // key={`${item.p}_${item.q}`}
               index={index}
               price={item.p}
               quantity={item.q}

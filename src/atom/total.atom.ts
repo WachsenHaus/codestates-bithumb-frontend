@@ -259,6 +259,9 @@ export const selectorFilterUseCoins = selector({
   },
 });
 
+/**
+ * 안씀
+ */
 export const selectorWebSocketTransaction = selector({
   key: 'selectorWebSocketTransaction',
   get: async ({ get }) => {

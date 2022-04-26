@@ -177,52 +177,57 @@ const useMergeTransactionWebsocketAndInitData = () => {
   const [drawTransaction, setDrawTransaction] = useRecoilState(atomDrawTransaction);
   const setSelectDetailCoin = useSetRecoilState(atomSelectCoinDetail);
 
-  const merge = async () => {
-    const result = new Promise<TypeTradeTransaction[]>((resolve, reject) => {
-      const deepCopyInitTransaction = _.clone(drawTransaction);
-      if (drawTransaction === undefined) {
-        return;
-      }
-      const { m, c, l } = websocketTransaction;
-      for (let i = 0; i < l.length; i++) {
-        const { o, n, p, q, t } = l[i];
-        let color = '1';
-        let prevPrice;
-        const lastItem = deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
-        if (lastItem) {
-          prevPrice = lastItem.contPrice;
-          if (p === prevPrice) {
-            color = lastItem.buySellGb;
-          } else if (p > prevPrice) {
-            color = '2';
-          } else {
-            color = '1';
-          }
+  const merge = () => {
+    const deepCopyInitTransaction = _.cloneDeep(drawTransaction);
+    if (drawTransaction === undefined) {
+      return;
+    }
+    const { m, c, l } = websocketTransaction;
+    for (let i = 0; i < l.length; i++) {
+      const { o, n, p, q, t } = l[i];
+      let color = '1';
+      let prevPrice;
+      const lastItem = deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
+      if (lastItem) {
+        prevPrice = lastItem.contPrice;
+        if (p === prevPrice) {
+          color = lastItem.buySellGb;
+        } else if (p > prevPrice) {
+          color = '2';
+        } else {
+          color = '1';
         }
-        setSelectDetailCoin((prevData) => {
-          return {
-            ...prevData,
-            e: p,
-          };
-        });
-        deepCopyInitTransaction.push({
-          coinType: c, //
-          contAmt: n, //
-          crncCd: m, //
-          buySellGb: color,
-          contPrice: p, //현재가
-          contQty: q, // 수량
-          contDtm: t, //
-        });
+      }
+      setSelectDetailCoin((prevData) => {
+        return {
+          ...prevData,
+          e: p,
+        };
+      });
+      deepCopyInitTransaction.push({
+        coinType: c, //
+        contAmt: n, //
+        crncCd: m, //
+        buySellGb: color,
+        contPrice: p, //현재가
+        contQty: q, // 수량
+        contDtm: t, //
+      });
 
-        // 트랜잭션은 20개의 데이터만 보관함.
+      // 트랜잭션은 20개의 데이터만 보관함.
+      for (let i = 0; i < 20; i++) {
         if (deepCopyInitTransaction.length > 20) {
           deepCopyInitTransaction.shift();
         }
       }
-      resolve(deepCopyInitTransaction);
-    });
-    result.then((item) => setDrawTransaction(item));
+    }
+    setDrawTransaction(deepCopyInitTransaction);
+
+    // const result = new Promise<TypeTradeTransaction[]>((resolve, reject) => {
+
+    //   resolve(deepCopyInitTransaction);
+    // });
+    // result.then((item) => setDrawTransaction(item));
   };
 
   useEffect(() => {

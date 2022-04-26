@@ -79,18 +79,21 @@ export const RenderNameColumn = React.memo((e: TableCellProps) => {
   const navigate = useNavigate();
   const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
 
-  const onSelectClick = useCallback((e: any) => {
-    const clickedCoinInfo = e.rowData as ISelectCoinDefault;
-    if (clickedCoinInfo === undefined) {
-      return;
-    }
-    if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
-      return;
-    }
-    const symbol = clickedCoinInfo.coinSymbol;
-    const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
-    navigate(`/${symbol}_${mSymbol}`);
-  }, []);
+  const onSelectClick = useCallback(
+    (e: any) => {
+      const clickedCoinInfo = e.rowData as ISelectCoinDefault;
+      if (clickedCoinInfo === undefined) {
+        return;
+      }
+      if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
+        return;
+      }
+      const symbol = clickedCoinInfo.coinSymbol;
+      const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
+      navigate(`/${symbol}_${mSymbol}`);
+    },
+    [selectCoinDefault]
+  );
 
   return (
     <motion.div

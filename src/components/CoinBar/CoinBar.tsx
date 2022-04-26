@@ -1,25 +1,17 @@
 import classNames from 'classnames';
 import { motion } from 'framer-motion';
 import React from 'react';
-import {
-  convertStringPriceToKRW,
-  convertStringPriceWON,
-  convertStringToVolume24,
-} from '../../utils/utils';
+import { convertStringPriceToKRW, convertStringPriceWON, convertStringToVolume24 } from '../../utils/utils';
 import CoinRate from './CoinRate';
 import useGetCoinBar from '../../hooks/useGetCoinBar';
 
-const CoinColumn = ({ children }: { children: React.ReactNode }) => (
-  <div className={`flex flex-col justify-center items-center`}>{children}</div>
-);
+const CoinColumn = React.memo(({ children }: { children: React.ReactNode }) => <div className={`flex flex-col justify-center items-center`}>{children}</div>);
 
 const CoinBar = () => {
   const { e, v24, u24, h, l, f, r, coinSymbol } = useGetCoinBar();
 
   return (
-    <motion.div
-      className={classNames(`flex  justify-around items-center my-4`)}
-    >
+    <motion.div className={classNames(`flex  justify-around items-center my-4`)}>
       <div className="font-bmjua">{coinSymbol}</div>
       <div>{convertStringPriceToKRW(e)}</div>
       <CoinRate rate={r} />
