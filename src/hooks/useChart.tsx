@@ -1,9 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  useRecoilStateLoadable,
-  useRecoilValue,
-  useSetRecoilState,
-} from 'recoil';
+import { useRecoilRefresher_UNSTABLE, useRecoilStateLoadable, useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
 import { atomChartData, selectorGetChartData } from '../atom/tvChart.atom';
@@ -13,6 +9,7 @@ export const useGetChartDatas = () => {
   const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
 
   const [getChartData, reload] = useRecoilStateLoadable(selectorGetChartData);
+  const refreshChartData = useRecoilRefresher_UNSTABLE(selectorGetChartData);
   const setChartData = useSetRecoilState(atomChartData);
   const isFetching = useRef(false);
 
@@ -49,6 +46,7 @@ export const useGetChartDatas = () => {
           v: [],
         });
         clearInterval(timerId.current);
+        refreshChartData();
         timerId.current = null;
       }
     };

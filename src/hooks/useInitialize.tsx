@@ -52,11 +52,11 @@ const useGetCoinList = () => {
  * URL주소를 분석하고 해당 값으로 defaultCoin을 설정합니다.
  */
 const useGetTradeParam = () => {
-  const params = useParams();
   const coins = useRecoilValue(atomCoinList);
+  const params = useParams();
   const setSelectCoin = useSetRecoilState(atomSelectCoinDefault);
   useEffect(() => {
-    if (params?.coinName) {
+    if (coins && params?.coinName) {
       const result = params?.coinName?.split('_');
       if (coins && result) {
         const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
@@ -84,7 +84,7 @@ const useGetTradeParam = () => {
         siseCrncCd: 'C0100',
       });
     }
-  }, [params, coins]);
+  }, [params]);
 };
 
 const useGetTradeData = () => {
@@ -130,8 +130,6 @@ const useGetPriceInfoList = () => {
     const { state, contents } = getPriceInfoList;
     if (state === 'hasValue') {
       if (contents) {
-        //
-        console.log(getPriceInfoList);
         setSelectDetailCoin(contents?.detailObj);
         setPriceInfoUseCoins(contents?.result);
       }
