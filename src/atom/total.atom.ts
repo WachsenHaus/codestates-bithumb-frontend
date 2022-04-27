@@ -1,9 +1,17 @@
 import { TypeCoinKind, TypeCoinClassCode } from './coinList.type';
 import { atom, selector } from 'recoil';
-import { generateKeywordForSearch, getCookie, order, unpackCookie } from '../utils/utils';
+import {
+  generateKeywordForSearch,
+  getCookie,
+  order,
+  unpackCookie,
+} from '../utils/utils';
 import { atomCoinList } from './coinList.atom';
 import { TypeDrawTicker } from './drawData.atom';
-import { TypeWebSocketTickerReturnType, TypeWebSocketTransactionReturnType } from './ws.type';
+import {
+  TypeWebSocketTickerReturnType,
+  TypeWebSocketTransactionReturnType,
+} from './ws.type';
 import _ from 'lodash';
 import { TypeTradeTransaction } from './tradeData.atom';
 
@@ -145,19 +153,13 @@ export const selectorMergeTickerAndCoins = selector({
   key: 'selectorMergeTickerAndCoins',
   get: ({ get }) => {
     const tickerObj = get(atomTickers);
-    // console.log(tickerObj);
     const coins = get(atomPriceInfoUseCoins);
-
     const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
-    // console.log(isExist);
     if (isExist === -1) {
-      // resolve(coins);
       return coins;
     } else if (tickerObj.m === 'C0101') {
-      // resolve(coins);
       return coins;
     } else {
-      // console.log({ ...tickerObj });
       const draft = _.clone(coins);
       let isUp;
       const currentPrice = Number(tickerObj.e);
@@ -170,8 +172,6 @@ export const selectorMergeTickerAndCoins = selector({
         isUp = false;
       }
       draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
-      // console.log(draft[isExist]);
-      // resolve(draft);
       return draft;
     }
   },
@@ -198,13 +198,21 @@ export const selectorPriceFilterdCoins = selector({
       if (filterKeyword === '') {
         resultUseCoins = prevUseCoins;
       } else {
-        resultUseCoins = _.filter(prevUseCoins, (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1);
+        resultUseCoins = _.filter(
+          prevUseCoins,
+          (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
+        );
       }
     } else {
       if (filterKeyword === '') {
         resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true);
       } else {
-        resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true && i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1);
+        resultUseCoins = _.filter(
+          prevUseCoins,
+          (i) =>
+            i.isFavorite === true &&
+            i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
+        );
       }
     }
     const result = order(orderBy, resultUseCoins, direction);
@@ -225,7 +233,10 @@ export const selectorFilterUseCoins = selector({
     const displayFilter = get(atomDisplayCoinsFilter);
 
     const useFilterCoins = defaultInfoCoins?.coinList.filter(
-      (item) => item.coinClassCode === displayFilter.coinClassCode && item.siseCrncCd === displayFilter.siseCrncCd && item.isLive === displayFilter.isLive
+      (item) =>
+        item.coinClassCode === displayFilter.coinClassCode &&
+        item.siseCrncCd === displayFilter.siseCrncCd &&
+        item.isLive === displayFilter.isLive
     );
     const cookieFavorites = getCookie('marketFavoritesCoin');
     const unPackCookie = unpackCookie(cookieFavorites);
@@ -236,7 +247,9 @@ export const selectorFilterUseCoins = selector({
         coinNameEn: item.coinNameEn,
         coinSymbol: item.coinSymbol,
       });
-      const cookieCoinSymbol = unPackCookie.find((i) => i.split('_')[0] === item.coinType);
+      const cookieCoinSymbol = unPackCookie.find(
+        (i) => i.split('_')[0] === item.coinType
+      );
       return {
         isFavorite: cookieCoinSymbol ? true : false,
         siseCrncCd: item.siseCrncCd,
@@ -280,7 +293,8 @@ export const selectorWebSocketTransaction = selector({
       const { o, n, p, q, t } = l[i];
       let color = '1';
       let prevPrice;
-      const lastItem = deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
+      const lastItem =
+        deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
       if (lastItem) {
         prevPrice = lastItem.contPrice;
         if (p === prevPrice) {
