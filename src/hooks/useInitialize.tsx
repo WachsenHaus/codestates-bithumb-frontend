@@ -1,6 +1,6 @@
 import _, { result } from 'lodash';
 import { resolve } from 'node:path/win32';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable, useSetRecoilState } from 'recoil';
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
@@ -55,8 +55,12 @@ const useGetTradeParam = () => {
   const coins = useRecoilValue(atomCoinList);
   const params = useParams();
   const setSelectCoin = useSetRecoilState(atomSelectCoinDefault);
+  const [ready, setReady] = useState(false);
   useEffect(() => {
-    if (coins && params?.coinName) {
+    console.log(params);
+    if (ready && coins && params?.coinName) {
+      console.log(coins);
+      console.log(params.coinName);
       const result = params?.coinName?.split('_');
       if (coins && result) {
         const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
@@ -76,7 +80,9 @@ const useGetTradeParam = () => {
           });
         }
       }
-    } else {
+      console.log('set params');
+    } else if (ready === true && params?.coinName === undefined) {
+      console.log('set default');
       setSelectCoin({
         coinType: 'C0101',
         coinSymbol: 'BTC',
@@ -84,7 +90,13 @@ const useGetTradeParam = () => {
         siseCrncCd: 'C0100',
       });
     }
-  }, [params]);
+  }, [params, ready]);
+
+  useEffect(() => {
+    if (coins) {
+      setReady(true);
+    }
+  }, [coins]);
 };
 
 const useGetTradeData = () => {
