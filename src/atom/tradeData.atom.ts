@@ -5,10 +5,7 @@ import { atom, selector } from 'recoil';
 import { ResponseVO } from '../type/api';
 import { Log } from '../utils/log';
 import { API_BITHUMB, API_BITHUMB_STATUS_CODE } from './../api/bt.api';
-import {
-  atomSelectCoinDetail,
-  ISelectCoinDetail,
-} from './selectCoinDetail.atom';
+import { atomSelectCoinDetail, ISelectCoinDetail } from './selectCoinDetail.atom';
 import _ from 'lodash';
 import produce from 'immer';
 import { atomSelectCoinDefault } from './selectCoinDefault.atom';
@@ -70,8 +67,6 @@ export const selectorTradeData = selector({
       if (coinType === '') {
         return;
       }
-      console.log('무한반복?');
-      console.log(coinType);
       const url = {
         type: 'custom',
         crncCd: siseCrncCd,
@@ -81,12 +76,9 @@ export const selectorTradeData = selector({
           transaction: { limit: 31 },
         },
       };
-      const result = await axios.get<ResponseVO<ITradeData>>(
-        `${API_BITHUMB.GET_TRADE_DATA}`,
-        {
-          params: url,
-        }
-      );
+      const result = await axios.get<ResponseVO<ITradeData>>(`${API_BITHUMB.GET_TRADE_DATA}`, {
+        params: url,
+      });
       return result.data;
     } catch (err) {
       Log(err);
@@ -108,29 +100,14 @@ export const selectPriceInfoToCoins = selector({
     if (tradeData === undefined) {
       return;
     }
-
     const tickerData = tradeData[selectDefaultCoin.siseCrncCd]['ticker'];
     const tickerKeys = Object.keys(tickerData);
     let detailObj: ISelectCoinDetail = {};
 
     const cloneUseCoin = _.clone(useCoins);
     for (let i = 0; i < tickerKeys.length; i++) {
-      const {
-        coinType,
-        buyVolume,
-        chgAmt,
-        chgRate,
-        openPrice,
-        volume24H,
-        value24H,
-        prevClosePrice,
-        highPrice,
-        lowPrice,
-        closePrice,
-      } = tickerData[tickerKeys[i]];
-      const isExist = cloneUseCoin.findIndex(
-        (item) => item.coinType === coinType
-      );
+      const { coinType, chgAmt, chgRate, volume24H, value24H, prevClosePrice, highPrice, lowPrice, closePrice } = tickerData[tickerKeys[i]];
+      const isExist = cloneUseCoin.findIndex((item) => item.coinType === coinType);
       if (coinType === selectDefaultCoin.coinType) {
         detailObj = {
           e: closePrice,
@@ -171,8 +148,7 @@ export const selectTransactionInfoToCoins = selector({
       return;
     }
 
-    const transactionData =
-      tradeData[selectDefaultCoin.siseCrncCd]['transaction'];
+    const transactionData = tradeData[selectDefaultCoin.siseCrncCd]['transaction'];
     const transactionKeys = Object.keys(transactionData);
 
     const keys = transactionData[transactionKeys[0]];

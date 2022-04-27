@@ -171,7 +171,6 @@ const Orderbook = () => {
             // 변동량은 전일종가를 비율식으로 계산한것.
             return (
               <OrderbookRow
-                // key={`${item.p}_${item.q}`}
                 key={index}
                 price={item.p}
                 quantity={item.q}
@@ -185,9 +184,6 @@ const Orderbook = () => {
         {orderBook?.bid?.map((item, index) => {
           return (
             <OrderbookRow
-              // key={uuidv4()}
-              // key={orderBook.timestamp}
-              // key={`${item.p}_${item.q}`}
               key={index}
               index={index}
               price={item.p}

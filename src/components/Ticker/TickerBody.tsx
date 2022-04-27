@@ -28,25 +28,13 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
       }
     ) => {
       const next = produce(drawTicker, (draft) => {
-        draft.forEach((item) => {
-          if (item.coinSymbol === e.rowData.coinSymbol) {
-            item.isFavorite = !item.isFavorite;
+        for (let i = 0; i < draft.length; i++) {
+          if (draft[i].coinSymbol === e.rowData.coinSymbol) {
+            draft[i].isFavorite = !draft[i].isFavorite;
           }
-        });
-        // const findItem = drawTicker.find((item) => item.coinSymbol === e.rowData.coinSymbol);
-        // if (findItem) {
-        //   findItem.isFavorite = !findItem.isFavorite;
-        // }
+        }
       });
       return next;
-      // const cloneDrawTicker = _.cloneDeep(drawTicker);
-      // const cloneDrawTicker = window.structuredClone(drawTicker);
-      // const findItem = cloneDrawTicker.find((item) => item.coinSymbol === e.rowData.coinSymbol);
-      // if (findItem) {
-      //   findItem.isFavorite = !findItem.isFavorite;
-      // }
-      // console.log(findItem);
-      // return cloneDrawTicker;
     },
     []
   );
@@ -59,7 +47,6 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
     applyCookie(packedCookies);
     const coins = onToggleCoin(drawTicker, e);
     setDrawTicker(coins);
-    console.log(coins);
   }, [drawTicker]);
 
   return (
@@ -79,39 +66,23 @@ export const RenderNameColumn = React.memo((e: TableCellProps) => {
   const navigate = useNavigate();
   const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
 
-  // const onSelectClick = useCallback(
-  //   (e: any) => {
-  //     const clickedCoinInfo = e.rowData as ISelectCoinDefault;
-  //     if (clickedCoinInfo === undefined) {
-  //       return;
-  //     }
-  //     if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
-  //       return;
-  //     }
-  //     const symbol = clickedCoinInfo.coinSymbol;
-  //     const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
-  //     if (navigate) {
-  //       navigate && navigate(`/${symbol}_${mSymbol}`);
-  //     }
-  //   },
-  //   [selectCoinDefault]
-  // );
-
-  const onSelectClick = (e: any) => {
-    const clickedCoinInfo = e.rowData as ISelectCoinDefault;
-    if (clickedCoinInfo === undefined) {
-      return;
-    }
-    if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
-      return;
-    }
-    const symbol = clickedCoinInfo.coinSymbol;
-    const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
-    if (navigate) {
-      navigate && navigate(`/${symbol}_${mSymbol}`);
-    }
-  };
-
+  const onSelectClick = useCallback(
+    (e: any) => {
+      const clickedCoinInfo = e.rowData as ISelectCoinDefault;
+      if (clickedCoinInfo === undefined) {
+        return;
+      }
+      if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
+        return;
+      }
+      const symbol = clickedCoinInfo.coinSymbol;
+      const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
+      if (navigate) {
+        navigate && navigate(`/${symbol}_${mSymbol}`);
+      }
+    },
+    [selectCoinDefault]
+  );
   return (
     <motion.div
       whileTap={{}}
