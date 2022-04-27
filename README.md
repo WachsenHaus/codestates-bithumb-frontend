@@ -31,7 +31,6 @@ npm run start // 프로젝트를 실행해주세요.
 
 - CSS / UI 도구
   - tailwincss
-  - GrommetUi
   - Material UI
   - Framer.motion
   - chart.js
