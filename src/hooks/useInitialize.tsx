@@ -184,12 +184,12 @@ const useGetFilteredCoins = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (isFlag) {
-      console.log('변경됨!');
-      setIsFlag(false);
-    }
-  }, [filteredCoins]);
+  // useEffect(() => {
+  //   if (isFlag) {
+  //     console.log('변경됨!');
+  //     setIsFlag(false);
+  //   }
+  // }, [filteredCoins]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   // const merge = () => {
@@ -198,21 +198,22 @@ const useGetFilteredCoins = () => {
   // };
 
   useEffect(() => {
-    if (isFlag === false) {
-      setTimeout(() => {
-        worker &&
-          worker.postMessage({
-            filterMode,
-            filterKeyword,
-            filterOrder,
-            filterDirection,
-            priceInfoUseCoins,
-          });
-        setIsFlag(true);
-      }, 16);
-    } else {
-      console.log('블락!');
-    }
+    worker &&
+      worker.postMessage({
+        filterMode,
+        filterKeyword,
+        filterOrder,
+        filterDirection,
+        priceInfoUseCoins,
+      });
+    // if (isFlag === false) {
+    //   setTimeout(() => {
+
+    //     setIsFlag(true);
+    //   }, 16);
+    // } else {
+    //   console.log('블락!');
+    // }
   }, [
     // isFlag,
     // merge,
