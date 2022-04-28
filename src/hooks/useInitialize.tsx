@@ -1,6 +1,5 @@
 import produce from 'immer';
 import _, { result } from 'lodash';
-import { resolve } from 'node:path/win32';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useRecoilState, useRecoilValue, useRecoilValueLoadable, useSetRecoilState } from 'recoil';
@@ -26,6 +25,7 @@ import {
 } from '../atom/total.atom';
 import { atomTradeData, selectorTradeData, selectPriceInfoToCoins, selectTransactionInfoToCoins, TypeTradeTransaction } from '../atom/tradeData.atom';
 import { TypeWebSocketTickerReturnType } from '../atom/ws.type';
+import mergeTransaction from './worker/mergeTransaction.js';
 
 /**
  * 모든 코인에 대한 기초 정보를 받아 옵니다.
@@ -237,54 +237,87 @@ const useGetInitTransactionData = () => {
 const useMergeTransactionWebsocketAndInitData = () => {
   const websocketTransaction = useRecoilValue(atomTransactions);
   const [drawTransaction, setDrawTransaction] = useRecoilState(atomDrawTransaction);
-  const setSelectDetailCoin = useSetRecoilState(atomSelectCoinDetail);
+  const [selectDetailCoin, setSelectDetailCoin] = useRecoilState(atomSelectCoinDetail);
+  const [worker, setWorker] = useState<any>();
+
+  useEffect(() => {
+    const worker: Worker = new Worker(mergeTransaction);
+    setWorker(worker);
+    worker.onmessage = (e) => {
+      console.log(e.data);
+      setSelectDetailCoin((prevData) => {
+        return {
+          ...prevData,
+          e: e.data.p,
+        };
+      });
+      setDrawTransaction(e.data.cloneDrawTransaction);
+    };
+  }, []);
+
+  useEffect(() => {
+    // worker &&
+    //   worker.postMessage({
+    //     drawTransaction,
+    //     websocketTransaction,
+    //     // selectDetailCoin
+    //     // setSelectDetailCoin,
+    //   });
+  }, [worker]);
 
   const merge = () => {
-    const next = produce(drawTransaction, (draft) => {
-      if (drawTransaction === undefined) {
-        return;
-      }
-      const { m, c, l } = websocketTransaction;
-      for (let i = 0; i < l.length; i++) {
-        const { o, n, p, q, t } = l[i];
-        let color = '1';
-        let prevPrice;
-        const lastItem = draft[draft.length - 1];
-        if (lastItem) {
-          prevPrice = lastItem.contPrice;
-          if (p === prevPrice) {
-            color = lastItem.buySellGb;
-          } else if (p > prevPrice) {
-            color = '2';
-          } else {
-            color = '1';
-          }
-        }
-        setSelectDetailCoin((prevData) => {
-          return {
-            ...prevData,
-            e: p,
-          };
-        });
-        draft.push({
-          coinType: c, //
-          contAmt: n, //
-          crncCd: m, //
-          buySellGb: color,
-          contPrice: p, //현재가
-          contQty: q, // 수량
-          contDtm: t, //
-        });
+    worker &&
+      worker.postMessage({
+        drawTransaction,
+        websocketTransaction,
+        // selectDetailCoin
+        // setSelectDetailCoin,
+      });
 
-        // 트랜잭션은 20개의 데이터만 보관함.
-        for (let i = 0; i < 20; i++) {
-          if (draft.length > 20) {
-            draft.shift();
-          }
-        }
-      }
-    });
-    setDrawTransaction(next);
+    // const next = produce(drawTransaction, (draft) => {
+    //   if (drawTransaction === undefined) {
+    //     return;
+    //   }
+    //   const { m, c, l } = websocketTransaction;
+    //   for (let i = 0; i < l.length; i++) {
+    //     const { o, n, p, q, t } = l[i];
+    //     let color = '1';
+    //     let prevPrice;
+    //     const lastItem = draft[draft.length - 1];
+    //     if (lastItem) {
+    //       prevPrice = lastItem.contPrice;
+    //       if (p === prevPrice) {
+    //         color = lastItem.buySellGb;
+    //       } else if (p > prevPrice) {
+    //         color = '2';
+    //       } else {
+    //         color = '1';
+    //       }
+    //     }
+    //     setSelectDetailCoin((prevData) => {
+    //       return {
+    //         ...prevData,
+    //         e: p,
+    //       };
+    //     });
+    //     draft.push({
+    //       coinType: c, //
+    //       contAmt: n, //
+    //       crncCd: m, //
+    //       buySellGb: color,
+    //       contPrice: p, //현재가
+    //       contQty: q, // 수량
+    //       contDtm: t, //
+    //     });
+    //     // 트랜잭션은 20개의 데이터만 보관함.
+    //     for (let i = 0; i < 20; i++) {
+    //       if (draft.length > 20) {
+    //         draft.shift();
+    //       }
+    //     }
+    //   }
+    // });
+    // setDrawTransaction(next);
   };
 
   useEffect(() => {

@@ -88,11 +88,16 @@ export const RenderNameColumn = React.memo(({ e, activeIndex }: { e: TableCellPr
   return (
     <motion.div
       whileTap={{}}
-      whileHover={{
-        marginLeft: '1rem',
-        scale: 1.1,
-      }}
-      className={classNames(`${selectCoin.coinType === e.rowData.coinType && `ml-10 text-red-300`}`, ` flex flex-col justify-center w-full h-full `)}
+      // whileHover={{
+      //   marginLeft: '1rem',
+      //   scale: 1.1,
+      // }}
+      className={classNames(
+        `${selectCoin.coinType === e.rowData.coinType && ` text-red-300`}`,
+        ` flex flex-col justify-center w-full h-full `,
+        `hover:scale-110`,
+        `hover:ml-4`
+      )}
       onClick={onSelectClick(e)}
     >
       {e.cellData}

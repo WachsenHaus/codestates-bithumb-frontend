@@ -12,12 +12,16 @@ const useGetPagination = () => {
 
   const [height, setHeight] = useState(350);
   const [page, setPage] = useState(0);
-  const headerHeight = 50;
-  const rowHeight = 50;
-  const rowCount = filterdCoins?.length;
-  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(undefined);
+  const [headerHeight, setHeaderHeight] = useState(50);
+  const [rowHeight, setRowHeight] = useState(50);
+  const [rowCount, setRowCount] = useState(filterdCoins?.length);
   const [perPage, setPerPage] = useState(height / rowHeight);
-  const pageCount = Math.ceil(rowCount / perPage);
+  const [pageCount, setPageCount] = useState(Math.ceil(rowCount / perPage));
+  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(undefined);
+  //   const headerHeight = 50;
+  //   const rowHeight = 50;
+  //   const rowCount = filterdCoins?.length;
+  //   const pageCount = Math.ceil(rowCount / perPage);
   const handleRowsScroll = useCallback((info: IndexRange & OverscanIndexRange) => {
     setPage((prev) => {
       return Math.ceil(info.stopIndex / perPage);

@@ -3,11 +3,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import { atomDrawCoinInfo } from '../../atom/drawData.atom';
-import {
-  atomOrderBook,
-  IOrderBookData,
-  TypeOrderObj,
-} from '../../atom/orderBook.atom';
+import { atomOrderBook, IOrderBookData, TypeOrderObj } from '../../atom/orderBook.atom';
 
 import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
 import { atomSelectCoinDetail } from '../../atom/selectCoinDetail.atom';
@@ -168,9 +164,7 @@ const Orderbook = () => {
         sx={{
           height: { sm: 200, md: 440 },
         }}
-        className={classNames(
-          `scrollbar-hide overflow-y-auto will-change-scroll`
-        )}
+        className={classNames(`scrollbar-hide overflow-y-auto will-change-scroll`)}
       >
         {_.clone(orderBook?.ask)
           .reverse()
@@ -178,7 +172,7 @@ const Orderbook = () => {
             // 변동량은 전일종가를 비율식으로 계산한것.
             return (
               <OrderbookRow
-                key={`${item.p}_${item.q}_${orderBook.timestamp}`}
+                // key={`${item.p}_${item.q}_${orderBook.timestamp}`}
                 price={item.p}
                 quantity={item.q}
                 orderType={'ask'}
@@ -191,7 +185,7 @@ const Orderbook = () => {
         {orderBook?.bid?.map((item, index) => {
           return (
             <OrderbookRow
-              key={`${item.p}_${item.q}_${orderBook.timestamp}`}
+              // key={`${item.p}_${item.q}_${orderBook.timestamp}`}
               index={index}
               price={item.p}
               quantity={item.q}
