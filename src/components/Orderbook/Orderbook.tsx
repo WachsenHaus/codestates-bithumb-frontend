@@ -3,11 +3,15 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import { atomDrawCoinInfo } from '../../atom/drawData.atom';
-import { atomOrderBook, TypeOrderObj } from '../../atom/orderBook.atom';
+import {
+  atomOrderBook,
+  IOrderBookData,
+  TypeOrderObj,
+} from '../../atom/orderBook.atom';
 
 import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
 import { atomSelectCoinDetail } from '../../atom/selectCoinDetail.atom';
-import { atomDrawTransaction, atomFinalTransaction } from '../../atom/total.atom';
+import { atomDrawTransaction } from '../../atom/total.atom';
 import { TypeTradeTransaction } from '../../atom/tradeData.atom';
 import { useGetOrderBookInterval } from '../../hooks/useOrderBook';
 import OrderbookRow from './OrderbookRow';
@@ -80,12 +84,13 @@ const useGetMaxQuantity = () => {
   const [maxQuantity, setMaxQuantity] = useState('0');
   const orderBook = useRecoilValue(atomOrderBook);
 
-  const calc = useCallback(() => {
+  const calc = useCallback((orderBook: IOrderBookData) => {
     const result = calcQuantity(orderBook.ask, orderBook.bid);
     setMaxQuantity(result);
-  }, [orderBook]);
+  }, []);
+
   useEffect(() => {
-    calc();
+    calc(orderBook);
   }, [orderBook]);
 
   return maxQuantity;
@@ -163,7 +168,9 @@ const Orderbook = () => {
         sx={{
           height: { sm: 200, md: 440 },
         }}
-        className={classNames(`scrollbar-hide overflow-y-auto will-change-scroll`)}
+        className={classNames(
+          `scrollbar-hide overflow-y-auto will-change-scroll`
+        )}
       >
         {_.clone(orderBook?.ask)
           .reverse()

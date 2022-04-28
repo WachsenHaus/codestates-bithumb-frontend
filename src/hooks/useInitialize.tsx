@@ -1,3 +1,4 @@
+import produce from 'immer';
 import _, { result } from 'lodash';
 import { resolve } from 'node:path/win32';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -94,6 +95,9 @@ const useGetTradeParam = () => {
   }, [coins]);
 };
 
+/**
+ * 선택된 코인의 초기 데이터와 코인리스트의 초기값들을 받아옵니다.
+ */
 const useGetTradeData = () => {
   const tradeData = useRecoilValueLoadable(selectorTradeData);
   const setTradeData = useSetRecoilState(atomTradeData);
@@ -166,6 +170,9 @@ const useGetFilteredCoins = () => {
   }, [pricefilterCoins, setFilteredCoins]);
 };
 
+/**
+ * 티커와 코인정보들을 합칩니다.
+ */
 const useMergeTickersWebsocketAndFilteredData = () => {
   // 티커정보와 코인정보를 합칩니다.
   const getAtomTicker = useRecoilValue(atomTickers);
@@ -219,15 +226,13 @@ const useGetInitTransactionData = () => {
     if (state === 'hasValue') {
       contents && setDrawTransaction(contents);
     } else if (state === 'hasError') {
-      console.log(selectTransaction);
-      console.log(state);
       console.log('error');
     }
   }, [selectTransaction]);
 };
 
 /**
- *
+ *트랜잭션데이터와 웹소켓 트랜잭션데이터를 병합합니다.
  */
 const useMergeTransactionWebsocketAndInitData = () => {
   const websocketTransaction = useRecoilValue(atomTransactions);
@@ -235,50 +240,51 @@ const useMergeTransactionWebsocketAndInitData = () => {
   const setSelectDetailCoin = useSetRecoilState(atomSelectCoinDetail);
 
   const merge = () => {
-    const deepCopyInitTransaction = _.cloneDeep(drawTransaction);
-    if (drawTransaction === undefined) {
-      return;
-    }
-    const { m, c, l } = websocketTransaction;
-    for (let i = 0; i < l.length; i++) {
-      const { o, n, p, q, t } = l[i];
-      let color = '1';
-      let prevPrice;
-      const lastItem = deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
-      if (lastItem) {
-        prevPrice = lastItem.contPrice;
-        if (p === prevPrice) {
-          color = lastItem.buySellGb;
-        } else if (p > prevPrice) {
-          color = '2';
-        } else {
-          color = '1';
-        }
+    const next = produce(drawTransaction, (draft) => {
+      if (drawTransaction === undefined) {
+        return;
       }
-      setSelectDetailCoin((prevData) => {
-        return {
-          ...prevData,
-          e: p,
-        };
-      });
-      deepCopyInitTransaction.push({
-        coinType: c, //
-        contAmt: n, //
-        crncCd: m, //
-        buySellGb: color,
-        contPrice: p, //현재가
-        contQty: q, // 수량
-        contDtm: t, //
-      });
+      const { m, c, l } = websocketTransaction;
+      for (let i = 0; i < l.length; i++) {
+        const { o, n, p, q, t } = l[i];
+        let color = '1';
+        let prevPrice;
+        const lastItem = draft[draft.length - 1];
+        if (lastItem) {
+          prevPrice = lastItem.contPrice;
+          if (p === prevPrice) {
+            color = lastItem.buySellGb;
+          } else if (p > prevPrice) {
+            color = '2';
+          } else {
+            color = '1';
+          }
+        }
+        setSelectDetailCoin((prevData) => {
+          return {
+            ...prevData,
+            e: p,
+          };
+        });
+        draft.push({
+          coinType: c, //
+          contAmt: n, //
+          crncCd: m, //
+          buySellGb: color,
+          contPrice: p, //현재가
+          contQty: q, // 수량
+          contDtm: t, //
+        });
 
-      // 트랜잭션은 20개의 데이터만 보관함.
-      for (let i = 0; i < 20; i++) {
-        if (deepCopyInitTransaction.length > 20) {
-          deepCopyInitTransaction.shift();
+        // 트랜잭션은 20개의 데이터만 보관함.
+        for (let i = 0; i < 20; i++) {
+          if (draft.length > 20) {
+            draft.shift();
+          }
         }
       }
-    }
-    setDrawTransaction(deepCopyInitTransaction);
+    });
+    setDrawTransaction(next);
   };
 
   useEffect(() => {
@@ -300,7 +306,7 @@ const useInitialize = () => {
   useGetFiltredUseCoins();
   // 추린 코인리스트에 가격정보를 병합한다.
   useGetPriceInfoList();
-  // 티커정보를 필터링된 배열과 병합하고, 코인리스트를 atomFinalCoin에 할당한다
+  // 티커정보를 필터링된 배열과 병합한다.
   useMergeTickersWebsocketAndFilteredData();
   // 키워드,방향등의 필터조건을 통과한 결과값을 filteredCoins에 할당한다.
   useGetFilteredCoins();

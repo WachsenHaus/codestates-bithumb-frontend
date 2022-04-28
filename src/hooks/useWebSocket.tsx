@@ -73,7 +73,6 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
             }
             if (wsSubscribe?.CLOSED || wsSubscribe === undefined) {
               setWsSubscribe(ws);
-              // ws.send(stringify(wsMessage));
             }
             break;
           default:
