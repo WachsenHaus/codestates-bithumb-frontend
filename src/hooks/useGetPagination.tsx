@@ -14,21 +14,13 @@ const useGetPagination = () => {
   const [page, setPage] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(50);
   const [rowHeight, setRowHeight] = useState(50);
-  const [rowCount, setRowCount] = useState(filterdCoins?.length);
-  // const rowCount = filterdCoins?.length;
+  const rowCount = filterdCoins?.length;
   const [perPage, setPerPage] = useState(height / rowHeight);
   const [pageCount, setPageCount] = useState(Math.ceil(rowCount / perPage));
   const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(
     undefined
   );
-  // const headerHeight = 50;
-  // const rowHeight = 50;
-  // const perPage = height / rowHeight;
-  // const pageCount = Math.ceil(rowCount / perPage);
 
-  useEffect(() => {
-    setRowCount(filterdCoins.length);
-  }, [filterdCoins.length]);
   useEffect(() => {
     setPageCount(Math.ceil(rowCount / perPage));
   }, [rowCount]);

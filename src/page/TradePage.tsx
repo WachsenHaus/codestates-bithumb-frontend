@@ -33,13 +33,13 @@ const TradePage = () => {
           <Header />
         </Box>
         <Box gridColumn={`span 7`}>
-          {/* <CoinBar /> */}
-          {/* <MainContent /> */}
+          <CoinBar />
+          <MainContent />
           <Ticker />
         </Box>
         <Box gridColumn={`span 5`}>
-          {/* <Orderbook /> */}
-          {/* <Transaction /> */}
+          <Orderbook />
+          <Transaction />
         </Box>
       </Box>
     </>

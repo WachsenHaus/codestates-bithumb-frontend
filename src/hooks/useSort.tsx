@@ -18,7 +18,6 @@ const useSort = () => {
 
   const onSetFilterDirection = useCallback(
     (type: 'e' | 'r' | 'u24') => () => {
-      console.log('zzz');
       let direction: 'desc' | 'asc' = 'desc';
       if (orderMode === type) {
         direction = sortDirection === 'asc' ? 'desc' : 'asc';

@@ -36,21 +36,21 @@ const Ticker = () => {
   const paginationObj = useGetPagination();
 
   const filterdCoins = useRecoilValue(atomFilteredCoins);
-  const onRender = useCallback(
-    ({ index }: { index: number }) => {
-      return filterdCoins[index];
-      // return [];
-    },
-    [filterdCoins]
-  );
+  const onRender = ({ index }: { index: number }) => {
+    return filterdCoins[index];
+  };
   const RowRenderer = useCallback((e: TableRowProps) => {
     return (
       <div className="flex border-b" key={e.key} style={e.style}>
-        <RenderFavoriteColumn {...e} />
-        <RenderNameColumn e={e} key={e.rowData.coinName} />
-        <RenderCurrentPriceColumn {...e} key={e.rowData.e} />
-        <RenderRateOfChange {...e} key={e.rowData.r} />
-        <RenderU24 {...e} key={e.rowData.u24} />
+        {e?.rowData && (
+          <>
+            <RenderFavoriteColumn {...e} />
+            <RenderNameColumn e={e} key={e.rowData.coinName} />
+            <RenderCurrentPriceColumn {...e} key={e.rowData.e} />
+            <RenderRateOfChange {...e} key={e.rowData.r} />
+            <RenderU24 {...e} key={e.rowData.u24} />
+          </>
+        )}
       </div>
     );
   }, []);
@@ -127,6 +127,9 @@ const Ticker = () => {
                   scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={onRender}
+                  // noRowsRenderer={() => <div>.</div>}
+                  // noContentRenderer={() => <div>.</div>}
+
                   // list={filterdCoins}
                   rowRenderer={RowRenderer}
                 >
