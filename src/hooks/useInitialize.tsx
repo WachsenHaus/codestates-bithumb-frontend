@@ -29,9 +29,9 @@ import {
   selectPriceInfoToCoins,
   selectTransactionInfoToCoins,
 } from '../atom/tradeData.atom';
-import workerMergeWebsocketTransaction from './worker/mergeWebsocketTransaction.js';
-import workerMergePriceInfoUseCoins from './worker/mergePriceInfoUseCoins.js';
-import workerSelectorPriceFilterdCoins from './worker/selectorPriceFilterdCoins.js';
+// import workerMergeWebsocketTransaction from './worker/mergeWebsocketTransaction.js';
+// import workerMergePriceInfoUseCoins from './worker/mergePriceInfoUseCoins.js';
+// import workerSelectorPriceFilterdCoins from './worker/selectorPriceFilterdCoins.js';
 
 /**
  * 모든 코인에 대한 기초 정보를 받아 옵니다.
@@ -176,7 +176,10 @@ const useGetFilteredCoins = () => {
   const [isFlag, setIsFlag] = useState(false);
 
   useEffect(() => {
-    const worker: Worker = new Worker(workerSelectorPriceFilterdCoins);
+    //workerSelectorPriceFilterdCoins
+    const worker: Worker = new Worker(
+      new URL('./worker/selectorPriceFilterdCoins.ts', import.meta.url)
+    );
     setWorker(worker);
     worker.onmessage = (e) => {
       // console.log(e.data);
@@ -237,7 +240,10 @@ const useMergeTickersWebsocketAndFilteredData = () => {
   );
   const [worker, setWorker] = useState<any>();
   useEffect(() => {
-    const worker: Worker = new Worker(workerMergePriceInfoUseCoins);
+    // const worker: Worker = new Worker(workerMergePriceInfoUseCoins);
+    const worker: Worker = new Worker(
+      new URL('./worker/mergePriceInfoUseCoins.ts', import.meta.url)
+    );
     setWorker(worker);
     worker.onmessage = (e) => {
       setPriceInfoUseCoins(e.data);
@@ -290,7 +296,10 @@ const useMergeTransactionWebsocketAndInitData = () => {
   const [worker, setWorker] = useState<any>();
 
   useEffect(() => {
-    const worker: Worker = new Worker(workerMergeWebsocketTransaction);
+    // const worker: Worker = new Worker(workerMergeWebsocketTransaction);
+    const worker: Worker = new Worker(
+      new URL(`./worker/mergeWebsocketTransaction.ts`, import.meta.url)
+    );
     setWorker(worker);
     worker.onmessage = (e) => {
       setSelectDetailCoin((prevData) => {
