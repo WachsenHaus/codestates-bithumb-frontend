@@ -1,22 +1,22 @@
 @keyframes ask-effect {
   from {
     opacity: 1;
-    background-color: blue;
+    /* background-color: blue; */
   }
   to {
     opacity: 0.1;
-    background-color: white;
+    /* background-color: white; */
   }
 }
 
 @keyframes bid-effect {
   from {
     opacity: 1;
-    background-color: red;
+    /* background-color: red; */
   }
   to {
     opacity: 0.1;
-    background-color: white;
+    /* background-color: white; */
   }
 }
 

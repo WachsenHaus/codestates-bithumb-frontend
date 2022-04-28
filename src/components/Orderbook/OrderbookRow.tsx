@@ -35,8 +35,8 @@ const OrderbookRow = ({
   return (
     <Box
       className={classNames(
-        `flex justify-around items-center w-full`
-        // `will-change-contents`
+        `flex justify-around items-center w-full`,
+        `will-change-contents`
       )}
       ref={scrollRef}
     >
@@ -53,8 +53,16 @@ const OrderbookRow = ({
           className={classNames(
             // `will-change-transform`,
             `text-left`,
-            `${eventType === 'ask' ? `${styles.askEffect}` : ''}`,
-            `${eventType === 'bid' ? `${styles.bidEffect}` : ''}`
+            `${
+              eventType === 'ask'
+                ? `shadow-inner shadow-blue-900 ${styles.askEffect}`
+                : ''
+            }`,
+            `${
+              eventType === 'bid'
+                ? `shadow-inner shadow-red-900 ${styles.bidEffect}`
+                : ''
+            }`
           )}
         >
           {convertStringPriceToKRW(price)}
