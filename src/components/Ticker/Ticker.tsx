@@ -7,6 +7,8 @@ import {
   IndexRange,
   OverscanIndexRange,
   Table,
+  TableRowProps,
+  TableRowRenderer,
 } from 'react-virtualized';
 import { InputAdornment, Pagination, Paper, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -41,6 +43,17 @@ const Ticker = () => {
     },
     [filterdCoins]
   );
+  const RowRenderer = useCallback((e: TableRowProps) => {
+    return (
+      <div className="flex border-b" key={e.key} style={e.style}>
+        <RenderFavoriteColumn {...e} />
+        <RenderNameColumn e={e} key={e.rowData.coinName} />
+        <RenderCurrentPriceColumn {...e} key={e.rowData.e} />
+        <RenderRateOfChange {...e} key={e.rowData.r} />
+        <RenderU24 {...e} key={e.rowData.u24} />
+      </div>
+    );
+  }, []);
 
   return (
     <div>
@@ -114,18 +127,20 @@ const Ticker = () => {
                   scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={onRender}
+                  // list={filterdCoins}
+                  rowRenderer={RowRenderer}
                 >
                   <Column
                     width={width * 0.05}
                     label=""
                     dataKey="isFavorite"
-                    cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
+                    // cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
                   />
                   <Column
                     width={width * 0.2}
                     label="자산"
                     dataKey="coinName"
-                    cellRenderer={(e) => <RenderNameColumn e={e} />}
+                    // cellRenderer={(e) => <RenderNameColumn e={e} />}
                     headerRenderer={(e) => <HeaderCoinName {...e} />}
                     headerClassName="flex items-center"
                   />
@@ -134,7 +149,7 @@ const Ticker = () => {
                     label="현재가"
                     dataKey="e"
                     className="flex"
-                    cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
+                    // cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
                     headerRenderer={(e) => (
                       <HeaderPrice
                         e={e}
@@ -149,7 +164,7 @@ const Ticker = () => {
                     width={width * 0.15}
                     label="변동률(당일)"
                     dataKey="r"
-                    cellRenderer={(e) => <RenderRateOfChange {...e} />}
+                    // cellRenderer={(e) => <RenderRateOfChange {...e} />}
                     headerRenderer={(e) => (
                       <HeaderRateOfChange
                         e={e}
@@ -164,7 +179,7 @@ const Ticker = () => {
                     width={width * 0.2}
                     label="거래금액(24H)"
                     dataKey="u24"
-                    cellRenderer={(e) => <RenderU24 {...e} />}
+                    // cellRenderer={(e) => <RenderU24 {...e} />}
                     headerRenderer={(e) => (
                       <HeaderVolume
                         e={e}
@@ -202,4 +217,4 @@ const Ticker = () => {
     </div>
   );
 };
-export default Ticker;
+export default React.memo(Ticker);

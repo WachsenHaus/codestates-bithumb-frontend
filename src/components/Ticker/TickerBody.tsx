@@ -1,5 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { TableCellProps, TableHeaderProps } from 'react-virtualized';
+import {
+  TableCellProps,
+  TableHeaderProps,
+  TableRowProps,
+} from 'react-virtualized';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -28,8 +32,9 @@ import {
 import _ from 'lodash';
 import produce from 'immer';
 
-export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
+export const RenderFavoriteColumn = (e: TableRowProps) => {
   const [drawTicker, setDrawTicker] = useRecoilState(atomPriceInfoUseCoins);
+  // console.log(rowData);
 
   const onToggleCoin = useCallback(
     (
@@ -61,7 +66,7 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
       const coins = onToggleCoin(drawTicker, e);
       setDrawTicker(coins);
     }, 0);
-  }, [e, onToggleCoin]);
+  }, [e.rowData, onToggleCoin]);
 
   return (
     <div
@@ -74,10 +79,10 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
       {e.rowData.isFavorite ? <StarRateIcon /> : <StarBorderIcon />}
     </div>
   );
-});
+};
 
 export const RenderNameColumn = React.memo(
-  ({ e, activeIndex }: { e: TableCellProps; activeIndex?: number }) => {
+  ({ e, activeIndex }: { e: TableRowProps; activeIndex?: number }) => {
     const navigate = useNavigate();
     const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
 
@@ -111,7 +116,7 @@ export const RenderNameColumn = React.memo(
         )}
         onClick={onSelectClick(e)}
       >
-        {e.cellData}
+        {e.rowData.coinName}
         <div className="text-xs font-bmjua">
           {e.rowData.coinSymbol}/{e.rowData.siseCrncCd === 'C0100' ? 'KRW' : ''}
         </div>
@@ -120,11 +125,11 @@ export const RenderNameColumn = React.memo(
   }
 );
 
-export const RenderCurrentPriceColumn = React.memo((e: TableCellProps) => {
+export const RenderCurrentPriceColumn = React.memo((e: TableRowProps) => {
   return (
     <div className="flex items-center will-change-contents">
       <div>
-        {convertStringPriceToKRW(e.cellData)}
+        {convertStringPriceToKRW(e.rowData.e)}
         {e.rowData.isUp && (
           <div
             className={classNames(
@@ -151,7 +156,7 @@ export const RenderCurrentPriceColumn = React.memo((e: TableCellProps) => {
   );
 });
 
-export const RenderRateOfChange = React.memo((e: TableCellProps) => {
+export const RenderRateOfChange = React.memo((e: TableRowProps) => {
   const [isUp, setIsUp] = useState(true);
   useEffect(() => {
     if (e.rowData.a?.includes('-')) {
@@ -175,13 +180,13 @@ export const RenderRateOfChange = React.memo((e: TableCellProps) => {
         `${isUp ? `text-red-500` : `text-blue-500`}`
       )}
     >
-      <div className="">{e.cellData}%</div>
+      <div className="">{e.rowData.r}%</div>
       <div className="ml-4 text-sm">{price}</div>
     </div>
   );
 });
 
-export const RenderU24 = React.memo((e: TableCellProps) => {
+export const RenderU24 = React.memo((e: TableRowProps) => {
   return (
     <div
       className={classNames(
@@ -189,7 +194,7 @@ export const RenderU24 = React.memo((e: TableCellProps) => {
         `w-full h-full`
       )}
     >
-      <div className="">{convertStringPriceWON(e.cellData)}</div>
+      <div className="">{convertStringPriceWON(e.rowData.u24)}</div>
     </div>
   );
 });
