@@ -17,77 +17,23 @@ import {
   RenderRateOfChange,
   RenderU24,
 } from './../Ticker/TickerBody';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import {
-  atomFilterDirection,
-  atomFilteredCoins,
-  atomFilterKeyword,
-  atomFilterMode,
-  atomFilterOrderBy,
-  atomFinalCoins,
-  atomPriceInfoUseCoins,
-} from '../../atom/total.atom';
+import { useRecoilValue } from 'recoil';
+import { atomFilteredCoins } from '../../atom/total.atom';
+import useFilterKeyword from '../../hooks/useFilterKeyword';
+import useSort from '../../hooks/useSort';
+import useGetPagination from '../../hooks/useGetPagination';
 
 const Ticker = () => {
-  const [orderMode, setOrderMode] = useRecoilState(atomFilterOrderBy);
-  const [sortDirection, setSortDirection] = useRecoilState(atomFilterDirection);
+  const [filterKeyword, onChange] = useFilterKeyword();
+  const sortObj = useSort();
+  const paginationObj = useGetPagination();
 
-  const [filterMode, setFilterMode] = useRecoilState(atomFilterMode);
-  const filterKeyword = useRecoilValue(atomFilterKeyword);
-  const setFilterKeyword = useSetRecoilState(atomFilterKeyword);
   const filterdCoins = useRecoilValue(atomFilteredCoins);
-  // const priceInfoUseCoins = useRecoilValue(atomPriceInfoUseCoins);
-
-  const delayKeyword = useRef(_.debounce((word) => debounceKeyword(word), 300)).current;
-
-  // 초ㅣ적화
-
-  const debounceKeyword = (word: any) => {
-    setFilterKeyword(word);
-  };
-
-  const rowHeight = 50;
-  const headerHeight = 50;
-  const rowCount = filterdCoins?.length;
-
-  const [height, setHeight] = useState(350);
-  const [page, setPage] = useState(0);
-  const [perPage, setPerPage] = useState(height / rowHeight);
-  const pageCount = Math.ceil(rowCount / perPage);
-  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(undefined);
-
-  const handleRowsScroll = useCallback((info: IndexRange & OverscanIndexRange) => {
-    setPage((prev) => {
-      return Math.ceil(info.stopIndex / perPage);
-    });
-    setScrollToIndex(undefined);
-  }, []);
-
-  const handlePageChange = useCallback((event: React.ChangeEvent<unknown>, page: number) => {
-    setPage(page);
-    setScrollToIndex((prev) => {
-      const scrollToIndex = (page - 1) * perPage;
-      return scrollToIndex;
-    });
-  }, []);
-
-  const onChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    const keyword = e.target.value as string;
-    delayKeyword(keyword);
-  }, []);
-
-  const onClick = useCallback(
-    (type: 'e' | 'r' | 'u24') => () => {
-      let direction: 'desc' | 'asc' = 'desc';
-      if (orderMode === type) {
-        direction = sortDirection === 'asc' ? 'desc' : 'asc';
-      } else {
-        direction = 'desc';
-      }
-      setOrderMode(type);
-      setSortDirection(direction);
+  const onRender = useCallback(
+    ({ index }: { index: number }) => {
+      return filterdCoins[index];
     },
-    [orderMode, sortDirection, setOrderMode, setSortDirection]
+    [filterdCoins]
   );
 
   return (
@@ -101,18 +47,14 @@ const Ticker = () => {
         >
           <div className={classNames(`w-full h-full`, `flex items-center justify-around`)}>
             <button
-              className={classNames(filterMode === 'normal' && `border-b-4 font-bold`, `border-b-black`, `h-full`)}
-              onClick={(e) => {
-                setFilterMode('normal');
-              }}
+              className={classNames(sortObj.filterMode === 'normal' && `border-b-4 font-bold`, `border-b-black`, `h-full`)}
+              onClick={sortObj.onSetFilterMode('normal')}
             >
               원화마켓
             </button>
             <button
-              className={classNames(filterMode === 'isFavorite' && `border-b-4 font-bold `, `border-b-black`, `h-full`)}
-              onClick={(e) => {
-                setFilterMode('isFavorite');
-              }}
+              className={classNames(sortObj.filterMode === 'isFavorite' && `border-b-4 font-bold `, `border-b-black`, `h-full`)}
+              onClick={sortObj.onSetFilterMode('isFavorite')}
             >
               즐겨찾기
             </button>
@@ -135,7 +77,7 @@ const Ticker = () => {
       <div>
         <Paper
           sx={{
-            height: height,
+            height: paginationObj.height,
             width: '100%',
           }}
         >
@@ -145,23 +87,21 @@ const Ticker = () => {
                 <Table
                   width={width}
                   height={height}
-                  headerHeight={headerHeight}
-                  rowHeight={rowHeight}
-                  rowCount={rowCount}
-                  scrollToIndex={scrollToIndex}
-                  onRowsRendered={handleRowsScroll}
+                  headerHeight={paginationObj.headerHeight}
+                  rowHeight={paginationObj.rowHeight}
+                  rowCount={paginationObj.rowCount}
+                  scrollToIndex={paginationObj.scrollToIndex}
+                  onRowsRendered={paginationObj.handleRowsScroll}
                   scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
-                  rowGetter={({ index }) => {
-                    return filterdCoins[index];
-                  }}
+                  rowGetter={onRender}
                 >
                   <Column width={width * 0.05} label="" dataKey="isFavorite" cellRenderer={(e) => <RenderFavoriteColumn {...e} />} />
                   <Column
                     width={width * 0.2}
                     label="자산"
                     dataKey="coinName"
-                    cellRenderer={(e) => <RenderNameColumn {...e} />}
+                    cellRenderer={(e) => <RenderNameColumn e={e} />}
                     headerRenderer={(e) => <HeaderCoinName {...e} />}
                     headerClassName="flex items-center"
                   />
@@ -171,7 +111,14 @@ const Ticker = () => {
                     dataKey="e"
                     className="flex"
                     cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
-                    headerRenderer={(e) => <HeaderPrice e={e} direction={sortDirection} arrowActive={orderMode === 'e'} onClick={onClick('e')} />}
+                    headerRenderer={(e) => (
+                      <HeaderPrice
+                        e={e}
+                        direction={sortObj.sortDirection}
+                        arrowActive={sortObj.orderMode === 'e'}
+                        onClick={sortObj.onSetFilterDirection('e')}
+                      />
+                    )}
                     headerClassName="flex items-center"
                   />
                   <Column
@@ -179,7 +126,14 @@ const Ticker = () => {
                     label="변동률(당일)"
                     dataKey="r"
                     cellRenderer={(e) => <RenderRateOfChange {...e} />}
-                    headerRenderer={(e) => <HeaderRateOfChange e={e} direction={sortDirection} arrowActive={orderMode === 'r'} onClick={onClick('r')} />}
+                    headerRenderer={(e) => (
+                      <HeaderRateOfChange
+                        e={e}
+                        direction={sortObj.sortDirection}
+                        arrowActive={sortObj.orderMode === 'r'}
+                        onClick={sortObj.onSetFilterDirection('r')}
+                      />
+                    )}
                     headerClassName="flex items-center"
                   />
                   <Column
@@ -187,7 +141,14 @@ const Ticker = () => {
                     label="거래금액(24H)"
                     dataKey="u24"
                     cellRenderer={(e) => <RenderU24 {...e} />}
-                    headerRenderer={(e) => <HeaderVolume e={e} direction={sortDirection} arrowActive={orderMode === 'u24'} onClick={onClick('u24')} />}
+                    headerRenderer={(e) => (
+                      <HeaderVolume
+                        e={e}
+                        direction={sortObj.sortDirection}
+                        arrowActive={sortObj.orderMode === 'u24'}
+                        onClick={sortObj.onSetFilterDirection('u24')}
+                      />
+                    )}
                     headerClassName="flex items-center"
                   />
                 </Table>
@@ -207,7 +168,7 @@ const Ticker = () => {
         </Paper>
       </div>
       <div className="flex items-center w-full ">
-        <Pagination count={pageCount} page={page} onChange={handlePageChange} className="mx-auto mt-2" />
+        <Pagination count={paginationObj.pageCount} page={paginationObj.page} onChange={paginationObj.handlePageChange} className="mx-auto mt-2" />
       </div>
     </div>
   );

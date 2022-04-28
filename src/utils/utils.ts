@@ -80,7 +80,7 @@ export const pushCookie = (
     rowData: TypeDrawTicker;
   }
 ) => {
-  const selectCoinName = `${e.rowData.coinType}_${e.rowData.m}`;
+  const selectCoinName = `${e.rowData.coinType}_${e.rowData.siseCrncCd}`;
   if (cookies?.length === 1 && cookies[0] === '') {
     cookies = [selectCoinName];
   } else {

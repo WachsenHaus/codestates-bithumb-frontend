@@ -12,9 +12,9 @@ import { TypeDrawTicker } from '../../atom/drawData.atom';
 import { applyCookie, convertStringPriceToKRW, convertStringPriceWON, getCookie, packCookie, pushCookie, unpackCookie } from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
-import { atomFilteredCoins, atomPriceInfoUseCoins, atomUseCoins } from '../../atom/total.atom';
+import { atomPriceInfoUseCoins } from '../../atom/total.atom';
 import { atomSelectCoinDefault, ISelectCoinDefault } from '../../atom/selectCoinDefault.atom';
-import _, { find } from 'lodash';
+import _ from 'lodash';
 import produce from 'immer';
 
 export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
@@ -47,7 +47,7 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
     applyCookie(packedCookies);
     const coins = onToggleCoin(drawTicker, e);
     setDrawTicker(coins);
-  }, [drawTicker]);
+  }, [drawTicker, e, onToggleCoin, setDrawTicker]);
 
   return (
     <motion.div
@@ -62,12 +62,13 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
   );
 });
 
-export const RenderNameColumn = React.memo((e: TableCellProps) => {
+export const RenderNameColumn = React.memo(({ e, activeIndex }: { e: TableCellProps; activeIndex?: number }) => {
   const navigate = useNavigate();
   const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
+  const selectCoin = useRecoilValue(atomSelectCoinDefault);
 
   const onSelectClick = useCallback(
-    (e: any) => {
+    (e: any) => () => {
       const clickedCoinInfo = e.rowData as ISelectCoinDefault;
       if (clickedCoinInfo === undefined) {
         return;
@@ -83,6 +84,7 @@ export const RenderNameColumn = React.memo((e: TableCellProps) => {
     },
     [selectCoinDefault]
   );
+
   return (
     <motion.div
       whileTap={{}}
@@ -90,10 +92,8 @@ export const RenderNameColumn = React.memo((e: TableCellProps) => {
         marginLeft: '1rem',
         scale: 1.1,
       }}
-      className="flex flex-col justify-center w-full h-full"
-      onClick={() => {
-        onSelectClick(e);
-      }}
+      className={classNames(`${selectCoin.coinType === e.rowData.coinType && `ml-10 text-red-300`}`, ` flex flex-col justify-center w-full h-full `)}
+      onClick={onSelectClick(e)}
     >
       {e.cellData}
       <div className="text-xs font-bmjua">
@@ -157,8 +157,8 @@ export const HeaderCoinName = React.memo((e: TableHeaderProps) => {
 export const HeaderPrice = React.memo(
   ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
     return (
-      <div className="flex justify-center items-center font-bmjua  cursor-pointer">
-        <div onClick={onClick}>현재가</div>
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer" onClick={onClick}>
+        <div>현재가</div>
         <SortArrow direction={direction} active={arrowActive} />
       </div>
     );
@@ -168,8 +168,8 @@ export const HeaderPrice = React.memo(
 export const HeaderRateOfChange = React.memo(
   ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
     return (
-      <div className="flex justify-center items-center font-bmjua  cursor-pointer">
-        <div onClick={onClick}>변동률(당일)</div>
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer" onClick={onClick}>
+        <div>변동률(당일)</div>
         <SortArrow direction={direction} active={arrowActive} />
       </div>
     );
@@ -179,8 +179,8 @@ export const HeaderRateOfChange = React.memo(
 export const HeaderVolume = React.memo(
   ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
     return (
-      <div className="flex justify-center items-center font-bmjua  cursor-pointer">
-        <div onClick={onClick}>거래금액(24H)</div>
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer" onClick={onClick}>
+        <div>거래금액(24H)</div>
         <SortArrow direction={direction} active={arrowActive} />
       </div>
     );

@@ -1,6 +1,6 @@
-import { Box, Container, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import classNames from 'classnames';
-import React, { useEffect } from 'react';
+import React from 'react';
 import CoinBar from '../components/CoinBar/CoinBar';
 import Header from '../components/Header/Header';
 import MainContent from '../components/MainContent';
@@ -11,10 +11,6 @@ import useChangeWebTitle from '../hooks/useChangeWebTitle';
 import useResetObserverDrawData from '../hooks/useResetDrawData';
 import { useGenerateBitThumbSocket } from '../hooks/useWebSocket';
 import useInitialize from '../hooks/useInitialize';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useRecoilValue, useRecoilState } from 'recoil';
-import { atomCoinList } from '../atom/coinList.atom';
-import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
 
 const TradePage = () => {
   useInitialize();

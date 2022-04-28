@@ -57,10 +57,7 @@ const useGetTradeParam = () => {
   const setSelectCoin = useSetRecoilState(atomSelectCoinDefault);
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    console.log(params);
     if (ready && coins && params?.coinName) {
-      console.log(coins);
-      console.log(params.coinName);
       const result = params?.coinName?.split('_');
       if (coins && result) {
         const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
@@ -80,9 +77,7 @@ const useGetTradeParam = () => {
           });
         }
       }
-      console.log('set params');
     } else if (ready === true && params?.coinName === undefined) {
-      console.log('set default');
       setSelectCoin({
         coinType: 'C0101',
         coinSymbol: 'BTC',
@@ -299,17 +294,14 @@ const useInitialize = () => {
   useGetCoinList();
   // URL을 분석하여 선택된 코인을 변경한다.
   useGetTradeParam();
-
+  // 초기 거래 데이터들을 받아옵니다.
   useGetTradeData();
-
   // 사용할 코인리스트만 추린다.
   useGetFiltredUseCoins();
-
   // 추린 코인리스트에 가격정보를 병합한다.
   useGetPriceInfoList();
   // 티커정보를 필터링된 배열과 병합하고, 코인리스트를 atomFinalCoin에 할당한다
   useMergeTickersWebsocketAndFilteredData();
-
   // 키워드,방향등의 필터조건을 통과한 결과값을 filteredCoins에 할당한다.
   useGetFilteredCoins();
 
