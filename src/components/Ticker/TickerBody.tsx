@@ -56,14 +56,17 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
     const pushedCookies = pushCookie(parsedCookies, e);
     const packedCookies = packCookie(pushedCookies);
     applyCookie(packedCookies);
-    const coins = onToggleCoin(drawTicker, e);
-    setDrawTicker(coins);
+
+    setTimeout(() => {
+      const coins = onToggleCoin(drawTicker, e);
+      setDrawTicker(coins);
+    }, 0);
   }, [drawTicker, e, onToggleCoin, setDrawTicker]);
 
   return (
     <motion.div
       onClick={onClick}
-      className="flex justify-center items-center h-full "
+      className="flex justify-center items-center h-full hover:cursor-pointer active:bg-yellow-200 "
       whileHover={{
         scale: 1.1,
       }}

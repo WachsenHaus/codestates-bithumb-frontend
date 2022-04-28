@@ -14,6 +14,8 @@ import {
 } from './ws.type';
 import _ from 'lodash';
 import { TypeTradeTransaction } from './tradeData.atom';
+import { atomSelectCoinDetail } from './selectCoinDetail.atom';
+import { atomSelectCoinDefault } from './selectCoinDefault.atom';
 
 // 1. draw atom은 ticker, coinBar, chart, orderbook,transaction 총 다섯개이다.
 // 각 요소들에서 그리기위한 정보는 다음과 같다.
@@ -229,6 +231,7 @@ export const selectorPriceFilterdCoins = selector({
 export const selectorFilterUseCoins = selector({
   key: 'selectorFilterUseCoins',
   get: ({ get }) => {
+    get(atomSelectCoinDefault);
     const defaultInfoCoins = get(atomCoinList);
     const displayFilter = get(atomDisplayCoinsFilter);
 

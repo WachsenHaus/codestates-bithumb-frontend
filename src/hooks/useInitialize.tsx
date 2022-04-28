@@ -163,7 +163,7 @@ const useGetPriceInfoList = () => {
 const useGetFilteredCoins = () => {
   // 가격 정보를 사용할 코인리스트에 넣고
   // const pricefilterCoins = useRecoilValueLoadable(selectorPriceFilterdCoins);
-  const setFilteredCoins = useSetRecoilState(atomFilteredCoins);
+  const [filteredCoins, setFilteredCoins] = useRecoilState(atomFilteredCoins);
 
   const filterMode = useRecoilValue(atomFilterMode);
   const filterKeyword = useRecoilValue(atomFilterKeyword);
@@ -173,31 +173,50 @@ const useGetFilteredCoins = () => {
 
   const [worker, setWorker] = useState<any>();
 
+  const [isFlag, setIsFlag] = useState(false);
+
   useEffect(() => {
     const worker: Worker = new Worker(workerSelectorPriceFilterdCoins);
     setWorker(worker);
     worker.onmessage = (e) => {
+      // console.log(e.data);
       setFilteredCoins(e.data);
     };
   }, []);
 
+  useEffect(() => {
+    if (isFlag) {
+      console.log('변경됨!');
+      setIsFlag(false);
+    }
+  }, [filteredCoins]);
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const merge = () => {
-    worker &&
-      worker.postMessage({
-        filterMode,
-        filterKeyword,
-        filterOrder,
-        filterDirection,
-        priceInfoUseCoins,
-      });
-  };
+  // const merge = () => {
+  //   worker &&
+
+  // };
 
   useEffect(() => {
-    // setTimeout(merge, 0);
-    merge();
+    if (isFlag === false) {
+      setTimeout(() => {
+        worker &&
+          worker.postMessage({
+            filterMode,
+            filterKeyword,
+            filterOrder,
+            filterDirection,
+            priceInfoUseCoins,
+          });
+        setIsFlag(true);
+      }, 16);
+    } else {
+      console.log('블락!');
+    }
   }, [
-    merge,
+    // isFlag,
+    // merge,
+    worker,
     filterMode,
     filterKeyword,
     filterOrder,
@@ -231,8 +250,8 @@ const useMergeTickersWebsocketAndFilteredData = () => {
       });
   };
   useEffect(() => {
-    // setTimeout(merge, 0);
-    merge();
+    setTimeout(merge, 0);
+    // merge();
   }, [getAtomTicker]);
 };
 
@@ -290,8 +309,8 @@ const useMergeTransactionWebsocketAndInitData = () => {
       });
   };
   useEffect(() => {
-    // setTimeout(merge, 0);
-    merge();
+    setTimeout(merge, 0);
+    // merge();
   }, [websocketTransaction]);
 };
 
