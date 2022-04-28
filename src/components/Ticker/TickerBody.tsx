@@ -128,12 +128,12 @@ export const RenderNameColumn = React.memo(
 
 export const RenderCurrentPriceColumn = React.memo((e: TableRowProps) => {
   return (
-    <div className="flex items-center will-change-transform">
+    <div className="flex items-center">
       <div>
         {convertStringPriceToKRW(e.rowData.e)}
-
         <div
           className={classNames(
+            // `will-change-transform`,
             `${styles.effect}`,
             `border-white`,
             e.rowData.isUp === true && `border-red-600`,

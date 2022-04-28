@@ -45,11 +45,11 @@
 }
 
 .askEffect {
-  animation: ask-effect 2s;
+  animation: ask-effect 0.2s forwards;
 }
 
 .bidEffect {
-  animation: bid-effect 2s;
+  animation: bid-effect 0.2s forwards;
 }
 .upEffect {
   animation: up-effect 0.2s;
@@ -60,5 +60,5 @@
 }
 
 .effect {
-  animation: down-effect 1s forwards;
+  animation: down-effect 0.2s forwards;
 }
