@@ -1,7 +1,5 @@
-import produce from 'immer';
-import _, { result } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   useRecoilState,
   useRecoilValue,
@@ -9,9 +7,7 @@ import {
   useSetRecoilState,
 } from 'recoil';
 import { API_BITHUMB_STATUS_CODE } from '../api/bt.api';
-import { selectorCoinBar } from '../atom/coinBar.atom';
 import { selectorGetCoinList, atomCoinList } from '../atom/coinList.atom';
-import { TypeDrawTicker } from '../atom/drawData.atom';
 import { atomSelectCoinDefault } from '../atom/selectCoinDefault.atom';
 import { atomSelectCoinDetail } from '../atom/selectCoinDetail.atom';
 import {
@@ -19,12 +15,7 @@ import {
   atomUseCoins,
   atomPriceInfoUseCoins,
   atomFilteredCoins,
-  selectorPriceFilterdCoins,
-  atomFinalCoins,
-  selectorMergeTickerAndCoins,
   atomDrawTransaction,
-  atomFinalTransaction,
-  selectorWebSocketTransaction,
   atomTickers,
   atomTransactions,
   atomFilterMode,
@@ -37,12 +28,10 @@ import {
   selectorTradeData,
   selectPriceInfoToCoins,
   selectTransactionInfoToCoins,
-  TypeTradeTransaction,
 } from '../atom/tradeData.atom';
-import { TypeWebSocketTickerReturnType } from '../atom/ws.type';
-import mergeTransaction from './worker/mergeTransaction.js';
-import mergeTickersWebsocketAndFilteredData from './worker/mergeTickersWebsocketAndFilteredData.js';
-import { order } from '../utils/utils';
+import workerMergeWebsocketTransaction from './worker/mergeWebsocketTransaction.js';
+import workerMergePriceInfoUseCoins from './worker/mergePriceInfoUseCoins.js';
+import workerSelectorPriceFilterdCoins from './worker/selectorPriceFilterdCoins.js';
 
 /**
  * 모든 코인에 대한 기초 정보를 받아 옵니다.
@@ -142,7 +131,6 @@ const useGetFiltredUseCoins = () => {
     if (state === 'hasValue') {
       contents && setUseCoins(contents);
     } else {
-      console.log(filterdUseCoins);
       console.log('erro');
     }
   }, [filterdUseCoins, setUseCoins]);
@@ -186,48 +174,35 @@ const useGetFilteredCoins = () => {
   const [worker, setWorker] = useState<any>();
 
   useEffect(() => {
-    const worker: Worker = new Worker(mergeTickersWebsocketAndFilteredData);
+    const worker: Worker = new Worker(workerSelectorPriceFilterdCoins);
     setWorker(worker);
     worker.onmessage = (e) => {
       setFilteredCoins(e.data);
     };
   }, []);
 
-  const merge = useCallback(
-    async (
-      filterMode,
-      filterKeyword,
-      filterOrder,
-      filterDirection,
-      priceInfoUseCoins
-    ) => {
-      worker &&
-        worker.postMessage({
-          filterMode,
-          filterKeyword,
-          filterOrder,
-          filterDirection,
-          priceInfoUseCoins,
-        });
-    },
-    [worker]
-  );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const merge = () => {
+    worker &&
+      worker.postMessage({
+        filterMode,
+        filterKeyword,
+        filterOrder,
+        filterDirection,
+        priceInfoUseCoins,
+      });
+  };
 
   useEffect(() => {
-    merge(
-      filterMode,
-      filterKeyword,
-      filterOrder,
-      filterDirection,
-      priceInfoUseCoins
-    );
+    // setTimeout(merge, 0);
+    merge();
   }, [
+    merge,
     filterMode,
     filterKeyword,
     filterOrder,
     filterDirection,
     priceInfoUseCoins,
-    merge,
   ]);
 };
 
@@ -240,40 +215,24 @@ const useMergeTickersWebsocketAndFilteredData = () => {
   const [priceInfoUseCoin, setPriceInfoUseCoins] = useRecoilState(
     atomPriceInfoUseCoins
   );
-
-  const merge = useCallback(
-    (ticker: TypeWebSocketTickerReturnType, coinList: TypeDrawTicker[]) => {
-      let draft;
-      const isExist = coinList.findIndex((item) => item.coinType === ticker.c);
-      if (isExist === -1) {
-        return;
-      } else if (ticker.m === 'C0101') {
-        return;
-      } else {
-        draft = _.clone(coinList);
-        let isUp;
-        const currentPrice = Number(ticker.e);
-        const prevPrice = Number(draft[isExist].e);
-        if (currentPrice > prevPrice) {
-          isUp = true;
-        } else if (currentPrice === prevPrice) {
-          isUp = undefined;
-        } else {
-          isUp = false;
-        }
-        draft[isExist] = { ...draft[isExist], ...ticker, isUp };
-        setPriceInfoUseCoins(draft);
-      }
-    },
-    []
-  );
-
+  const [worker, setWorker] = useState<any>();
   useEffect(() => {
-    const tickerObj = getAtomTicker;
-    const coins = priceInfoUseCoin;
-    merge(tickerObj, coins);
-
-    // merge();
+    const worker: Worker = new Worker(workerMergePriceInfoUseCoins);
+    setWorker(worker);
+    worker.onmessage = (e) => {
+      setPriceInfoUseCoins(e.data);
+    };
+  }, []);
+  const merge = () => {
+    worker &&
+      worker.postMessage({
+        tickerObj: getAtomTicker,
+        coins: priceInfoUseCoin,
+      });
+  };
+  useEffect(() => {
+    // setTimeout(merge, 0);
+    merge();
   }, [getAtomTicker]);
 };
 
@@ -311,10 +270,9 @@ const useMergeTransactionWebsocketAndInitData = () => {
   const [worker, setWorker] = useState<any>();
 
   useEffect(() => {
-    const worker: Worker = new Worker(mergeTransaction);
+    const worker: Worker = new Worker(workerMergeWebsocketTransaction);
     setWorker(worker);
     worker.onmessage = (e) => {
-      console.log(e.data);
       setSelectDetailCoin((prevData) => {
         return {
           ...prevData,
@@ -332,6 +290,7 @@ const useMergeTransactionWebsocketAndInitData = () => {
       });
   };
   useEffect(() => {
+    // setTimeout(merge, 0);
     merge();
   }, [websocketTransaction]);
 };

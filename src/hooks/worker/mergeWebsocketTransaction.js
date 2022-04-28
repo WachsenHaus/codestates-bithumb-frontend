@@ -48,6 +48,7 @@ const workercode = () => {
     };
 
     this.self.postMessage(result);
+    result = undefined;
   };
 };
 

@@ -149,36 +149,36 @@ export const atomFinalCoins = atom<TypeDrawTicker[]>({
 });
 
 // 해당 티커가 갱신될때,
-export const selectorMergeTickerAndCoins = selector({
-  key: 'selectorMergeTickerAndCoins',
-  get: ({ get }) => {
-    const tickerObj = get(atomTickers);
-    const coins = get(atomPriceInfoUseCoins);
-    const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
-    if (isExist === -1) {
-      return coins;
-    } else if (tickerObj.m === 'C0101') {
-      return coins;
-    } else {
-      const draft = _.clone(coins);
-      let isUp;
-      const currentPrice = Number(tickerObj.e);
-      const prevPrice = Number(draft[isExist].e);
-      if (currentPrice > prevPrice) {
-        isUp = true;
-      } else if (currentPrice === prevPrice) {
-        isUp = undefined;
-      } else {
-        isUp = false;
-      }
-      draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
-      return draft;
-    }
-  },
-  cachePolicy_UNSTABLE: {
-    eviction: 'most-recent',
-  },
-});
+// export const selectorMergeTickerAndCoins = selector({
+//   key: 'selectorMergeTickerAndCoins',
+//   get: ({ get }) => {
+//     const tickerObj = get(atomTickers);
+//     const coins = get(atomPriceInfoUseCoins);
+//     const isExist = coins.findIndex((item) => item.coinType === tickerObj.c);
+//     if (isExist === -1) {
+//       return coins;
+//     } else if (tickerObj.m === 'C0101') {
+//       return coins;
+//     } else {
+//       const draft = _.clone(coins);
+//       let isUp;
+//       const currentPrice = Number(tickerObj.e);
+//       const prevPrice = Number(draft[isExist].e);
+//       if (currentPrice > prevPrice) {
+//         isUp = true;
+//       } else if (currentPrice === prevPrice) {
+//         isUp = undefined;
+//       } else {
+//         isUp = false;
+//       }
+//       draft[isExist] = { ...draft[isExist], ...tickerObj, isUp };
+//       return draft;
+//     }
+//   },
+//   cachePolicy_UNSTABLE: {
+//     eviction: 'most-recent',
+//   },
+// });
 
 /**
  * 가격정보가 포함되고 사용중인 코인목록을 의존하면서, keyword와 mode, orderby로 필터링을 하는 함수
