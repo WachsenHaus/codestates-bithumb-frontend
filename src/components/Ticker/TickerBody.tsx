@@ -31,6 +31,7 @@ import {
 } from '../../atom/selectCoinDefault.atom';
 import _ from 'lodash';
 import produce from 'immer';
+import { Scale } from '@mui/icons-material';
 
 export const RenderFavoriteColumn = (e: TableRowProps) => {
   const [drawTicker, setDrawTicker] = useRecoilState(atomPriceInfoUseCoins);
@@ -127,30 +128,21 @@ export const RenderNameColumn = React.memo(
 
 export const RenderCurrentPriceColumn = React.memo((e: TableRowProps) => {
   return (
-    <div className="flex items-center will-change-contents">
+    <div className="flex items-center will-change-transform">
       <div>
         {convertStringPriceToKRW(e.rowData.e)}
-        {e.rowData.isUp && (
-          <div
-            className={classNames(
-              `${styles.upEffect}`,
-              `border-2 border-white`,
-              `h-1`
-            )}
-          />
-        )}
-        {e.rowData.isUp === false && (
-          <div
-            className={classNames(
-              `${styles.downEffect}`,
-              `border-2 border-white`,
-              `h-1`
-            )}
-          />
-        )}
-        {e.rowData.isUp === undefined && (
-          <div className={classNames(`border-2 border-white`, `h-1`)} />
-        )}
+
+        <div
+          className={classNames(
+            `${styles.effect}`,
+            `border-white`,
+            e.rowData.isUp === true && `border-red-600`,
+            e.rowData.isUp === false && `border-blue-600`,
+            e.rowData?.isUp === undefined && `border-white`,
+            `border-2`,
+            `h-1`
+          )}
+        />
       </div>
     </div>
   );

@@ -53,7 +53,10 @@ const Ticker = () => {
           <>
             <RenderFavoriteColumn {...e} />
             <RenderNameColumn e={e} key={e.rowData.coinName} />
-            <RenderCurrentPriceColumn {...e} key={e.rowData.e} />
+            <RenderCurrentPriceColumn
+              {...e}
+              key={`${e.rowData.e}_${e.rowData.u24}`}
+            />
             <RenderRateOfChange {...e} key={e.rowData.r} />
             <RenderU24 {...e} key={e.rowData.u24} />
           </>
@@ -62,6 +65,53 @@ const Ticker = () => {
     );
   };
   const RowRenderer = useMemo(() => rendeeeeer, []);
+  // const RowRenderer = (e: TableRowProps) => {
+  //   // console.log(e.rowData);
+  //   return (
+  //     <div className="flex border-b" key={e.key} style={e.style}>
+  //       {e?.rowData && (
+  //         <>
+  //           <RenderFavoriteColumn {...e} />
+  //           <RenderNameColumn e={e} key={e.rowData.coinName} />
+  //           <RenderCurrentPriceColumn
+  //             {...e}
+  //             key={`${e.rowData.e}_${e.rowData.r}_${e.rowData.u24}`}
+  //           />
+  //           <RenderRateOfChange
+  //             {...e}
+  //             key={e.rowData.r}
+  //             // key={(Math.random() * 4).toString()}
+  //           />
+  //           <RenderU24
+  //             {...e}
+  //             key={e.rowData.u24}
+  //             // key={(Math.random() * 5).toString()}
+  //           />
+  //         </>
+  //       )}
+  //     </div>
+  //   );
+  // };
+
+  // const rendeeeeer = (e: TableRowProps) => {
+  //   return (
+  //     <div className="flex border-b" key={e.key} style={e.style}>
+  //       {e?.rowData && (
+  //         <>
+  //           <RenderFavoriteColumn {...e} />
+  //           <RenderNameColumn e={e} key={e.rowData.coinName} />
+  //           <RenderCurrentPriceColumn
+  //             {...e}
+  //             key={`${e.rowData.e}_${e.rowData.r}_${e.rowData.u24}`}
+  //           />
+  //           <RenderRateOfChange {...e} key={e.rowData.r} />
+  //           <RenderU24 {...e} key={e.rowData.u24} />
+  //         </>
+  //       )}
+  //     </div>
+  //   );
+  // };
+  // const RowRenderer = useMemo(() => rendeeeeer, []);
 
   return (
     <div>

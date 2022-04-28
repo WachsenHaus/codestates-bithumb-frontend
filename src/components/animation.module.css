@@ -21,24 +21,26 @@
 }
 
 @keyframes up-effect {
-  from {
-    opacity: 1;
-    border-color: red;
+  0% {
+    /* opacity: 0; */
+    /* border-color: red; */
   }
-  to {
+  100% {
     opacity: 0;
-    border-color: white;
+    /* border-color: white; */
   }
 }
 
 @keyframes down-effect {
-  from {
-    opacity: 1;
-    border-color: blue;
+  0% {
+    /* opacity: 0; */
+    /* border-color: blue; */
   }
-  to {
+  100% {
     opacity: 0;
-    border-color: white;
+    transform: scale(0);
+
+    /* border-color: white; */
   }
 }
 
@@ -55,4 +57,8 @@
 
 .downEffect {
   animation: down-effect 0.2s;
+}
+
+.effect {
+  animation: down-effect 1s forwards;
 }
