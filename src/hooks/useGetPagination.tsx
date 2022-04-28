@@ -29,6 +29,10 @@ const useGetPagination = () => {
   useEffect(() => {
     setRowCount(filterdCoins.length);
   }, [filterdCoins.length]);
+  useEffect(() => {
+    setPageCount(Math.ceil(rowCount / perPage));
+  }, [rowCount]);
+
   const handleRowsScroll = useCallback(
     (info: IndexRange & OverscanIndexRange) => {
       setPage((prev) => {

@@ -64,7 +64,7 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
   }, [e, onToggleCoin]);
 
   return (
-    <motion.div
+    <div
       onClick={onClick}
       className="flex justify-center items-center h-full hover:cursor-pointer active:bg-yellow-200  hover:scale-110"
       // whileHover={{
@@ -72,7 +72,7 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
       // }}
     >
       {e.rowData.isFavorite ? <StarRateIcon /> : <StarBorderIcon />}
-    </motion.div>
+    </div>
   );
 });
 
@@ -100,12 +100,7 @@ export const RenderNameColumn = React.memo(
     );
 
     return (
-      <motion.div
-        whileTap={{}}
-        // whileHover={{
-        //   marginLeft: '1rem',
-        //   scale: 1.1,
-        // }}
+      <div
         className={classNames(
           `${
             selectCoinDefault.coinType === e.rowData.coinType && ` text-red-300`
@@ -120,43 +115,39 @@ export const RenderNameColumn = React.memo(
         <div className="text-xs font-bmjua">
           {e.rowData.coinSymbol}/{e.rowData.siseCrncCd === 'C0100' ? 'KRW' : ''}
         </div>
-      </motion.div>
+      </div>
     );
   }
 );
 
 export const RenderCurrentPriceColumn = React.memo((e: TableCellProps) => {
   return (
-    <motion.div className="flex items-center">
+    <div className="flex items-center will-change-contents">
       <div>
         {convertStringPriceToKRW(e.cellData)}
-        <AnimatePresence>
-          {e.rowData.isUp && (
-            <motion.div
-              className={classNames(
-                `${styles.upEffect}`,
-                `border-2 border-white`,
-                `h-1`
-              )}
-            />
-          )}
-          {e.rowData.isUp === false && (
-            <motion.div
-              className={classNames(
-                `${styles.downEffect}`,
-                `border-2 border-white`,
-                `h-1`
-              )}
-            />
-          )}
-          {e.rowData.isUp === undefined && (
-            <motion.div
-              className={classNames(`border-2 border-white`, `h-1`)}
-            />
-          )}
-        </AnimatePresence>
+        {e.rowData.isUp && (
+          <div
+            className={classNames(
+              `${styles.upEffect}`,
+              `border-2 border-white`,
+              `h-1`
+            )}
+          />
+        )}
+        {e.rowData.isUp === false && (
+          <div
+            className={classNames(
+              `${styles.downEffect}`,
+              `border-2 border-white`,
+              `h-1`
+            )}
+          />
+        )}
+        {e.rowData.isUp === undefined && (
+          <div className={classNames(`border-2 border-white`, `h-1`)} />
+        )}
       </div>
-    </motion.div>
+    </div>
   );
 });
 
@@ -177,29 +168,29 @@ export const RenderRateOfChange = React.memo((e: TableCellProps) => {
   }
 
   return (
-    <motion.div
+    <div
       className={classNames(
         `flex flex-col justify-center items-start`,
         `w-full h-full`,
         `${isUp ? `text-red-500` : `text-blue-500`}`
       )}
     >
-      <motion.div className="">{e.cellData}%</motion.div>
-      <motion.div className="ml-4 text-sm">{price}</motion.div>
-    </motion.div>
+      <div className="">{e.cellData}%</div>
+      <div className="ml-4 text-sm">{price}</div>
+    </div>
   );
 });
 
 export const RenderU24 = React.memo((e: TableCellProps) => {
   return (
-    <motion.div
+    <div
       className={classNames(
         `flex flex-col items-start justify-center`,
         `w-full h-full`
       )}
     >
-      <motion.div className="">{convertStringPriceWON(e.cellData)}</motion.div>
-    </motion.div>
+      <div className="">{convertStringPriceWON(e.cellData)}</div>
+    </div>
   );
 });
 
