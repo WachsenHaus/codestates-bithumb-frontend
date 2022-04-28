@@ -61,15 +61,15 @@ export const RenderFavoriteColumn = React.memo((e: TableCellProps) => {
       const coins = onToggleCoin(drawTicker, e);
       setDrawTicker(coins);
     }, 0);
-  }, [drawTicker, e, onToggleCoin, setDrawTicker]);
+  }, [e, onToggleCoin]);
 
   return (
     <motion.div
       onClick={onClick}
-      className="flex justify-center items-center h-full hover:cursor-pointer active:bg-yellow-200 "
-      whileHover={{
-        scale: 1.1,
-      }}
+      className="flex justify-center items-center h-full hover:cursor-pointer active:bg-yellow-200  hover:scale-110"
+      // whileHover={{
+      //   scale: 1.1,
+      // }}
     >
       {e.rowData.isFavorite ? <StarRateIcon /> : <StarBorderIcon />}
     </motion.div>

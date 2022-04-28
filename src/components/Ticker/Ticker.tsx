@@ -2,7 +2,12 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
-import { Column, IndexRange, OverscanIndexRange, Table } from 'react-virtualized';
+import {
+  Column,
+  IndexRange,
+  OverscanIndexRange,
+  Table,
+} from 'react-virtualized';
 import { InputAdornment, Pagination, Paper, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import _ from 'lodash';
@@ -32,6 +37,7 @@ const Ticker = () => {
   const onRender = useCallback(
     ({ index }: { index: number }) => {
       return filterdCoins[index];
+      // return [];
     },
     [filterdCoins]
   );
@@ -45,15 +51,28 @@ const Ticker = () => {
             gridTemplateColumns: '40% auto',
           }}
         >
-          <div className={classNames(`w-full h-full`, `flex items-center justify-around`)}>
+          <div
+            className={classNames(
+              `w-full h-full`,
+              `flex items-center justify-around`
+            )}
+          >
             <button
-              className={classNames(sortObj.filterMode === 'normal' && `border-b-4 font-bold`, `border-b-black`, `h-full`)}
+              className={classNames(
+                sortObj.filterMode === 'normal' && `border-b-4 font-bold`,
+                `border-b-black`,
+                `h-full`
+              )}
               onClick={sortObj.onSetFilterMode('normal')}
             >
               원화마켓
             </button>
             <button
-              className={classNames(sortObj.filterMode === 'isFavorite' && `border-b-4 font-bold `, `border-b-black`, `h-full`)}
+              className={classNames(
+                sortObj.filterMode === 'isFavorite' && `border-b-4 font-bold `,
+                `border-b-black`,
+                `h-full`
+              )}
               onClick={sortObj.onSetFilterMode('isFavorite')}
             >
               즐겨찾기
@@ -96,7 +115,12 @@ const Ticker = () => {
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={onRender}
                 >
-                  <Column width={width * 0.05} label="" dataKey="isFavorite" cellRenderer={(e) => <RenderFavoriteColumn {...e} />} />
+                  <Column
+                    width={width * 0.05}
+                    label=""
+                    dataKey="isFavorite"
+                    cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
+                  />
                   <Column
                     width={width * 0.2}
                     label="자산"
@@ -168,7 +192,12 @@ const Ticker = () => {
         </Paper>
       </div>
       <div className="flex items-center w-full ">
-        <Pagination count={paginationObj.pageCount} page={paginationObj.page} onChange={paginationObj.handlePageChange} className="mx-auto mt-2" />
+        <Pagination
+          count={paginationObj.pageCount}
+          page={paginationObj.page}
+          onChange={paginationObj.handlePageChange}
+          className="mx-auto mt-2"
+        />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-restricted-globals */
-//
+import _ from 'lodash';
 
 self.onmessage = function (e) {
   const { data } = e;
@@ -9,7 +9,11 @@ self.onmessage = function (e) {
 
   let draft;
 
-  const isExist = coinList.findIndex((item: any) => item.coinType === ticker.c);
+  const isExist = _.findIndex(
+    coinList,
+    (item: any) => item.coinType === ticker.c
+  );
+  // const isExist = coinList.findIndex();
   if (isExist === -1) {
     return;
   } else if (ticker.m === 'C0101') {
@@ -18,7 +22,7 @@ self.onmessage = function (e) {
     draft = coinList;
     let isUp;
     const currentPrice = Number(ticker.e);
-    const prevPrice = Number(draft[isExist].e);
+    const prevPrice = Number(coinList[isExist].e);
     if (currentPrice > prevPrice) {
       isUp = true;
     } else if (currentPrice === prevPrice) {
@@ -26,18 +30,10 @@ self.onmessage = function (e) {
     } else {
       isUp = false;
     }
-    draft[isExist] = { ...draft[isExist], ...ticker, isUp };
+
+    coinList[isExist] = { ...coinList[isExist], ...ticker, isUp };
   }
 
   self.postMessage(draft);
-  // result = null;
-  // resultUseCoins = null;
 };
 export {};
-// let code = workercode.toString();
-// code = code.substring(code.indexOf('{') + 1, code.lastIndexOf('}'));
-
-// const blob = new Blob([code], { type: 'application/javascript' });
-// const worker_script = URL.createObjectURL(blob);
-
-// export default worker_script;

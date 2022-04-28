@@ -1,6 +1,11 @@
 import { useCallback } from 'react';
 import { useRecoilState } from 'recoil';
-import { atomFilterOrderBy, atomFilterDirection, atomFilterMode, TypefilterMode } from '../atom/total.atom';
+import {
+  atomFilterOrderBy,
+  atomFilterDirection,
+  atomFilterMode,
+  TypefilterMode,
+} from '../atom/total.atom';
 
 /**
  *
@@ -13,6 +18,7 @@ const useSort = () => {
 
   const onSetFilterDirection = useCallback(
     (type: 'e' | 'r' | 'u24') => () => {
+      console.log('zzz');
       let direction: 'desc' | 'asc' = 'desc';
       if (orderMode === type) {
         direction = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -32,7 +38,13 @@ const useSort = () => {
     []
   );
 
-  return { orderMode, filterMode, sortDirection, onSetFilterMode, onSetFilterDirection } as const;
+  return {
+    orderMode,
+    filterMode,
+    sortDirection,
+    onSetFilterMode,
+    onSetFilterDirection,
+  } as const;
 };
 
 export default useSort;
