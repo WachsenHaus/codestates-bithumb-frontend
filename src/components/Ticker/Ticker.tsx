@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
 import {
@@ -39,7 +45,8 @@ const Ticker = () => {
   const onRender = ({ index }: { index: number }) => {
     return filterdCoins[index];
   };
-  const RowRenderer = useCallback((e: TableRowProps) => {
+
+  const rendeeeeer = (e: TableRowProps) => {
     return (
       <div className="flex border-b" key={e.key} style={e.style}>
         {e?.rowData && (
@@ -53,7 +60,8 @@ const Ticker = () => {
         )}
       </div>
     );
-  }, []);
+  };
+  const RowRenderer = useMemo(() => rendeeeeer, []);
 
   return (
     <div>
