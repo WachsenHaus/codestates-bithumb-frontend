@@ -55,6 +55,15 @@ const useGetTradeParam = () => {
       const result = params?.coinName?.split('_');
       if (coins && result) {
         const item = coins.coinList.find((item) => item.coinSymbol === result[0]);
+        if (item === undefined) {
+          setSelectCoin({
+            coinType: 'C0101',
+            coinSymbol: 'BTC',
+            marketSymbol: 'KRW',
+            siseCrncCd: 'C0100',
+          });
+          return;
+        }
         const type = item?.coinType;
         const siseCrncCd = item?.siseCrncCd;
         const coinSymbol = item?.coinSymbol;
@@ -148,6 +157,9 @@ const useGetPriceInfoList = () => {
 const useMergeTickersWebsocketAndFilteredData = () => {
   // 티커정보와 코인정보를 합칩니다.
   const getAtomTicker = useRecoilValue(atomTickers);
+  const getDefaultCoin = useRecoilValue(atomSelectCoinDefault);
+  const getDetailCoin = useRecoilValue(atomSelectCoinDetail);
+  const getAtomTransaction = useRecoilValue(atomTransactions);
   const [priceInfoUseCoin, setPriceInfoUseCoins] = useRecoilState(atomPriceInfoUseCoins);
   const [worker, setWorker] = useState<any>();
 
@@ -162,14 +174,26 @@ const useMergeTickersWebsocketAndFilteredData = () => {
   }, []);
 
   const memoMerge = useCallback(
-    ({ getAtomTicker, priceInfoUseCoin }: { getAtomTicker: any; priceInfoUseCoin: any }) => {
+    ({
+      getAtomTicker,
+      priceInfoUseCoin,
+      getDetailCoin,
+      getDefaultCoin,
+    }: {
+      getAtomTicker: any;
+      priceInfoUseCoin: any;
+      getDetailCoin?: any;
+      getDefaultCoin?: any;
+    }) => {
       worker &&
         worker.postMessage({
           tickerObj: getAtomTicker,
           coins: priceInfoUseCoin,
+          detail: getDetailCoin,
+          default: getDefaultCoin,
         });
     },
-    [getAtomTicker]
+    [worker]
   );
 
   useEffect(() => {
@@ -177,9 +201,11 @@ const useMergeTickersWebsocketAndFilteredData = () => {
       memoMerge({
         getAtomTicker,
         priceInfoUseCoin,
+        getDetailCoin,
+        getDefaultCoin,
       });
     }, 0);
-  }, [getAtomTicker]);
+  }, [getAtomTicker, memoMerge]);
 };
 
 /**
@@ -284,6 +310,7 @@ const useMergeTransactionWebsocketAndInitData = () => {
         return {
           ...prevData,
           e: e.data.p,
+          r: e.data.r,
         };
       });
       setDrawTransaction(e.data.cloneDrawTransaction);
@@ -294,6 +321,7 @@ const useMergeTransactionWebsocketAndInitData = () => {
       worker.postMessage({
         drawTransaction,
         websocketTransaction,
+        selectDetailCoin,
       });
   };
   useEffect(() => {

@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import React from 'react';
 import CI from '../../asset/img/sp_main_new.png';
 import bg_main from '../../asset/img/bg_main.png';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
+  const navigate = useNavigate();
   return (
     <AppBar
       position="static"
@@ -27,6 +29,9 @@ const Header = () => {
             flexGrow: 0,
             backgroundImage: `url(${CI})`,
             backgroundPosition: '29px 14px',
+          }}
+          onClick={() => {
+            navigate('/');
           }}
         />
         <Box sx={{ flexGrow: 1 }} />

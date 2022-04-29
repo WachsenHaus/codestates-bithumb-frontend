@@ -25,17 +25,23 @@ export const convertStringPriceToKRW = (value?: string) => {
 };
 
 const CONST_DIVIDE_WON_MILLION = 8;
-export const convertStringPriceWON = (value?: string) => {
+export const convertStringPriceWON = (value?: string, type?: '억' | '백만') => {
   if (value) {
     const numberValue = Number(value);
     let price;
-    if (value.length < CONST_DIVIDE_WON_MILLION) {
-      price = (numberValue / 1000) | 0;
-      price = `${price.toLocaleString('ko-kr')}천`;
+    if (type === '억') {
+      price = numberValue / 1000 / 1000 / 100;
+      price = `${(Math.round(price * 10) / 10).toLocaleString('ko-kr')}억`;
     } else {
-      price = (numberValue / 1000 / 1000) | 0;
-      price = `${price.toLocaleString('ko-kr')}백만`;
+      if (value.length < CONST_DIVIDE_WON_MILLION) {
+        price = (numberValue / 1000) | 0;
+        price = `${price.toLocaleString('ko-kr')}천`;
+      } else {
+        price = (numberValue / 1000 / 1000) | 0;
+        price = `${price.toLocaleString('ko-kr')}백만`;
+      }
     }
+
     return price;
   } else {
     return undefined;

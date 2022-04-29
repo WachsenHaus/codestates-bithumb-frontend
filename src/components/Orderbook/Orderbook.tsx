@@ -3,11 +3,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import { atomDrawCoinInfo } from '../../atom/drawData.atom';
-import {
-  atomOrderBook,
-  IOrderBookData,
-  TypeOrderObj,
-} from '../../atom/orderBook.atom';
+import { atomOrderBook, IOrderBookData, TypeOrderObj } from '../../atom/orderBook.atom';
 
 import { atomSelectCoinDefault } from '../../atom/selectCoinDefault.atom';
 import { atomSelectCoinDetail } from '../../atom/selectCoinDetail.atom';
@@ -37,7 +33,7 @@ const calcQuantity = (ask: TypeOrderObj[], bid: TypeOrderObj[]) => {
   return lastMaxValue.toString();
 };
 
-const getRateOfChange = (f: string | undefined, e: string) => {
+export const getRateOfChange = (f: string | undefined, e: string) => {
   if (f === undefined || f === '' || e === '') {
     return;
   }
@@ -168,9 +164,7 @@ const Orderbook = () => {
         sx={{
           height: { sm: 200, md: 440 },
         }}
-        className={classNames(
-          `scrollbar-hide overflow-y-auto will-change-scroll`
-        )}
+        className={classNames(`scrollbar-hide overflow-y-auto will-change-scroll`)}
       >
         {_.clone(orderBook?.ask)
           .reverse()

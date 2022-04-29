@@ -23,7 +23,7 @@ const CoinBar = () => {
       </CoinColumn>
       <CoinColumn>
         <h1 className="font-bmjua">거래금액(24H)</h1>
-        <span>{convertStringPriceWON(u24)}</span>
+        <span>{convertStringPriceWON(u24, '억')}</span>
       </CoinColumn>
       <CoinColumn>
         <h1 className="font-bmjua">고가(당일)</h1>

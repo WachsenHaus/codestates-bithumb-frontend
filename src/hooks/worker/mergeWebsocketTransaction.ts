@@ -1,11 +1,30 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-restricted-globals */
 
+// getRateOfChange
+const getRateOfChange = (f: string | undefined, e: string) => {
+  if (f === undefined || f === '' || e === '') {
+    return;
+  }
+  const basePrice = Number(f);
+  const currentPrice = Number(e);
+  const r = (currentPrice * 100) / basePrice - 100;
+  if (r === 0) {
+    console.log(r);
+    return r.toFixed(2).toString();
+  } else if (r.toFixed(2).toString().includes('-')) {
+    return r.toFixed(2).toString();
+  } else {
+    return `+${r.toFixed(2).toString()}`;
+  }
+};
+
 self.onmessage = function (e) {
   const { data } = e;
   let result;
   const cloneDrawTransaction = data.drawTransaction;
   const { m, c, l } = data.websocketTransaction;
+  const detail = data.selectDetailCoin;
   for (let i = 0; i < l.length; i++) {
     const { o, n, p, q, t } = l[i];
     let color = '1';
@@ -21,8 +40,10 @@ self.onmessage = function (e) {
         color = '1';
       }
     }
+    const r = getRateOfChange(detail.f, p);
     result = {
       p: p,
+      r: r,
     };
     cloneDrawTransaction.push({
       coinType: c, //
