@@ -54,6 +54,9 @@ npm run start // 프로젝트를 실행해주세요.
   - Notion
   - Figma
 
+<img src="https://user-images.githubusercontent.com/59411545/165929665-1f3b5138-94da-4c7c-9a3e-9a23666af797.png" width="400" height="400">  
+
+
 ## 구현한 기능 목록
 
 1. 체결내역, 호가창, 전체코인목록에 가격반영내용이 실시간으로 애니메이션과 함께 보여집니다.
