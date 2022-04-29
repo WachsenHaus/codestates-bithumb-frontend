@@ -6,7 +6,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { atomSubscribeWebSocektMessage, atomSubscribeWebSocket } from '../atom/ws.atom';
 import { TypeWebSocketSubscribeReturnType, TypeWebSocketTypes } from '../atom/ws.type';
 import { atomWsStBar } from '../atom/tvChart.atom';
-import { atomTickers, atomTransactions } from '../atom/total.atom';
+import { atomTickers, atomTransactions, atomWebsocketObj } from '../atom/total.atom';
 
 /**
  *
@@ -19,6 +19,7 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
   const setTickers = useSetRecoilState(atomTickers);
   const setTransactions = useSetRecoilState(atomTransactions);
   const setSt = useSetRecoilState(atomWsStBar);
+  const setWebsocketObj = useSetRecoilState(atomWebsocketObj);
 
   const generateOnError: any | null = (type: TypeWebSocketTypes) => (ev: Event) => {
     console.error(`Error WebSocket ${type} ${ev}`);
@@ -36,11 +37,36 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
         case 'SUBSCRIBE':
           if (type === 'data') {
             if (subtype === 'tk') {
-              setTickers(content);
+              // setWebsocketObj((prevData) => {
+              //   return {
+              //     ...prevData,
+              //     tickers: content,
+              //   };
+              // });
+              setTimeout(() => {
+                setTickers(content);
+              }, 0);
             } else if (subtype === 'st') {
-              setSt(content);
+              // setWebsocketObj((prevData) => {
+              //   return {
+              //     ...prevData,
+              //     stbar: content,
+              //   };
+              // });
+
+              setTimeout(() => {
+                setSt(content);
+              }, 0);
             } else if (subtype === 'tr') {
-              setTransactions(content);
+              // setWebsocketObj((prevData) => {
+              //   return {
+              //     ...prevData,
+              //     transactions: content,
+              //   };
+              // });
+              setTimeout(() => {
+                setTransactions(content);
+              }, 0);
             }
           }
           break;

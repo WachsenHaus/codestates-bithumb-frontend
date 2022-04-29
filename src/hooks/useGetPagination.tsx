@@ -17,34 +17,26 @@ const useGetPagination = () => {
   const rowCount = filterdCoins?.length;
   const [perPage, setPerPage] = useState(height / rowHeight);
   const [pageCount, setPageCount] = useState(Math.ceil(rowCount / perPage));
-  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(
-    undefined
-  );
+  const [scrollToIndex, setScrollToIndex] = useState<undefined | number>(undefined);
 
   useEffect(() => {
     setPageCount(Math.ceil(rowCount / perPage));
   }, [rowCount]);
 
-  const handleRowsScroll = useCallback(
-    (info: IndexRange & OverscanIndexRange) => {
-      setPage((prev) => {
-        return Math.ceil(info.stopIndex / perPage);
-      });
-      setScrollToIndex(undefined);
-    },
-    []
-  );
+  const handleRowsScroll = useCallback((info: IndexRange & OverscanIndexRange) => {
+    setPage((prev) => {
+      return Math.ceil(info.stopIndex / perPage);
+    });
+    setScrollToIndex(undefined);
+  }, []);
 
-  const handlePageChange = useCallback(
-    (event: React.ChangeEvent<unknown>, page: number) => {
-      setPage(page);
-      setScrollToIndex((prev) => {
-        const scrollToIndex = (page - 1) * perPage;
-        return scrollToIndex;
-      });
-    },
-    []
-  );
+  const handlePageChange = useCallback((event: React.ChangeEvent<unknown>, page: number) => {
+    setPage(page);
+    setScrollToIndex((prev) => {
+      const scrollToIndex = (page - 1) * perPage;
+      return scrollToIndex;
+    });
+  }, []);
 
   return {
     height,

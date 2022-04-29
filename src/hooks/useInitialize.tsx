@@ -158,7 +158,11 @@ const useMergeTickersWebsocketAndFilteredData = () => {
     const worker: Worker = new Worker(new URL('./worker/mergePriceInfoUseCoins.ts', import.meta.url));
     setWorker(worker);
     worker.onmessage = (e) => {
+      setTimeout(() => {
+        setPriceInfoUseCoins(e.data);
+      }, 0);
       // setPriceInfoUseCoins(e.data);
+      //
     };
   }, []);
 
@@ -172,8 +176,8 @@ const useMergeTickersWebsocketAndFilteredData = () => {
 
   const memoMerge = useCallback(merge, [getAtomTicker]);
   useEffect(() => {
-    setTimeout(memoMerge, 0);
-    // setTimeout(merge, 0);
+    // setInterval(memoMerge, 16);
+    setTimeout(merge, 0);
     // merge();
   }, [getAtomTicker]);
 };
@@ -198,22 +202,100 @@ const useGetFilteredCoins = () => {
     const worker: Worker = new Worker(new URL('./worker/selectorPriceFilterdCoins.ts', import.meta.url));
     setWorker(worker);
     worker.onmessage = (e) => {
-      // console.log(e.data);
-      setFilteredCoins(e.data);
+      setTimeout(() => {
+        setFilteredCoins(e.data);
+      }, 0);
     };
   }, []);
 
+  // const merge = () => {
+
+  // };
+
+  // const memoMerge = useCallback((filterMode,
+  //   filterKeyword,
+  //   filterOrder,
+  //   filterDirection,
+  //   priceInfoUseCoins,) => {
+  //   if(worker){
+  //     worker.postMessage({
+  //       filterMode,
+  //       filterKeyword,
+  //       filterOrder,
+  //       filterDirection,
+  //       priceInfoUseCoins,
+  //     })
+  //   }
+
+  // }), []);
+
+  const memoMerge = useCallback(
+    ({
+      filterMode,
+      filterKeyword,
+      filterOrder,
+      filterDirection,
+      priceInfoUseCoins,
+    }: {
+      filterMode: any;
+      filterKeyword: any;
+      filterOrder: any;
+      filterDirection: any;
+      priceInfoUseCoins: any;
+    }) => {
+      worker &&
+        worker.postMessage({
+          filterMode: filterMode,
+          filterKeyword: filterKeyword,
+          filterOrder: filterOrder,
+          filterDirection: filterDirection,
+          priceInfoUseCoins: priceInfoUseCoins,
+        });
+    },
+    [worker]
+  );
+
+  // const merge = () => {
+  //   worker &&
+  //     worker.postMessage({
+  //       filterMode,
+  //       filterKeyword,
+  //       filterOrder,
+  //       filterDirection,
+  //       priceInfoUseCoins,
+  //     });
+  // };
   useEffect(() => {
-    console.log('??');
-    worker &&
-      worker.postMessage({
-        filterMode,
-        filterKeyword,
-        filterOrder,
-        filterDirection,
-        priceInfoUseCoins,
+    // setInterval(memoMerge, 16);
+    // memoMerge({
+    //   filterMode: filterMode,
+    //   filterKeyword: filterKeyword,
+    //   filterOrder: filterOrder,
+    //   filterDirection: filterDirection,
+    //   priceInfoUseCoins: priceInfoUseCoins,
+    // });
+    setTimeout(() => {
+      memoMerge({
+        filterMode: filterMode,
+        filterKeyword: filterKeyword,
+        filterOrder: filterOrder,
+        filterDirection: filterDirection,
+        priceInfoUseCoins: priceInfoUseCoins,
       });
-  }, [worker, filterMode, filterKeyword, filterOrder, filterDirection]);
+    }, 0);
+    // merge();
+  }, [worker, filterMode, filterKeyword, filterOrder, filterDirection, priceInfoUseCoins, memoMerge]);
+
+  // useEffect(() => {
+  //   worker &&
+  //     worker.postMessage({
+  //       filterMode,
+  //       filterKeyword,
+  //       filterOrder,
+  //       filterDirection,
+  //       priceInfoUseCoins,
+  //     });
+  // }, [worker, filterMode, filterKeyword, filterOrder, filterDirection, priceInfoUseCoins]);
 };
 
 /**
@@ -287,17 +369,17 @@ const useInitialize = () => {
   // 추린 코인리스트에 가격정보를 병합한다.
   useGetPriceInfoList();
   // 티커정보를 필터링된 배열과 병합한다.
-  // useMergeTickersWebsocketAndFilteredData();
+  useMergeTickersWebsocketAndFilteredData();
   // 키워드,방향등의 필터조건을 통과한 결과값을 filteredCoins에 할당한다.
-  // useGetFilteredCoins();
+  useGetFilteredCoins();
 
   /**
    * 트랜잭션
    */
   // 코인이 변경되면 초기 트랜잭션 데이터를 받아온다.
-  // useGetInitTransactionData();
+  useGetInitTransactionData();
   // 받아온 트랜잭션 데이터와 웹소켓 데이터를 병합한다.
-  // useMergeTransactionWebsocketAndInitData();
+  useMergeTransactionWebsocketAndInitData();
 };
 
 export default useInitialize;
