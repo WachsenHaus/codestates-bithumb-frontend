@@ -1,21 +1,14 @@
 import { TypeCoinKind, TypeCoinClassCode } from './coinList.type';
 import { atom, selector } from 'recoil';
-import {
-  generateKeywordForSearch,
-  getCookie,
-  order,
-  unpackCookie,
-} from '../utils/utils';
+import { generateKeywordForSearch, getCookie, order, unpackCookie } from '../utils/utils';
 import { atomCoinList } from './coinList.atom';
 import { TypeDrawTicker } from './drawData.atom';
-import {
-  TypeWebSocketTickerReturnType,
-  TypeWebSocketTransactionReturnType,
-} from './ws.type';
+import { TypeWebSocketTickerReturnType, TypeWebSocketTransactionReturnType } from './ws.type';
 import _ from 'lodash';
 import { TypeTradeTransaction } from './tradeData.atom';
 import { atomSelectCoinDetail } from './selectCoinDetail.atom';
 import { atomSelectCoinDefault } from './selectCoinDefault.atom';
+import { iStChartData } from './tvChart.atom';
 
 // 1. draw atom은 ticker, coinBar, chart, orderbook,transaction 총 다섯개이다.
 // 각 요소들에서 그리기위한 정보는 다음과 같다.
@@ -126,6 +119,24 @@ export const atomPriceInfoUseCoins = atom<TypeDrawTicker[]>({
   default: [],
 });
 
+export type TypeWebsocketObjs = {
+  tickers: TypeWebSocketTickerReturnType;
+  transactions: TypeWebSocketTransactionReturnType;
+  stbar?: iStChartData;
+};
+export const atomWebsocketObj = atom<TypeWebsocketObjs>({
+  key: 'atomWebsocketObj',
+  default: {
+    tickers: {},
+    transactions: {
+      m: 'C0100',
+      c: '',
+      l: [],
+    },
+    stbar: undefined,
+  },
+});
+
 export const atomTickers = atom<TypeWebSocketTickerReturnType>({
   key: 'atomTickers',
   default: {},
@@ -185,45 +196,45 @@ export const atomFinalCoins = atom<TypeDrawTicker[]>({
 /**
  * 가격정보가 포함되고 사용중인 코인목록을 의존하면서, keyword와 mode, orderby로 필터링을 하는 함수
  */
-export const selectorPriceFilterdCoins = selector({
-  key: 'selectorPriceFilterdCoins',
-  get: ({ get }) => {
-    const filterMode = get(atomFilterMode);
-    const filterKeyword = get(atomFilterKeyword);
-    const orderBy = get(atomFilterOrderBy);
-    const direction = get(atomFilterDirection);
-    const prevUseCoins = get(atomPriceInfoUseCoins);
+// export const selectorPriceFilterdCoins = selector({
+//   key: 'selectorPriceFilterdCoins',
+//   get: ({ get }) => {
+//     const filterMode = get(atomFilterMode);
+//     const filterKeyword = get(atomFilterKeyword);
+//     const orderBy = get(atomFilterOrderBy);
+//     const direction = get(atomFilterDirection);
+//     const prevUseCoins = get(atomPriceInfoUseCoins);
 
-    let resultUseCoins;
+//     let resultUseCoins;
 
-    if (filterMode === 'normal') {
-      if (filterKeyword === '') {
-        resultUseCoins = prevUseCoins;
-      } else {
-        resultUseCoins = _.filter(
-          prevUseCoins,
-          (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
-        );
-      }
-    } else {
-      if (filterKeyword === '') {
-        resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true);
-      } else {
-        resultUseCoins = _.filter(
-          prevUseCoins,
-          (i) =>
-            i.isFavorite === true &&
-            i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
-        );
-      }
-    }
-    const result = order(orderBy, resultUseCoins, direction);
-    return result;
-  },
-  cachePolicy_UNSTABLE: {
-    eviction: 'most-recent',
-  },
-});
+//     if (filterMode === 'normal') {
+//       if (filterKeyword === '') {
+//         resultUseCoins = prevUseCoins;
+//       } else {
+//         resultUseCoins = _.filter(
+//           prevUseCoins,
+//           (i) => i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
+//         );
+//       }
+//     } else {
+//       if (filterKeyword === '') {
+//         resultUseCoins = _.filter(prevUseCoins, (i) => i.isFavorite === true);
+//       } else {
+//         resultUseCoins = _.filter(
+//           prevUseCoins,
+//           (i) =>
+//             i.isFavorite === true &&
+//             i.consonant?.toLowerCase().indexOf(filterKeyword) !== -1
+//         );
+//       }
+//     }
+//     const result = order(orderBy, resultUseCoins, direction);
+//     return result;
+//   },
+//   cachePolicy_UNSTABLE: {
+//     eviction: 'most-recent',
+//   },
+// });
 
 /**
  * 표시하려는 코인만 추리는 셀렉터
@@ -236,10 +247,7 @@ export const selectorFilterUseCoins = selector({
     const displayFilter = get(atomDisplayCoinsFilter);
 
     const useFilterCoins = defaultInfoCoins?.coinList.filter(
-      (item) =>
-        item.coinClassCode === displayFilter.coinClassCode &&
-        item.siseCrncCd === displayFilter.siseCrncCd &&
-        item.isLive === displayFilter.isLive
+      (item) => item.coinClassCode === displayFilter.coinClassCode && item.siseCrncCd === displayFilter.siseCrncCd && item.isLive === displayFilter.isLive
     );
     const cookieFavorites = getCookie('marketFavoritesCoin');
     const unPackCookie = unpackCookie(cookieFavorites);
@@ -250,9 +258,7 @@ export const selectorFilterUseCoins = selector({
         coinNameEn: item.coinNameEn,
         coinSymbol: item.coinSymbol,
       });
-      const cookieCoinSymbol = unPackCookie.find(
-        (i) => i.split('_')[0] === item.coinType
-      );
+      const cookieCoinSymbol = unPackCookie.find((i) => i.split('_')[0] === item.coinType);
       return {
         isFavorite: cookieCoinSymbol ? true : false,
         siseCrncCd: item.siseCrncCd,
@@ -296,8 +302,7 @@ export const selectorWebSocketTransaction = selector({
       const { o, n, p, q, t } = l[i];
       let color = '1';
       let prevPrice;
-      const lastItem =
-        deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
+      const lastItem = deepCopyInitTransaction[deepCopyInitTransaction.length - 1];
       if (lastItem) {
         prevPrice = lastItem.contPrice;
         if (p === prevPrice) {

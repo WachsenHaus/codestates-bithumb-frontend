@@ -3,14 +3,8 @@ import parse from 'fast-json-parse';
 import React, { useEffect } from 'react';
 import _ from 'lodash';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import {
-  atomSubscribeWebSocektMessage,
-  atomSubscribeWebSocket,
-} from '../atom/ws.atom';
-import {
-  TypeWebSocketSubscribeReturnType,
-  TypeWebSocketTypes,
-} from '../atom/ws.type';
+import { atomSubscribeWebSocektMessage, atomSubscribeWebSocket } from '../atom/ws.atom';
+import { TypeWebSocketSubscribeReturnType, TypeWebSocketTypes } from '../atom/ws.type';
 import { atomWsStBar } from '../atom/tvChart.atom';
 import { atomTickers, atomTransactions } from '../atom/total.atom';
 
@@ -26,60 +20,54 @@ export const useGenerateBitThumbSocket = (type: TypeWebSocketTypes) => {
   const setTransactions = useSetRecoilState(atomTransactions);
   const setSt = useSetRecoilState(atomWsStBar);
 
-  const generateOnError: any | null =
-    (type: TypeWebSocketTypes) => (ev: Event) => {
-      console.error(`Error WebSocket ${type} ${ev}`);
-      console.error(ev);
-    };
-  const generateOnCloser: any | null =
-    (type: TypeWebSocketTypes) => (ev: CloseEvent) => {
-      console.info(`Close WebSocket ${type} ${ev}`);
-      console.info(ev);
-    };
+  const generateOnError: any | null = (type: TypeWebSocketTypes) => (ev: Event) => {
+    console.error(`Error WebSocket ${type} ${ev}`);
+    console.error(ev);
+  };
+  const generateOnCloser: any | null = (type: TypeWebSocketTypes) => (ev: CloseEvent) => {
+    console.info(`Close WebSocket ${type} ${ev}`);
+    console.info(ev);
+  };
 
-  const generateOnMessage: any | null =
-    (nameType: TypeWebSocketTypes) =>
-    (ev: MessageEvent<TypeWebSocketSubscribeReturnType>) => {
-      if (ev) {
-        const { subtype, type, content }: TypeWebSocketSubscribeReturnType =
-          parse(ev.data).value;
-        switch (nameType) {
-          case 'SUBSCRIBE':
-            if (type === 'data') {
-              if (subtype === 'tk') {
-                setTickers(content);
-              } else if (subtype === 'st') {
-                setSt(content);
-              } else if (subtype === 'tr') {
-                setTransactions(content);
-              }
+  const generateOnMessage: any | null = (nameType: TypeWebSocketTypes) => (ev: MessageEvent<TypeWebSocketSubscribeReturnType>) => {
+    if (ev) {
+      const { subtype, type, content }: TypeWebSocketSubscribeReturnType = parse(ev.data).value;
+      switch (nameType) {
+        case 'SUBSCRIBE':
+          if (type === 'data') {
+            if (subtype === 'tk') {
+              setTickers(content);
+            } else if (subtype === 'st') {
+              setSt(content);
+            } else if (subtype === 'tr') {
+              setTransactions(content);
             }
-            break;
-          default:
-            break;
-        }
+          }
+          break;
+        default:
+          break;
       }
-    };
+    }
+  };
 
-  const generateOnOpen: any | null =
-    (type: TypeWebSocketTypes, ws: WebSocket) => (ev: Event) => {
-      if (ev) {
-        console.log(`Connected WebSocket ${type}`);
-        switch (type) {
-          case 'SUBSCRIBE':
-            if (wsSubscribe) {
-              wsSubscribe.close();
-              console.warn(`Exist ${type} Socket`);
-            }
-            if (wsSubscribe?.CLOSED || wsSubscribe === undefined) {
-              setWsSubscribe(ws);
-            }
-            break;
-          default:
-            break;
-        }
+  const generateOnOpen: any | null = (type: TypeWebSocketTypes, ws: WebSocket) => (ev: Event) => {
+    if (ev) {
+      console.log(`Connected WebSocket ${type}`);
+      switch (type) {
+        case 'SUBSCRIBE':
+          if (wsSubscribe) {
+            wsSubscribe.close();
+            console.warn(`Exist ${type} Socket`);
+          }
+          if (wsSubscribe?.CLOSED || wsSubscribe === undefined) {
+            setWsSubscribe(ws);
+          }
+          break;
+        default:
+          break;
       }
-    };
+    }
+  };
 
   /**
    * 웹소켓의 구독 메세지가 변경되면 소켓에 전달합니다.

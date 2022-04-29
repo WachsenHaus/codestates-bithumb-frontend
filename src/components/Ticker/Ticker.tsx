@@ -1,21 +1,8 @@
 /* eslint-disable @typescript-eslint/no-redeclare */
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import React, { useCallback, useMemo } from 'react';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import classNames from 'classnames';
-import {
-  Column,
-  IndexRange,
-  OverscanIndexRange,
-  Table,
-  TableRowProps,
-  TableRowRenderer,
-} from 'react-virtualized';
+import { Column, Table, TableRowProps } from 'react-virtualized';
 import { InputAdornment, Pagination, Paper, TextField } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import _ from 'lodash';
@@ -42,29 +29,27 @@ const Ticker = () => {
   const paginationObj = useGetPagination();
 
   const filterdCoins = useRecoilValue(atomFilteredCoins);
-  const onRender = ({ index }: { index: number }) => {
-    return filterdCoins[index];
-  };
 
-  const rendeeeeer = (e: TableRowProps) => {
+  const rowGetter = ({ index }: { index: number }) => filterdCoins[index];
+
+  const onRender = useCallback(rowGetter, [filterdCoins]);
+
+  const RowRenderer = (e: TableRowProps) => {
     return (
       <div className="flex border-b" key={e.key} style={e.style}>
         {e?.rowData && (
           <>
-            <RenderFavoriteColumn {...e} />
+            {/* <RenderFavoriteColumn {...e} />
             <RenderNameColumn e={e} key={e.rowData.coinName} />
-            <RenderCurrentPriceColumn
-              {...e}
-              key={`${e.rowData.e}_${e.rowData.u24}`}
-            />
+            <RenderCurrentPriceColumn {...e} key={`${e.rowData.e}_${e.rowData.u24}`} />
             <RenderRateOfChange {...e} key={e.rowData.r} />
-            <RenderU24 {...e} key={e.rowData.u24} />
+            <RenderU24 {...e} key={e.rowData.u24} /> */}
           </>
         )}
       </div>
     );
   };
-  const RowRenderer = useMemo(() => rendeeeeer, []);
+  // const RowRenderer = useMemo(() => rendeeeeer, []);
   // const RowRenderer = (e: TableRowProps) => {
   //   // console.log(e.rowData);
   //   return (
@@ -122,28 +107,15 @@ const Ticker = () => {
             gridTemplateColumns: '40% auto',
           }}
         >
-          <div
-            className={classNames(
-              `w-full h-full`,
-              `flex items-center justify-around`
-            )}
-          >
+          <div className={classNames(`w-full h-full`, `flex items-center justify-around`)}>
             <button
-              className={classNames(
-                sortObj.filterMode === 'normal' && `border-b-4 font-bold`,
-                `border-b-black`,
-                `h-full`
-              )}
+              className={classNames(sortObj.filterMode === 'normal' && `border-b-4 font-bold`, `border-b-black`, `h-full`)}
               onClick={sortObj.onSetFilterMode('normal')}
             >
               원화마켓
             </button>
             <button
-              className={classNames(
-                sortObj.filterMode === 'isFavorite' && `border-b-4 font-bold `,
-                `border-b-black`,
-                `h-full`
-              )}
+              className={classNames(sortObj.filterMode === 'isFavorite' && `border-b-4 font-bold `, `border-b-black`, `h-full`)}
               onClick={sortObj.onSetFilterMode('isFavorite')}
             >
               즐겨찾기
@@ -185,23 +157,13 @@ const Ticker = () => {
                   scrollToAlignment="start"
                   rowClassName={classNames(`flex border-b `)}
                   rowGetter={onRender}
-                  // noRowsRenderer={() => <div>.</div>}
-                  // noContentRenderer={() => <div>.</div>}
-
-                  // list={filterdCoins}
                   rowRenderer={RowRenderer}
                 >
-                  <Column
-                    width={width * 0.05}
-                    label=""
-                    dataKey="isFavorite"
-                    // cellRenderer={(e) => <RenderFavoriteColumn {...e} />}
-                  />
+                  <Column width={width * 0.05} label="" dataKey="isFavorite" />
                   <Column
                     width={width * 0.2}
                     label="자산"
                     dataKey="coinName"
-                    // cellRenderer={(e) => <RenderNameColumn e={e} />}
                     headerRenderer={(e) => <HeaderCoinName {...e} />}
                     headerClassName="flex items-center"
                   />
@@ -210,7 +172,6 @@ const Ticker = () => {
                     label="현재가"
                     dataKey="e"
                     className="flex"
-                    // cellRenderer={(e) => <RenderCurrentPriceColumn {...e} />}
                     headerRenderer={(e) => (
                       <HeaderPrice
                         e={e}
@@ -225,7 +186,6 @@ const Ticker = () => {
                     width={width * 0.15}
                     label="변동률(당일)"
                     dataKey="r"
-                    // cellRenderer={(e) => <RenderRateOfChange {...e} />}
                     headerRenderer={(e) => (
                       <HeaderRateOfChange
                         e={e}
@@ -240,7 +200,6 @@ const Ticker = () => {
                     width={width * 0.2}
                     label="거래금액(24H)"
                     dataKey="u24"
-                    // cellRenderer={(e) => <RenderU24 {...e} />}
                     headerRenderer={(e) => (
                       <HeaderVolume
                         e={e}
@@ -268,12 +227,7 @@ const Ticker = () => {
         </Paper>
       </div>
       <div className="flex items-center w-full ">
-        <Pagination
-          count={paginationObj.pageCount}
-          page={paginationObj.page}
-          onChange={paginationObj.handlePageChange}
-          className="mx-auto mt-2"
-        />
+        <Pagination count={paginationObj.pageCount} page={paginationObj.page} onChange={paginationObj.handlePageChange} className="mx-auto mt-2" />
       </div>
     </div>
   );
