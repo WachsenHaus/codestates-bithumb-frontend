@@ -19,9 +19,6 @@ import {
   atomFilterDirection,
 } from '../atom/total.atom';
 import { atomTradeData, selectorTradeData, selectPriceInfoToCoins, selectTransactionInfoToCoins } from '../atom/tradeData.atom';
-// import workerMergeWebsocketTransaction from './worker/mergeWebsocketTransaction.js';
-// import workerMergePriceInfoUseCoins from './worker/mergePriceInfoUseCoins.js';
-// import workerSelectorPriceFilterdCoins from './worker/selectorPriceFilterdCoins.js';
 
 /**
  * 모든 코인에 대한 기초 정보를 받아 옵니다.
@@ -161,24 +158,27 @@ const useMergeTickersWebsocketAndFilteredData = () => {
       setTimeout(() => {
         setPriceInfoUseCoins(e.data);
       }, 0);
-      // setPriceInfoUseCoins(e.data);
-      //
     };
   }, []);
 
-  const merge = () => {
-    worker &&
-      worker.postMessage({
-        tickerObj: getAtomTicker,
-        coins: priceInfoUseCoin,
-      });
-  };
+  const memoMerge = useCallback(
+    ({ getAtomTicker, priceInfoUseCoin }: { getAtomTicker: any; priceInfoUseCoin: any }) => {
+      worker &&
+        worker.postMessage({
+          tickerObj: getAtomTicker,
+          coins: priceInfoUseCoin,
+        });
+    },
+    [getAtomTicker]
+  );
 
-  const memoMerge = useCallback(merge, [getAtomTicker]);
   useEffect(() => {
-    // setInterval(memoMerge, 16);
-    setTimeout(merge, 0);
-    // merge();
+    setTimeout(() => {
+      memoMerge({
+        getAtomTicker,
+        priceInfoUseCoin,
+      });
+    }, 0);
   }, [getAtomTicker]);
 };
 
@@ -198,7 +198,6 @@ const useGetFilteredCoins = () => {
   const [worker, setWorker] = useState<any>();
 
   useEffect(() => {
-    //workerSelectorPriceFilterdCoins
     const worker: Worker = new Worker(new URL('./worker/selectorPriceFilterdCoins.ts', import.meta.url));
     setWorker(worker);
     worker.onmessage = (e) => {
@@ -207,27 +206,6 @@ const useGetFilteredCoins = () => {
       }, 0);
     };
   }, []);
-
-  // const merge = () => {
-
-  // };
-
-  // const memoMerge = useCallback((filterMode,
-  //   filterKeyword,
-  //   filterOrder,
-  //   filterDirection,
-  //   priceInfoUseCoins,) => {
-  //   if(worker){
-  //     worker.postMessage({
-  //       filterMode,
-  //       filterKeyword,
-  //       filterOrder,
-  //       filterDirection,
-  //       priceInfoUseCoins,
-  //     })
-  //   }
-
-  // }), []);
 
   const memoMerge = useCallback(
     ({
@@ -255,25 +233,7 @@ const useGetFilteredCoins = () => {
     [worker]
   );
 
-  // const merge = () => {
-  //   worker &&
-  //     worker.postMessage({
-  //       filterMode,
-  //       filterKeyword,
-  //       filterOrder,
-  //       filterDirection,
-  //       priceInfoUseCoins,
-  //     });
-  // };
   useEffect(() => {
-    // setInterval(memoMerge, 16);
-    // memoMerge({
-    //   filterMode: filterMode,
-    //   filterKeyword: filterKeyword,
-    //   filterOrder: filterOrder,
-    //   filterDirection: filterDirection,
-    //   priceInfoUseCoins: priceInfoUseCoins,
-    // });
     setTimeout(() => {
       memoMerge({
         filterMode: filterMode,
@@ -283,19 +243,7 @@ const useGetFilteredCoins = () => {
         priceInfoUseCoins: priceInfoUseCoins,
       });
     }, 0);
-    // merge();
   }, [worker, filterMode, filterKeyword, filterOrder, filterDirection, priceInfoUseCoins, memoMerge]);
-
-  // useEffect(() => {
-  //   worker &&
-  //     worker.postMessage({
-  //       filterMode,
-  //       filterKeyword,
-  //       filterOrder,
-  //       filterDirection,
-  //       priceInfoUseCoins,
-  //     });
-  // }, [worker, filterMode, filterKeyword, filterOrder, filterDirection, priceInfoUseCoins]);
 };
 
 /**

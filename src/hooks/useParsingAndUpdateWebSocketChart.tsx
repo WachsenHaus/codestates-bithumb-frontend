@@ -3,6 +3,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useRecoilValue, useRecoilState, useRecoilValueLoadable } from 'recoil';
+import { atomSelectChartSetup } from '../atom/selectChart.atom';
 import { atomWsStBar, iStBar, atomDrawStBars, selectorDrawStBars } from '../atom/tvChart.atom';
 
 const CONST_KR_UTC = 9 * 60 * 60 * 1000;
@@ -11,6 +12,28 @@ const useParsingAndUpdateWebSocketChart = (candleRef: React.MutableRefObject<ISe
   // websocket stbar
   const wsStBar = useRecoilValue(atomWsStBar);
   const [currentBar, setCurrentBar] = useState<iStBar | undefined>(undefined);
+  const { chartTime } = useRecoilValue(atomSelectChartSetup);
+  const [divideTime, setDivideTime] = useState(60);
+
+  useEffect(() => {
+    switch (chartTime) {
+      case '1M':
+        setDivideTime(60);
+        break;
+      case '10M':
+        setDivideTime(600);
+        break;
+      case '30M':
+        setDivideTime(1800);
+        break;
+      case '1H':
+        setDivideTime(3600);
+        break;
+
+      default:
+        break;
+    }
+  }, [chartTime]);
 
   // atom
   const [drawStBars, setDrawStBars] = useRecoilState(atomDrawStBars);
@@ -48,7 +71,7 @@ const useParsingAndUpdateWebSocketChart = (candleRef: React.MutableRefObject<ISe
     if (wsStBar) {
       const { o, t, e } = wsStBar;
       const currentTime = moment(t, 'YYYYMMDDHHmmss').utc().valueOf() as UTCTimestamp;
-      const int = ((((currentTime + CONST_KR_UTC) / 1000 / 60) | 0) * 60) as UTCTimestamp;
+      const int = ((((currentTime + CONST_KR_UTC) / 1000 / divideTime) | 0) * divideTime) as UTCTimestamp;
       const nextTime = int;
       if (currentBar === undefined) {
         setCurrentBar({

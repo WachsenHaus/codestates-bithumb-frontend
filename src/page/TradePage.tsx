@@ -37,6 +37,7 @@ const TradePage = () => {
           <MainContent />
           <Ticker />
         </Box>
+
         <Box gridColumn={`span 5`}>
           <Orderbook />
           <Transaction />

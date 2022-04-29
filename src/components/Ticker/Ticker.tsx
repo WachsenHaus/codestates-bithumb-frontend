@@ -37,15 +37,22 @@ const Ticker = () => {
   const RowRenderer = (e: TableRowProps) => {
     return (
       <div className="flex border-b" key={e.key} style={e.style}>
-        {e?.rowData && (
-          <>
-            <RenderFavoriteColumn {...e} />
-            <RenderNameColumn e={e} key={e.rowData.coinName} />
-            <RenderCurrentPriceColumn {...e} key={`${e.rowData.e}_${e.rowData.u24}`} />
-            <RenderRateOfChange {...e} key={e.rowData.r} />
-            <RenderU24 {...e} key={e.rowData.u24} />
-          </>
-        )}
+        <div
+          className="grid w-full"
+          style={{
+            gridTemplateColumns: '5% 20% 20% 15% auto',
+          }}
+        >
+          {e?.rowData && (
+            <>
+              <RenderFavoriteColumn {...e} />
+              <RenderNameColumn e={e} key={e.rowData.coinName} />
+              <RenderCurrentPriceColumn {...e} key={`${e.rowData.e}_${e.rowData.u24}`} />
+              <RenderRateOfChange {...e} key={e.rowData.r} />
+              <RenderU24 {...e} key={e.rowData.u24} />
+            </>
+          )}
+        </div>
       </div>
     );
   };
