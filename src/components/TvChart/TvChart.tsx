@@ -12,4 +12,4 @@ const TvChart = () => {
   return <div className={classNames(`w-11/12 h-full`)} ref={wrapperRef} />;
 };
 
-export default TvChart;
+export default React.memo(TvChart);

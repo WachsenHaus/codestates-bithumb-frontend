@@ -164,7 +164,7 @@ const Orderbook = () => {
         sx={{
           height: { sm: 200, md: 440 },
         }}
-        className={classNames(`scrollbar-hide overflow-y-auto will-change-scroll`)}
+        className={classNames(`scrollbar-hide overflow-y-auto will-change-contents`)}
       >
         {_.clone(orderBook?.ask)
           .reverse()

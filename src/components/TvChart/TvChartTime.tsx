@@ -31,4 +31,4 @@ const TvChartTime = () => {
   );
 };
 
-export default TvChartTime;
+export default React.memo(TvChartTime);

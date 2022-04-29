@@ -1,9 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import {
-  TableCellProps,
-  TableHeaderProps,
-  TableRowProps,
-} from 'react-virtualized';
+import { TableCellProps, TableHeaderProps, TableRowProps } from 'react-virtualized';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -13,22 +9,11 @@ import StarRateIcon from '@mui/icons-material/StarRate';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { TypeDrawTicker } from '../../atom/drawData.atom';
-import {
-  applyCookie,
-  convertStringPriceToKRW,
-  convertStringPriceWON,
-  getCookie,
-  packCookie,
-  pushCookie,
-  unpackCookie,
-} from '../../utils/utils';
+import { applyCookie, convertStringPriceToKRW, convertStringPriceWON, getCookie, packCookie, pushCookie, unpackCookie } from '../../utils/utils';
 import classNames from 'classnames';
 import styles from '../../components/animation.module.css';
 import { atomPriceInfoUseCoins } from '../../atom/total.atom';
-import {
-  atomSelectCoinDefault,
-  ISelectCoinDefault,
-} from '../../atom/selectCoinDefault.atom';
+import { atomSelectCoinDefault, ISelectCoinDefault } from '../../atom/selectCoinDefault.atom';
 import _ from 'lodash';
 import produce from 'immer';
 import { Scale } from '@mui/icons-material';
@@ -82,49 +67,45 @@ export const RenderFavoriteColumn = (e: TableRowProps) => {
   );
 };
 
-export const RenderNameColumn = React.memo(
-  ({ e, activeIndex }: { e: TableRowProps; activeIndex?: number }) => {
-    const navigate = useNavigate();
-    const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
+export const RenderNameColumn = React.memo(({ e, activeIndex }: { e: TableRowProps; activeIndex?: number }) => {
+  const navigate = useNavigate();
+  const selectCoinDefault = useRecoilValue(atomSelectCoinDefault);
 
-    const onSelectClick = useCallback(
-      (e: any) => () => {
-        const clickedCoinInfo = e.rowData as ISelectCoinDefault;
-        if (clickedCoinInfo === undefined) {
-          return;
-        }
-        if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
-          return;
-        }
-        const symbol = clickedCoinInfo.coinSymbol;
-        const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
-        if (navigate) {
-          navigate && navigate(`/${symbol}_${mSymbol}`);
-        }
-      },
-      [selectCoinDefault]
-    );
+  const onSelectClick = useCallback(
+    (e: any) => () => {
+      const clickedCoinInfo = e.rowData as ISelectCoinDefault;
+      if (clickedCoinInfo === undefined) {
+        return;
+      }
+      if (clickedCoinInfo.coinSymbol === selectCoinDefault.coinSymbol) {
+        return;
+      }
+      const symbol = clickedCoinInfo.coinSymbol;
+      const mSymbol = clickedCoinInfo.siseCrncCd === 'C0100' ? 'KRW' : 'BTC';
+      if (navigate) {
+        navigate && navigate(`/${symbol}_${mSymbol}`);
+      }
+    },
+    [selectCoinDefault]
+  );
 
-    return (
-      <div
-        className={classNames(
-          `${
-            selectCoinDefault.coinType === e.rowData.coinType && ` text-red-300`
-          }`,
-          ` flex flex-col justify-center w-full h-full `,
-          `hover:scale-110`,
-          `hover:ml-4`
-        )}
-        onClick={onSelectClick(e)}
-      >
-        {e.rowData.coinName}
-        <div className="text-xs font-bmjua">
-          {e.rowData.coinSymbol}/{e.rowData.siseCrncCd === 'C0100' ? 'KRW' : ''}
-        </div>
+  return (
+    <div
+      className={classNames(
+        `${selectCoinDefault.coinType === e.rowData.coinType && ` text-red-300`}`,
+        ` flex flex-col justify-center w-full h-full `,
+        `hover:scale-110`,
+        `hover:ml-4`
+      )}
+      onClick={onSelectClick(e)}
+    >
+      {e.rowData.coinName}
+      <div className="text-xs font-bmjua">
+        {e.rowData.coinSymbol}/{e.rowData.siseCrncCd === 'C0100' ? 'KRW' : ''}
       </div>
-    );
-  }
-);
+    </div>
+  );
+});
 
 export const RenderCurrentPriceColumn = React.memo((e: TableRowProps) => {
   return (
@@ -149,7 +130,7 @@ export const RenderCurrentPriceColumn = React.memo((e: TableRowProps) => {
 });
 
 export const RenderRateOfChange = React.memo((e: TableRowProps) => {
-  const [isUp, setIsUp] = useState(true);
+  const [isUp, setIsUp] = useState<boolean | undefined>(undefined);
   useEffect(() => {
     if (e.rowData.a?.includes('-')) {
       setIsUp(false);
@@ -169,7 +150,8 @@ export const RenderRateOfChange = React.memo((e: TableRowProps) => {
       className={classNames(
         `flex flex-col justify-center items-start`,
         `w-full h-full`,
-        `${isUp ? `text-red-500` : `text-blue-500`}`
+        `${isUp ? `text-red-500` : ``}`,
+        `${isUp === false ? `text-blue-500` : ``}`
       )}
     >
       <div className="">{e.rowData.r}%</div>
@@ -180,12 +162,7 @@ export const RenderRateOfChange = React.memo((e: TableRowProps) => {
 
 export const RenderU24 = React.memo((e: TableRowProps) => {
   return (
-    <div
-      className={classNames(
-        `flex flex-col items-start justify-center`,
-        `w-full h-full`
-      )}
-    >
+    <div className={classNames(`flex flex-col items-start justify-center`, `w-full h-full`)}>
       <div className="">{convertStringPriceWON(e.rowData.u24)}</div>
     </div>
   );
@@ -196,22 +173,9 @@ export const HeaderCoinName = React.memo((e: TableHeaderProps) => {
 });
 
 export const HeaderPrice = React.memo(
-  ({
-    e,
-    onClick,
-    direction,
-    arrowActive,
-  }: {
-    e: TableHeaderProps;
-    onClick: () => void;
-    direction: 'desc' | 'asc';
-    arrowActive: boolean;
-  }) => {
+  ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
     return (
-      <div
-        className="flex justify-center items-center font-bmjua  cursor-pointer"
-        onClick={onClick}
-      >
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer" onClick={onClick}>
         <div>현재가</div>
         <SortArrow direction={direction} active={arrowActive} />
       </div>
@@ -220,22 +184,9 @@ export const HeaderPrice = React.memo(
 );
 
 export const HeaderRateOfChange = React.memo(
-  ({
-    e,
-    onClick,
-    direction,
-    arrowActive,
-  }: {
-    e: TableHeaderProps;
-    onClick: () => void;
-    direction: 'desc' | 'asc';
-    arrowActive: boolean;
-  }) => {
+  ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
     return (
-      <div
-        className="flex justify-center items-center font-bmjua  cursor-pointer"
-        onClick={onClick}
-      >
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer" onClick={onClick}>
         <div>변동률(당일)</div>
         <SortArrow direction={direction} active={arrowActive} />
       </div>
@@ -244,22 +195,9 @@ export const HeaderRateOfChange = React.memo(
 );
 
 export const HeaderVolume = React.memo(
-  ({
-    e,
-    onClick,
-    direction,
-    arrowActive,
-  }: {
-    e: TableHeaderProps;
-    onClick: () => void;
-    direction: 'desc' | 'asc';
-    arrowActive: boolean;
-  }) => {
+  ({ e, onClick, direction, arrowActive }: { e: TableHeaderProps; onClick: () => void; direction: 'desc' | 'asc'; arrowActive: boolean }) => {
     return (
-      <div
-        className="flex justify-center items-center font-bmjua  cursor-pointer"
-        onClick={onClick}
-      >
+      <div className="flex justify-center items-center font-bmjua  cursor-pointer" onClick={onClick}>
         <div>거래금액(24H)</div>
         <SortArrow direction={direction} active={arrowActive} />
       </div>
@@ -267,23 +205,9 @@ export const HeaderVolume = React.memo(
   }
 );
 
-const SortArrow = ({
-  direction,
-  active,
-}: {
-  direction: 'desc' | 'asc';
-  active: boolean;
-}) => (
+const SortArrow = ({ direction, active }: { direction: 'desc' | 'asc'; active: boolean }) => (
   <div className="flex flex-col justify-center items-center opacity-50">
-    <ArrowDropUpIcon
-      className={classNames(
-        direction === 'asc' && active ? `opacity-100` : 'opacity-50'
-      )}
-    />
-    <ArrowDropDownIcon
-      className={classNames(
-        direction === 'desc' && active ? `opacity-100` : 'opacity-50'
-      )}
-    />
+    <ArrowDropUpIcon className={classNames(direction === 'asc' && active ? `opacity-100` : 'opacity-50')} />
+    <ArrowDropDownIcon className={classNames(direction === 'desc' && active ? `opacity-100` : 'opacity-50')} />
   </div>
 );

@@ -33,13 +33,7 @@ const OrderbookRow = ({
     }
   }, [index]);
   return (
-    <Box
-      className={classNames(
-        `flex justify-around items-center w-full`,
-        `will-change-contents`
-      )}
-      ref={scrollRef}
-    >
+    <Box className={classNames(`flex justify-around items-center w-full`)} ref={scrollRef}>
       <Box
         className={classNames(
           `w-1/2`,
@@ -53,16 +47,8 @@ const OrderbookRow = ({
           className={classNames(
             // `will-change-transform`,
             `text-left`,
-            `${
-              eventType === 'ask'
-                ? `shadow-inner shadow-blue-900 ${styles.askEffect}`
-                : ''
-            }`,
-            `${
-              eventType === 'bid'
-                ? `shadow-inner shadow-red-900 ${styles.bidEffect}`
-                : ''
-            }`
+            `${eventType === 'ask' ? `shadow-inner shadow-blue-900 ${styles.askEffect}` : ''}`,
+            `${eventType === 'bid' ? `shadow-inner shadow-red-900 ${styles.bidEffect}` : ''}`
           )}
         >
           {convertStringPriceToKRW(price)}
@@ -76,9 +62,7 @@ const OrderbookRow = ({
           sx={{
             width: `${quantityRatio}%`,
             height: '100%',
-            backgroundColor: `${
-              orderType === 'ask' ? '#416ac25e;' : '#ff000021;'
-            }`,
+            backgroundColor: `${orderType === 'ask' ? '#416ac25e;' : '#ff000021;'}`,
           }}
         />
       </Box>

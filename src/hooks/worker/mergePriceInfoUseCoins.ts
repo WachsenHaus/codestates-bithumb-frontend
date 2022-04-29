@@ -9,15 +9,8 @@ self.onmessage = function (e) {
   const detail = data.detail;
   const defaultCoin = data.default;
 
-  let draft;
-
   // console.log(item.coinType === ticker.c ,item.coinType === defaultCoin.coinType )
-  const isExist = _.findIndex(coinList, (item: any) => {
-    if (item.coinType === defaultCoin.coinType) {
-      console.log(item);
-    }
-    return item.coinType === ticker.c || item.coinType === defaultCoin.coinType;
-  });
+  const isExist = _.findIndex(coinList, (item: any) => item.coinType === ticker.c || item.coinType === defaultCoin.coinType);
   // const isExist = coinList.findIndex();
   if (isExist === -1) {
     return;
